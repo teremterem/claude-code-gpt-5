@@ -1,13 +1,63 @@
 model_list:
-  - model_name: gpt-5
+  - model_name: gpt-5-reason-minimal
     litellm_params:
       model: openai/gpt-5
-      reasoning_effort: os.environ/REASONING_EFFORT
+      reasoning_effort: minimal
 
-  - model_name: gpt-5-mini
+  - model_name: gpt-5-reason-low
+    litellm_params:
+      model: openai/gpt-5
+      reasoning_effort: low
+
+  - model_name: gpt-5-reason-medium
+    litellm_params:
+      model: openai/gpt-5
+      reasoning_effort: medium
+
+  - model_name: gpt-5-reason-high
+    litellm_params:
+      model: openai/gpt-5
+      reasoning_effort: high
+
+  - model_name: gpt-5-mini-reason-minimal
     litellm_params:
       model: openai/gpt-5-mini
-      reasoning_effort: os.environ/REASONING_EFFORT
+      reasoning_effort: minimal
+
+  - model_name: gpt-5-mini-reason-low
+    litellm_params:
+      model: openai/gpt-5-mini
+      reasoning_effort: low
+
+  - model_name: gpt-5-mini-reason-medium
+    litellm_params:
+      model: openai/gpt-5-mini
+      reasoning_effort: medium
+
+  - model_name: gpt-5-mini-reason-high
+    litellm_params:
+      model: openai/gpt-5-mini
+      reasoning_effort: high
+
+  - model_name: gpt-5-nano-reason-minimal
+    litellm_params:
+      model: openai/gpt-5-nano
+      reasoning_effort: minimal
+
+  - model_name: gpt-5-nano-reason-low
+    litellm_params:
+      model: openai/gpt-5-nano
+      reasoning_effort: low
+
+  - model_name: gpt-5-nano-reason-medium
+    litellm_params:
+      model: openai/gpt-5-nano
+      reasoning_effort: medium
+
+  - model_name: gpt-5-nano-reason-high
+    litellm_params:
+      model: openai/gpt-5-nano
+      reasoning_effort: high
 
   - model_name: claude-3-5-haiku-20241022
     litellm_params:
