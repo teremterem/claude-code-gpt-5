@@ -111,3 +111,14 @@ API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-An
 **WORKAROUND:** If your request requires searching the web, temporarily switch back to one of the Claude 4 models using the `/model` command in Claude Code. Claude models remain available alongside `gpt-5` and will use the Anthropic API key from your `.env`.
 
 **The `Fetch` tool DOES work, though (getting web content from specific URLs).**
+
+## Adding More Models 🔧
+
+To support additional models beyond the pre-configured GPT-5 variants, you can modify the `config.yaml` file. Simply add new entries to the `model_list` following the existing format:
+
+```yaml
+- model_name: your-custom-model-name
+  litellm_params:
+    model: provider/model-name
+    # additional parameters as needed
+```
