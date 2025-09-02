@@ -1,7 +1,9 @@
-custom_llm_provider:
-  provider: custom_handler.CustomLLMHandler
-
 model_list:
   - model_name: "*"
     litellm_params:
-      model: custom/custom
+      model: "custom_llm_router/*"
+
+litellm_settings:
+  custom_provider_map:
+  - provider: custom_llm_router
+    custom_handler: custom_llm_router.custom_llm_router

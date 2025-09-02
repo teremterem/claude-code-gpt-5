@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import asyncio
 from typing import Any, Dict, List, Optional
 
 import litellm
 
 
-class CustomLLMHandler:
+class CustomLLMRouter:
     """
     Routes model requests to the correct provider and parameters.
     """
@@ -63,7 +62,7 @@ class CustomLLMHandler:
             mapped["api_key"] = api_key
         return await litellm.acompletion(messages=messages, **mapped)
 
-    def stream(
+    def streaming(
         self,
         model: str,
         messages: List[Dict[str, Any]],
@@ -76,7 +75,7 @@ class CustomLLMHandler:
         mapped["stream"] = True
         return litellm.completion(messages=messages, **mapped)
 
-    async def astream(
+    async def astreaming(
         self,
         model: str,
         messages: List[Dict[str, Any]],
@@ -88,3 +87,6 @@ class CustomLLMHandler:
             mapped["api_key"] = api_key
         mapped["stream"] = True
         return await litellm.acompletion(messages=messages, **mapped)
+
+
+custom_llm_router = CustomLLMRouter()
