@@ -5,3 +5,8 @@ description = "Connect Claude Code CLI to GPT-5"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = ["litellm[proxy]"]
+
+[project.optional-dependencies]
+tests = [
+    "pytest>=7",
+]
