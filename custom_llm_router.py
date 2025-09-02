@@ -1,92 +1,227 @@
-from typing import Any, AsyncGenerator, Generator, Optional
+import re
+from typing import Any, AsyncGenerator, Callable, Generator, Optional, Union
 
+import httpx
 import litellm
-from litellm import GenericStreamingChunk
+from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
 
-class CustomLLMRouter:
+def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
+    """
+    Map a friendly model alias to a provider model and extra params.
+
+    Supported patterns:
+    - gpt-5(-mini|-nano)?-reason-(minimal|low|medium|high)
+      -> maps to openai/gpt-5[(-mini|-nano)] with reasoning_effort
+    - claude-* -> maps directly to anthropic/claude-*
+
+    Returns a tuple of (provider_model, extra_params)
+    """
+    model = requested_model.strip()
+
+    # Claude passthrough (kept for Claude Code fast model usage)
+    if model.startswith("claude-"):
+        return f"anthropic/{model}", {}
+
+    # GPT-5 family with reasoning effort
+    m = re.fullmatch(
+        r"gpt-5(?P<variant>-(mini|nano))?-reason-(?P<effort>minimal|low|medium|high)",
+        model,
+    )
+    if m:
+        variant = m.group("variant") or ""
+        effort = m.group("effort")
+        provider_model = f"openai/gpt-5{variant or ''}"
+        return provider_model, {"reasoning_effort": effort}
+
+    # Default passthrough – use as-is
+    # TODO Raise an error instead ?
+    return model, {}
+
+class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
     """
 
-    def _map_model(self, model: str, kwargs: dict[str, Any]) -> dict[str, Any]:
-        # TODO Make this method straightforward (explicit mapping ?)
-        params: dict[str, Any] = {}
-        if model.startswith("claude-"):
-            params["model"] = f"anthropic/{model}"
-            return params
-        if model.startswith("gpt-5"):
-            base: str
-            if model.startswith("gpt-5-mini"):
-                base = "openai/gpt-5-mini"
-            elif model.startswith("gpt-5-nano"):
-                base = "openai/gpt-5-nano"
-            else:
-                base = "openai/gpt-5"
-            params["model"] = base
-            if "reason-minimal" in model:
-                params["reasoning_effort"] = "minimal"
-            elif "reason-low" in model:
-                params["reasoning_effort"] = "low"
-            elif "reason-medium" in model:
-                params["reasoning_effort"] = "medium"
-            elif "reason-high" in model:
-                params["reasoning_effort"] = "high"
-            params.update({k: v for k, v in kwargs.items() if k != "model"})
-            return params
-        params["model"] = model
-        params.update({k: v for k, v in kwargs.items() if k != "model"})
-        return params
-
     def completion(
         self,
         model: str,
-        messages: list[dict[str, Any]],
-        api_key: Optional[str] = None,
-        **kwargs: Any,
-    ) -> Any:
-        mapped = self._map_model(model, kwargs)
-        if api_key is not None:
-            mapped["api_key"] = api_key
-        return litellm.completion(messages=messages, **mapped)
+        messages: list,
+        api_base: str,
+        custom_prompt_dict: dict,
+        model_response: ModelResponse,
+        print_verbose: Callable,
+        encoding,
+        api_key,
+        logging_obj,
+        optional_params: dict,
+        acompletion=None,
+        litellm_params=None,
+        logger_fn=None,
+        headers={},
+        timeout: Optional[Union[float, httpx.Timeout]] = None,
+        client: Optional[HTTPHandler] = None,
+    ) -> ModelResponse:
+        model, extra_params = route_model(model)
+        optional_params.update(extra_params)
+
+        try:
+            response = litellm.completion(
+                model=model,
+                messages=messages,
+                custom_prompt_dict=custom_prompt_dict,
+                model_response=model_response,
+                print_verbose=print_verbose,
+                encoding=encoding,
+                logging_obj=logging_obj,
+                optional_params=optional_params,
+                acompletion=acompletion,
+                litellm_params=litellm_params,
+                logger_fn=logger_fn,
+                headers=headers,
+                timeout=timeout,
+                client=client,
+            )
+        except Exception as e:
+            raise RuntimeError(f"[COMPLETION] Error calling litellm.completion: {e}") from e
+
+        return response
 
     async def acompletion(
         self,
         model: str,
-        messages: list[dict[str, Any]],
-        api_key: Optional[str] = None,
-        **kwargs: Any,
-    ) -> Any:
-        mapped = self._map_model(model, kwargs)
-        if api_key is not None:
-            mapped["api_key"] = api_key
-        return await litellm.acompletion(messages=messages, **mapped)
+        messages: list,
+        api_base: str,
+        custom_prompt_dict: dict,
+        model_response: ModelResponse,
+        print_verbose: Callable,
+        encoding,
+        api_key,
+        logging_obj,
+        optional_params: dict,
+        acompletion=None,
+        litellm_params=None,
+        logger_fn=None,
+        headers={},
+        timeout: Optional[Union[float, httpx.Timeout]] = None,
+        client: Optional[AsyncHTTPHandler] = None,
+    ) -> ModelResponse:
+        model, extra_params = route_model(model)
+        optional_params.update(extra_params)
+
+        try:
+            response = await litellm.acompletion(
+                model=model,
+                messages=messages,
+                custom_prompt_dict=custom_prompt_dict,
+                model_response=model_response,
+                print_verbose=print_verbose,
+                encoding=encoding,
+                logging_obj=logging_obj,
+                optional_params=optional_params,
+                acompletion=acompletion,
+                litellm_params=litellm_params,
+                logger_fn=logger_fn,
+                headers=headers,
+                timeout=timeout,
+                client=client,
+            )
+        except Exception as e:
+            raise RuntimeError(f"[ACOMPLETION] Error calling litellm.acompletion: {e}") from e
+        return response
 
     def streaming(
         self,
         model: str,
-        messages: list[dict[str, Any]],
-        api_key: Optional[str] = None,
-        **kwargs: Any,
+        messages: list,
+        api_base: str,
+        custom_prompt_dict: dict,
+        model_response: ModelResponse,
+        print_verbose: Callable,
+        encoding,
+        api_key,
+        logging_obj,
+        optional_params: dict,
+        acompletion=None,
+        litellm_params=None,
+        logger_fn=None,
+        headers={},
+        timeout: Optional[Union[float, httpx.Timeout]] = None,
+        client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
-        mapped = self._map_model(model, kwargs)
-        if api_key is not None:
-            mapped["api_key"] = api_key
-        mapped["stream"] = True
-        return litellm.completion(messages=messages, **mapped)
+        model, extra_params = route_model(model)
+        optional_params.update(extra_params)
+
+        try:
+            response = litellm.completion(
+                model=model,
+                messages=messages,
+                custom_prompt_dict=custom_prompt_dict,
+                model_response=model_response,
+                print_verbose=print_verbose,
+                encoding=encoding,
+                logging_obj=logging_obj,
+                optional_params=optional_params,
+                acompletion=acompletion,
+                litellm_params=litellm_params,
+                logger_fn=logger_fn,
+                headers=headers,
+                timeout=timeout,
+                client=client,
+            )
+        except Exception as e:
+            raise RuntimeError(f"[STREAMING] Error calling litellm.completion: {e}") from e
+
+        for chunk in response:
+            # TODO Convert ModelResponseStream (chunk) into GenericStreamingChunk
+            yield chunk
 
     async def astreaming(
         self,
         model: str,
-        messages: list[dict[str, Any]],
-        api_key: Optional[str] = None,
-        **kwargs: Any,
+        messages: list,
+        api_base: str,
+        custom_prompt_dict: dict,
+        model_response: ModelResponse,
+        print_verbose: Callable,
+        encoding,
+        api_key,
+        logging_obj,
+        optional_params: dict,
+        acompletion=None,
+        litellm_params=None,
+        logger_fn=None,
+        headers={},
+        timeout: Optional[Union[float, httpx.Timeout]] = None,
+        client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
-        mapped = self._map_model(model, kwargs)
-        if api_key is not None:
-            mapped["api_key"] = api_key
-        mapped["stream"] = True
-        return await litellm.acompletion(messages=messages, **mapped)
+        model, extra_params = route_model(model)
+        optional_params.update(extra_params)
+
+        try:
+            response = await litellm.acompletion(
+                model=model,
+                stream=True,
+                messages=messages,
+                custom_prompt_dict=custom_prompt_dict,
+                model_response=model_response,
+                print_verbose=print_verbose,
+                encoding=encoding,
+                logging_obj=logging_obj,
+                optional_params=optional_params,
+                acompletion=acompletion,
+                litellm_params=litellm_params,
+                logger_fn=logger_fn,
+                headers=headers,
+                timeout=timeout,
+                client=client,
+            )
+        except Exception as e:
+            raise RuntimeError(f"[ASTREAMING] Error calling litellm.acompletion: {e}") from e
+
+        async for chunk in response:
+            # TODO Convert ModelResponseStream (chunk) into GenericStreamingChunk
+            yield chunk
 
 
 custom_llm_router = CustomLLMRouter()
