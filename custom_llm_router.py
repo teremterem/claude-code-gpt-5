@@ -1,8 +1,7 @@
-from __future__ import annotations
-
-from typing import Any, Dict, List, Optional
+from typing import Any, AsyncGenerator, Generator, Optional
 
 import litellm
+from litellm import GenericStreamingChunk
 
 
 class CustomLLMRouter:
@@ -10,8 +9,9 @@ class CustomLLMRouter:
     Routes model requests to the correct provider and parameters.
     """
 
-    def _map_model(self, model: str, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-        params: Dict[str, Any] = {}
+    def _map_model(self, model: str, kwargs: dict[str, Any]) -> dict[str, Any]:
+        # TODO Make this method straightforward (explicit mapping ?)
+        params: dict[str, Any] = {}
         if model.startswith("claude-"):
             params["model"] = f"anthropic/{model}"
             return params
@@ -41,7 +41,7 @@ class CustomLLMRouter:
     def completion(
         self,
         model: str,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         api_key: Optional[str] = None,
         **kwargs: Any,
     ) -> Any:
@@ -53,7 +53,7 @@ class CustomLLMRouter:
     async def acompletion(
         self,
         model: str,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         api_key: Optional[str] = None,
         **kwargs: Any,
     ) -> Any:
@@ -65,10 +65,10 @@ class CustomLLMRouter:
     def streaming(
         self,
         model: str,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         api_key: Optional[str] = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> Generator[GenericStreamingChunk, None, None]:
         mapped = self._map_model(model, kwargs)
         if api_key is not None:
             mapped["api_key"] = api_key
@@ -78,10 +78,10 @@ class CustomLLMRouter:
     async def astreaming(
         self,
         model: str,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         api_key: Optional[str] = None,
         **kwargs: Any,
-    ) -> Any:
+    ) -> AsyncGenerator[GenericStreamingChunk, None]:
         mapped = self._map_model(model, kwargs)
         if api_key is not None:
             mapped["api_key"] = api_key
