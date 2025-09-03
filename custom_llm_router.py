@@ -255,7 +255,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers,
                 timeout=timeout,
                 client=client,
-                **(optional_params or {}),
+                **optional_params,
             )
         except Exception as e:
             raise RuntimeError(f"[COMPLETION] Error calling litellm.completion: {e}") from e
@@ -292,7 +292,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers,
                 timeout=timeout,
                 client=client,
-                **(optional_params or {}),
+                **optional_params,
             )
         except Exception as e:
             raise RuntimeError(f"[ACOMPLETION] Error calling litellm.acompletion: {e}") from e
@@ -330,7 +330,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers,
                 timeout=timeout,
                 client=client,
-                **(optional_params or {}),
+                **optional_params,
             )
         except Exception as e:
             raise RuntimeError(f"[STREAMING] Error calling litellm.completion: {e}") from e
