@@ -8,6 +8,10 @@ from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
+litellm.success_callback = ["langfuse"]
+litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
+
+
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
