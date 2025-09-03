@@ -7,9 +7,6 @@ import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
 
-logger = logging.getLogger(__name__)
-
-
 def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
     """
     Map a friendly model alias to a provider model and extra params.
@@ -26,7 +23,8 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
     # Claude passthrough (kept for Claude Code fast model usage)
     if model.startswith("claude-"):
         final = f"anthropic/{model}"
-        logger.info("%s -> %s", requested_model, final)
+        # TODO Make it possible to disable this print ? (turn it into a log record ?)
+        print(f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final}\033[0m")
         return final, {}
 
     # GPT-5 family with reasoning effort
@@ -38,12 +36,16 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
         variant = m.group("variant") or ""
         effort = m.group("effort")
         provider_model = f"openai/gpt-5{variant or ''}"
-        logger.info("%s -> %s [reasoning_effort: %s]", requested_model, provider_model, effort)
+        # TODO Make it possible to disable this print ? (turn it into a log record ?)
+        print(
+            f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{provider_model}\033[0m "
+            f"[\033[1m\033[33mreasoning_effort: {effort}\033[0m]"
+        )
         return provider_model, {"reasoning_effort": effort}
 
     # Default passthrough – use as-is, but log for visibility
     # If we ever want to restrict models, raise a ValueError here instead.
-    logger.info("%s -> %s", requested_model, model)
+    logger.error("%s -> %s", requested_model, model)
     return model, {}
 
 
@@ -65,6 +67,7 @@ def _to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
     is_finished: bool = False
     index: int = 0
     provider_specific_fields: Optional[dict[str, Any]] = None
+    tool_use: Optional[dict[str, Any]] = None
 
     try:
         # chunk may be a pydantic object with attributes
@@ -82,6 +85,103 @@ def _to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
                     content = delta.get("content")
                 if isinstance(content, str):
                     text = content
+
+                # TOOL CALLS (OpenAI-style incremental tool_calls on delta)
+                # Attempt to normalize to a ChatCompletionToolCallChunk-like dict
+                # Expected shape (best-effort):
+                # { index: int, id: Optional[str], type: "function", function: { name: str|None, arguments: str|None } }
+                tool_calls = getattr(delta, "tool_calls", None)
+                if tool_calls is None and isinstance(delta, dict):
+                    tool_calls = delta.get("tool_calls")
+                if isinstance(tool_calls, list) and tool_calls:
+                    tc = tool_calls[0]
+                    # tc can be a dict or object with attributes
+                    def _get(obj, key, default=None):
+                        if isinstance(obj, dict):
+                            return obj.get(key, default)
+                        return getattr(obj, key, default)
+
+                    tc_index = _get(tc, "index", 0)
+                    tc_id = _get(tc, "id", None)
+                    tc_type = _get(tc, "type", "function")
+                    fn = _get(tc, "function", {})
+                    fn_name = _get(fn, "name", None)
+                    fn_args = _get(fn, "arguments", None)
+                    # Ensure arguments is a string for streaming deltas
+                    if fn_args is not None and not isinstance(fn_args, str):
+                        try:
+                            # Last resort stringification for partial structured args
+                            fn_args = str(fn_args)
+                        except Exception:
+                            fn_args = None
+                    tool_use = {
+                        "index": tc_index if isinstance(tc_index, int) else 0,
+                        "id": tc_id if isinstance(tc_id, str) else None,
+                        "type": tc_type if isinstance(tc_type, str) else "function",
+                        "function": {
+                            "name": fn_name if isinstance(fn_name, str) else None,
+                            "arguments": fn_args if isinstance(fn_args, str) else None,
+                        },
+                    }
+
+                # Anthropic-style tool_use block on delta
+                if tool_use is None:
+                    a_tool_use = getattr(delta, "tool_use", None)
+                    if a_tool_use is None and isinstance(delta, dict):
+                        a_tool_use = delta.get("tool_use")
+                    if a_tool_use is not None:
+                        def _get(obj, key, default=None):
+                            if isinstance(obj, dict):
+                                return obj.get(key, default)
+                            return getattr(obj, key, default)
+                        tu_id = _get(a_tool_use, "id", None)
+                        tu_name = _get(a_tool_use, "name", None)
+                        tu_input = _get(a_tool_use, "input", None)
+                        # Represent input as a string for arguments to keep consistency
+                        if tu_input is not None and not isinstance(tu_input, str):
+                            try:
+                                tu_input = str(tu_input)
+                            except Exception:
+                                tu_input = None
+                        tool_use = {
+                            "index": 0,
+                            "id": tu_id if isinstance(tu_id, str) else None,
+                            "type": "function",
+                            "function": {
+                                "name": tu_name if isinstance(tu_name, str) else None,
+                                "arguments": tu_input if isinstance(tu_input, str) else None,
+                            },
+                        }
+
+                # Older OpenAI-style function_call on delta
+                if tool_use is None:
+                    function_call = getattr(delta, "function_call", None)
+                    if function_call is None and isinstance(delta, dict):
+                        function_call = delta.get("function_call")
+                    if function_call is not None:
+                        # function_call can be dict-like or object-like
+                        fn_name = None
+                        fn_args = None
+                        if isinstance(function_call, dict):
+                            fn_name = function_call.get("name")
+                            fn_args = function_call.get("arguments")
+                        else:
+                            fn_name = getattr(function_call, "name", None)
+                            fn_args = getattr(function_call, "arguments", None)
+                        if fn_args is not None and not isinstance(fn_args, str):
+                            try:
+                                fn_args = str(fn_args)
+                            except Exception:
+                                fn_args = None
+                        tool_use = {
+                            "index": 0,
+                            "id": None,
+                            "type": "function",
+                            "function": {
+                                "name": fn_name if isinstance(fn_name, str) else None,
+                                "arguments": fn_args if isinstance(fn_args, str) else None,
+                            },
+                        }
 
             # Some providers use `text`
             if not text:
@@ -117,7 +217,7 @@ def _to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
         "finish_reason": finish_reason,
         "usage": None,
         "index": index,
-        "tool_use": None,
+        "tool_use": tool_use,
         "provider_specific_fields": provider_specific_fields,
     }
 
@@ -267,14 +367,6 @@ class CustomLLMRouter(CustomLLM):
             response = await litellm.acompletion(
                 model=model,
                 messages=messages,
-                # custom_prompt_dict=custom_prompt_dict,
-                # model_response=model_response,
-                # print_verbose=print_verbose,
-                # encoding=encoding,
-                # logging_obj=logging_obj,
-                # optional_params=optional_params,
-                # acompletion=acompletion,
-                # litellm_params=litellm_params,
                 logger_fn=logger_fn,
                 headers=headers,
                 timeout=timeout,
