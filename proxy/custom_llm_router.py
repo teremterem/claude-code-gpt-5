@@ -4,8 +4,8 @@ import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from convert_stream import to_generic_streaming_chunk
-from route_model import route_model
+from proxy.convert_stream import to_generic_streaming_chunk
+from proxy.route_model import route_model
 
 
 class CustomLLMRouter(CustomLLM):
