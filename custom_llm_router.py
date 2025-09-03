@@ -208,8 +208,7 @@ def _to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
             index = 0
 
     except Exception as e:
-        # On any unexpected structure, log and pass through minimal chunk
-        logger.debug("Failed to convert stream chunk to generic format: %s", e)
+        raise RuntimeError(f"Failed to convert ModelResponseStream to GenericStreamingChunk: {e}") from e
 
     return {
         "text": text,
