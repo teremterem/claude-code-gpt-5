@@ -69,14 +69,6 @@ class CustomLLMRouter(CustomLLM):
             response = litellm.completion(
                 model=model,
                 messages=messages,
-                custom_prompt_dict=custom_prompt_dict,
-                model_response=model_response,
-                print_verbose=print_verbose,
-                encoding=encoding,
-                logging_obj=logging_obj,
-                optional_params=optional_params,
-                acompletion=acompletion,
-                litellm_params=litellm_params,
                 logger_fn=logger_fn,
                 headers=headers,
                 timeout=timeout,
@@ -113,14 +105,6 @@ class CustomLLMRouter(CustomLLM):
             response = await litellm.acompletion(
                 model=model,
                 messages=messages,
-                custom_prompt_dict=custom_prompt_dict,
-                model_response=model_response,
-                print_verbose=print_verbose,
-                encoding=encoding,
-                logging_obj=logging_obj,
-                optional_params=optional_params,
-                acompletion=acompletion,
-                litellm_params=litellm_params,
                 logger_fn=logger_fn,
                 headers=headers,
                 timeout=timeout,
@@ -150,20 +134,14 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         model, extra_params = route_model(model)
+
         optional_params.update(extra_params)
+        optional_params["stream"] = True
 
         try:
             response = litellm.completion(
                 model=model,
                 messages=messages,
-                custom_prompt_dict=custom_prompt_dict,
-                model_response=model_response,
-                print_verbose=print_verbose,
-                encoding=encoding,
-                logging_obj=logging_obj,
-                optional_params=optional_params,
-                acompletion=acompletion,
-                litellm_params=litellm_params,
                 logger_fn=logger_fn,
                 headers=headers,
                 timeout=timeout,
@@ -196,6 +174,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         model, extra_params = route_model(model)
+
         optional_params.update(extra_params)
         optional_params["stream"] = True
 
@@ -217,13 +196,12 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
-            return
-            async for chunk in response:
-                # TODO Convert ModelResponseStream (chunk) into GenericStreamingChunk
-                yield chunk
         except Exception as e:
             raise RuntimeError(f"[ASTREAMING] Error calling litellm.acompletion: {e}") from e
 
+        async for chunk in response:
+            # TODO Convert ModelResponseStream (chunk) into GenericStreamingChunk
+            yield chunk
 
 
 custom_llm_router = CustomLLMRouter()
