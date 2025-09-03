@@ -11,6 +11,7 @@ requires-python = ">=3.8"
 dependencies = ["litellm[proxy]"]
 
 [project.optional-dependencies]
+langfuse = ["langfuse"]
 dev = [
     "black",
     "pre-commit",
