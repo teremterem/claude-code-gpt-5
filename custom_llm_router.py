@@ -42,10 +42,10 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
         )
         return provider_model, {"reasoning_effort": effort}
 
-    # Default passthrough – use as-is, but log for visibility
-    # If we ever want to restrict models, raise a ValueError here instead.
-    logger.error("%s -> %s", requested_model, model)
-    return model, {}
+    raise ValueError(
+        f"Unknown model alias '{requested_model}'. Supported patterns: "
+        "'gpt-5(-mini|-nano)?-reason-(minimal|low|medium|high)' or 'claude-*'."
+    )
 
 
 def _to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
