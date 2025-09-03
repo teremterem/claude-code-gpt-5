@@ -1,9 +1,13 @@
 import re
+import logging
 from typing import Any, AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
+
+
+logger = logging.getLogger(__name__)
 
 
 def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
@@ -17,12 +21,13 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
 
     Returns a tuple of (provider_model, extra_params)
     """
-    # TODO Make info logs of the following format: "<original_model> -> <final_model> [reasoning_effort: <effort>]"
     model = requested_model.strip()
 
     # Claude passthrough (kept for Claude Code fast model usage)
     if model.startswith("claude-"):
-        return f"anthropic/{model}", {}
+        final = f"anthropic/{model}"
+        logger.info(f"{requested_model} -> {final}")
+        return final, {}
 
     # GPT-5 family with reasoning effort
     m = re.fullmatch(
@@ -33,11 +38,17 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
         variant = m.group("variant") or ""
         effort = m.group("effort")
         provider_model = f"openai/gpt-5{variant or ''}"
+        logger.info(
+            f"{requested_model} -> {provider_model} [reasoning_effort: {effort}]"
+        )
         return provider_model, {"reasoning_effort": effort}
 
-    # Default passthrough – use as-is
-    # TODO Raise an error instead ?
-    return model, {}
+    # Default: raise for unknown aliases so callers fix config
+    raise ValueError(
+        "Unknown model alias '"
+        + model
+        + "'. Supported patterns: 'gpt-5(-mini|-nano)?-reason-(minimal|low|medium|high)' or 'claude-*'."
+    )
 
 class CustomLLMRouter(CustomLLM):
     """
@@ -74,6 +85,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers,
                 timeout=timeout,
                 client=client,
+                **optional_params,
             )
         except Exception as e:
             raise RuntimeError(f"[COMPLETION] Error calling litellm.completion: {e}") from e
@@ -110,6 +122,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers,
                 timeout=timeout,
                 client=client,
+                **optional_params,
             )
         except Exception as e:
             raise RuntimeError(f"[ACOMPLETION] Error calling litellm.acompletion: {e}") from e
@@ -147,13 +160,18 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers,
                 timeout=timeout,
                 client=client,
+                **optional_params,
             )
         except Exception as e:
             raise RuntimeError(f"[STREAMING] Error calling litellm.completion: {e}") from e
 
         for chunk in response:
-            # TODO Convert ModelResponseStream (chunk) into GenericStreamingChunk
-            yield chunk
+            # Convert ModelResponseStream (chunk) into GenericStreamingChunk (dict-like)
+            if hasattr(chunk, "to_dict"):
+                yield chunk.to_dict()  # type: ignore[func-returns-value]
+            else:
+                # Assume it's already a compatible GenericStreamingChunk
+                yield chunk  # type: ignore[misc]
 
     async def astreaming(
         self,
@@ -201,8 +219,11 @@ class CustomLLMRouter(CustomLLM):
             raise RuntimeError(f"[ASTREAMING] Error calling litellm.acompletion: {e}") from e
 
         async for chunk in response:
-            # TODO Convert ModelResponseStream (chunk) into GenericStreamingChunk
-            yield chunk
+            # Convert ModelResponseStream (chunk) into GenericStreamingChunk (dict-like)
+            if hasattr(chunk, "to_dict"):
+                yield chunk.to_dict()  # type: ignore[func-returns-value]
+            else:
+                yield chunk  # type: ignore[misc]
 
 
 custom_llm_router = CustomLLMRouter()
