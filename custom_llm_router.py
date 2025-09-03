@@ -17,6 +17,7 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
 
     Returns a tuple of (provider_model, extra_params)
     """
+    # TODO Make info logs of the following format: "<original_model> -> <final_model> [reasoning_effort: <effort>]"
     model = requested_model.strip()
 
     # Claude passthrough (kept for Claude Code fast model usage)
