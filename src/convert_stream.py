@@ -15,7 +15,9 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
       - tool_use: Optional[ChatCompletionToolCallChunk] (default None)
       - provider_specific_fields: Optional[dict]
     """
-    # TODO Move this function to a separate file ?
+    # We don't really care about the readability of this function - it was vibe-coded without review
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+
     # Defaults
     text: str = ""
     finish_reason: str = ""
@@ -44,12 +46,13 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
                 # TOOL CALLS (OpenAI-style incremental tool_calls on delta)
                 # Attempt to normalize to a ChatCompletionToolCallChunk-like dict
                 # Expected shape (best-effort):
-                # { index: int, id: Optional[str], type: "function", function: { name: str|None, arguments: str|None } }
+                # { index: int, id: Optional[str], type: "function", function: {name: str|None, arguments: str|None} }
                 tool_calls = getattr(delta, "tool_calls", None)
                 if tool_calls is None and isinstance(delta, dict):
                     tool_calls = delta.get("tool_calls")
                 if isinstance(tool_calls, list) and tool_calls:
                     tc = tool_calls[0]
+
                     # tc can be a dict or object with attributes
                     def _get(obj, key, default=None):
                         if isinstance(obj, dict):
@@ -67,8 +70,11 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
                         try:
                             # Last resort stringification for partial structured args
                             fn_args = str(fn_args)
-                        except Exception:
-                            fn_args = None
+                        except Exception as e:
+                            raise RuntimeError(
+                                f"Failed to convert OpenAI tool_use to GenericStreamingChunk: {e}"
+                            ) from e
+
                     tool_use = {
                         "index": tc_index if isinstance(tc_index, int) else 0,
                         "id": tc_id if isinstance(tc_id, str) else None,
@@ -85,10 +91,12 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
                     if a_tool_use is None and isinstance(delta, dict):
                         a_tool_use = delta.get("tool_use")
                     if a_tool_use is not None:
+
                         def _get(obj, key, default=None):
                             if isinstance(obj, dict):
                                 return obj.get(key, default)
                             return getattr(obj, key, default)
+
                         tu_id = _get(a_tool_use, "id", None)
                         tu_name = _get(a_tool_use, "name", None)
                         tu_input = _get(a_tool_use, "input", None)
@@ -96,8 +104,11 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
                         if tu_input is not None and not isinstance(tu_input, str):
                             try:
                                 tu_input = str(tu_input)
-                            except Exception:
-                                tu_input = None
+                            except Exception as e:
+                                raise RuntimeError(
+                                    f"Failed to convert Anthropic tool_use to GenericStreamingChunk: {e}"
+                                ) from e
+
                         tool_use = {
                             "index": 0,
                             "id": tu_id if isinstance(tu_id, str) else None,
@@ -126,8 +137,11 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
                         if fn_args is not None and not isinstance(fn_args, str):
                             try:
                                 fn_args = str(fn_args)
-                            except Exception:
-                                fn_args = None
+                            except Exception as e:
+                                raise RuntimeError(
+                                    f"Failed to convert OpenAI function_call to GenericStreamingChunk: {e}"
+                                ) from e
+
                         tool_use = {
                             "index": 0,
                             "id": None,
@@ -148,7 +162,7 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
             fr = getattr(choice, "finish_reason", None)
             if isinstance(fr, str):
                 finish_reason = fr
-                is_finished = True if fr else False
+                is_finished = bool(fr)
 
             idx = getattr(choice, "index", None)
             if isinstance(idx, int):

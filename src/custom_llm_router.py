@@ -13,6 +13,8 @@ class CustomLLMRouter(CustomLLM):
     Routes model requests to the correct provider and parameters.
     """
 
+    # pylint: disable=too-many-positional-arguments,too-many-locals
+
     def completion(
         self,
         model: str,
@@ -28,7 +30,7 @@ class CustomLLMRouter(CustomLLM):
         acompletion=None,
         litellm_params=None,
         logger_fn=None,
-        headers={},
+        headers=None,
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
@@ -40,7 +42,7 @@ class CustomLLMRouter(CustomLLM):
                 model=model,
                 messages=messages,
                 logger_fn=logger_fn,
-                headers=headers,
+                headers=headers or {},
                 timeout=timeout,
                 client=client,
                 **optional_params,
@@ -65,7 +67,7 @@ class CustomLLMRouter(CustomLLM):
         acompletion=None,
         litellm_params=None,
         logger_fn=None,
-        headers={},
+        headers=None,
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
@@ -77,7 +79,7 @@ class CustomLLMRouter(CustomLLM):
                 model=model,
                 messages=messages,
                 logger_fn=logger_fn,
-                headers=headers,
+                headers=headers or {},
                 timeout=timeout,
                 client=client,
                 **optional_params,
@@ -101,7 +103,7 @@ class CustomLLMRouter(CustomLLM):
         acompletion=None,
         litellm_params=None,
         logger_fn=None,
-        headers={},
+        headers=None,
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
@@ -115,7 +117,7 @@ class CustomLLMRouter(CustomLLM):
                 model=model,
                 messages=messages,
                 logger_fn=logger_fn,
-                headers=headers,
+                headers=headers or {},
                 timeout=timeout,
                 client=client,
                 **optional_params,
@@ -141,7 +143,7 @@ class CustomLLMRouter(CustomLLM):
         acompletion=None,
         litellm_params=None,
         logger_fn=None,
-        headers={},
+        headers=None,
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
@@ -155,7 +157,7 @@ class CustomLLMRouter(CustomLLM):
                 model=model,
                 messages=messages,
                 logger_fn=logger_fn,
-                headers=headers,
+                headers=headers or {},
                 timeout=timeout,
                 client=client,
                 **optional_params,
