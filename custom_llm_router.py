@@ -1,4 +1,3 @@
-import logging
 import re
 from typing import Any, AsyncGenerator, Callable, Generator, Optional, Union
 
@@ -61,6 +60,7 @@ def _to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
       - tool_use: Optional[ChatCompletionToolCallChunk] (default None)
       - provider_specific_fields: Optional[dict]
     """
+    # TODO Move this function to a separate file ?
     # Defaults
     text: str = ""
     finish_reason: str = ""
@@ -215,7 +215,7 @@ def _to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
         "text": text,
         "is_finished": is_finished,
         "finish_reason": finish_reason,
-        "usage": None,
+        "usage": None,  # TODO Do we have to put anything here ?
         "index": index,
         "tool_use": tool_use,
         "provider_specific_fields": provider_specific_fields,
