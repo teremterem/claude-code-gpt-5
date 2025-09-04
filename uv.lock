@@ -1898,7 +1898,7 @@ wheels = [
 
 [[package]]
 name = "litellm"
-version = "1.76.1"
+version = "1.76.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp", version = "3.10.11", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -1922,9 +1922,9 @@ dependencies = [
     { name = "tokenizers", version = "0.21.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "tokenizers", version = "0.22.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f8/fd/aa87c0a598377786521bee585f4d525e846f5339b816903298bfbb9daef5/litellm-1.76.1.tar.gz", hash = "sha256:d5a3a3efda04999b60ec0d1c29c1eaaa12f89a7b29db4bda691c7fb55b4fa6ad", size = 10178100, upload-time = "2025-08-30T21:05:48.578Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/75/a3/f7c00c660972eed1ba5ed53771ac9b4235e7fb1dc410e91d35aff2778ae7/litellm-1.76.2.tar.gz", hash = "sha256:fc7af111fa0f06943d8dbebed73f88000f9902f0d0ee0882c57d0bd5c1a37ecb", size = 10189238, upload-time = "2025-09-04T00:25:09.472Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d9/d3/16423b6d399540eeff357f00abc85f62dc337d347a0c98ccadc448a61df5/litellm-1.76.1-py3-none-any.whl", hash = "sha256:938f05075372f26098211ea9b3cb0a6bb7b46111330226b70d42d40bd307812f", size = 8965465, upload-time = "2025-08-30T21:05:46.068Z" },
+    { url = "https://files.pythonhosted.org/packages/79/f4/980cc81c21424026dcb48a541654fd6f4286891825a3d0dd51f02b65cbc3/litellm-1.76.2-py3-none-any.whl", hash = "sha256:a9a2ef64a598b5b4ae245f1de6afc400856477cd6f708ff633d95e2275605a45", size = 8973847, upload-time = "2025-09-04T00:25:05.353Z" },
 ]
 
 [package.optional-dependencies]
@@ -2487,7 +2487,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.105.0"
+version = "1.106.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio", version = "4.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -2503,9 +2503,9 @@ dependencies = [
     { name = "typing-extensions", version = "4.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "typing-extensions", version = "4.15.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6f/a9/c8c2dea8066a8f3079f69c242f7d0d75aaad4c4c3431da5b0df22a24e75d/openai-1.105.0.tar.gz", hash = "sha256:a68a47adce0506d34def22dd78a42cbb6cfecae1cf6a5fe37f38776d32bbb514", size = 557265, upload-time = "2025-09-03T14:14:08.586Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/3a/ef6c6842ea4df48453f5ff7b624178273d9137acb318afba3872a5f3da49/openai-1.106.0.tar.gz", hash = "sha256:8c5ae2ae61a619cd8ba22aeda8fdff00428280041eff5be5555287634ea6f460", size = 561133, upload-time = "2025-09-04T13:37:37.012Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/01/186845829d3a3609bb5b474067959076244dd62540d3e336797319b13924/openai-1.105.0-py3-none-any.whl", hash = "sha256:3ad7635132b0705769ccae31ca7319f59ec0c7d09e94e5e713ce2d130e5b021f", size = 928203, upload-time = "2025-09-03T14:14:06.842Z" },
+    { url = "https://files.pythonhosted.org/packages/01/66/465e4e8095becd1cd8c0a32283d530e7866f434031eafdc93cc1f04869d7/openai-1.106.0-py3-none-any.whl", hash = "sha256:47bf9d07df203cd2b7f90ac2da84aea40340dbdebb2da2f4f70e3a133c605d57", size = 930767, upload-time = "2025-09-04T13:37:34.982Z" },
 ]
 
 [[package]]
