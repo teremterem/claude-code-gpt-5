@@ -1,3 +1,4 @@
+import os
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
@@ -6,6 +7,19 @@ from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse
 
 from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
+
+
+if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
+    try:
+        import langfuse  # pylint: disable=unused-import
+    except ImportError:
+        print(
+            "\033[1;31mLangfuse is not installed. Please install it with either `uv sync --extra langfuse` or "
+            "`uv sync --all-extras`.\033[0m"
+        )
+    else:
+        litellm.success_callback = ["langfuse"]
+        litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
 
 
 class CustomLLMRouter(CustomLLM):

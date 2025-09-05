@@ -78,13 +78,13 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 2. **Connect to your proxy to use GPT-5 variants**:
    ```bash
-   ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-low
+   ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
    ```
 
    **Available models for the `--model` parameter:**
    - **GPT-5**:
       - `gpt-5-reason-minimal`
-      - `gpt-5-reason-low` (recommended)
+      - `gpt-5-reason-low`
       - `gpt-5-reason-medium`
       - `gpt-5-reason-high`
    - **GPT-5-mini**:
