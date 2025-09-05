@@ -18,6 +18,7 @@ if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
             "`uv sync --all-extras`.\033[0m"
         )
     else:
+        print("\033[1;34mEnabling Langfuse logging...\033[0m")
         litellm.success_callback = ["langfuse"]
         litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
 
