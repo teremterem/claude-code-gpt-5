@@ -9,6 +9,30 @@ from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
+def _truthy(val: Optional[str]) -> bool:
+    if val is None:
+        return True
+    return val.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _maybe_append_one_tool_instruction(provider_model: str, messages: list) -> list:
+    if not provider_model.startswith("openai/"):
+        return messages
+    if not _truthy(os.getenv("GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE")):
+        return messages
+    appended = list(messages)
+    appended.append(
+        {
+            "role": "system",
+            "content": (
+                "Always call at most one tool per assistant response. "
+                "Never request or execute multiple tool calls in a single response."
+            ),
+        }
+    )
+    return appended
+
+
 if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     try:
         import langfuse  # pylint: disable=unused-import
@@ -53,6 +77,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params.update(extra_params)
 
         try:
+            messages = _maybe_append_one_tool_instruction(model, messages)
             response = litellm.completion(
                 model=model,
                 messages=messages,
@@ -90,6 +115,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params.update(extra_params)
 
         try:
+            messages = _maybe_append_one_tool_instruction(model, messages)
             response = await litellm.acompletion(
                 model=model,
                 messages=messages,
@@ -128,6 +154,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params["stream"] = True
 
         try:
+            messages = _maybe_append_one_tool_instruction(model, messages)
             response = litellm.completion(
                 model=model,
                 messages=messages,
@@ -168,6 +195,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params["stream"] = True
 
         try:
+            messages = _maybe_append_one_tool_instruction(model, messages)
             response = await litellm.acompletion(
                 model=model,
                 messages=messages,
