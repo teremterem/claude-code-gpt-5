@@ -9,6 +9,48 @@ from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
+def _enforce_single_tool_message_enabled() -> bool:
+    """Return True if we should append the single-tool-call instruction.
+
+    Defaults to True when the env var is unset. Treats common truthy values
+    ("1", "true", "yes", "on") as True and falsy values ("0", "false",
+    "no", "off") as False.
+    """
+    raw = os.getenv("GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE")
+    if raw is None:
+        return True
+    raw_l = raw.strip().lower()
+    if raw_l in {"1", "true", "yes", "on"}:
+        return True
+    if raw_l in {"0", "false", "no", "off"}:
+        return False
+    # Fallback: non-empty values default to True
+    return bool(raw_l)
+
+
+_SINGLE_TOOL_CALL_INSTRUCTION = (
+    "IMPORTANT: The CLI can only process one tool call per response. "
+    "Always call at most one tool in a single response. If multiple tools are needed, "
+    "choose the next best single tool, return exactly one tool call, and wait for the next turn."
+)
+
+
+def _maybe_append_single_tool_instruction(provider_model: str, messages: list) -> list:
+    """Append enforcement instruction as the last message for GPT models when enabled.
+
+    The instruction is only added for OpenAI GPT models, not for Claude/Anthropic.
+    """
+    try:
+        is_gpt = provider_model.startswith("openai/")
+    except Exception:  # TODO WTF ?!  # pylint: disable=broad-exception-caught
+        is_gpt = False
+
+    if is_gpt and _enforce_single_tool_message_enabled():
+        # Append as a final system message without mutating original list
+        return [*messages, {"role": "system", "content": _SINGLE_TOOL_CALL_INSTRUCTION}]
+    return messages
+
+
 if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     try:
         import langfuse  # pylint: disable=unused-import
@@ -53,6 +95,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params.update(extra_params)
 
         try:
+            messages = _maybe_append_single_tool_instruction(model, messages)
             response = litellm.completion(
                 model=model,
                 messages=messages,
@@ -90,6 +133,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params.update(extra_params)
 
         try:
+            messages = _maybe_append_single_tool_instruction(model, messages)
             response = await litellm.acompletion(
                 model=model,
                 messages=messages,
@@ -128,6 +172,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params["stream"] = True
 
         try:
+            messages = _maybe_append_single_tool_instruction(model, messages)
             response = litellm.completion(
                 model=model,
                 messages=messages,
@@ -168,6 +213,7 @@ class CustomLLMRouter(CustomLLM):
         optional_params["stream"] = True
 
         try:
+            messages = _maybe_append_single_tool_instruction(model, messages)
             response = await litellm.acompletion(
                 model=model,
                 messages=messages,
