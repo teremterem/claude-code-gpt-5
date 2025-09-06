@@ -20,7 +20,7 @@ if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     else:
         print("\033[1;34mEnabling Langfuse logging...\033[0m")
         litellm.success_callback = ["langfuse"]
-        litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
+        litellm.failure_callback = ["langfuse"]
 
 
 class CustomLLMRouter(CustomLLM):
