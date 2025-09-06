@@ -11,28 +11,28 @@ from proxy.route_model import route_model
 
 def _should_enforce_single_tool_call() -> bool:
     """
-    Check if GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE is enabled (default: true).
+    Check if OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE is enabled (default: true).
     """
-    env_value = os.getenv("GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower()
+    env_value = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower()
     return env_value in ("true", "1", "yes", "on")
 
 
-def _modify_messages_for_gpt(messages: list, provider_model: str) -> list:
+def _modify_messages_for_openai(messages: list, provider_model: str) -> list:
     """
-    Add instruction to enforce single tool call per response for GPT models.
+    Add instruction to enforce single tool call per response for OpenAI models.
 
     Args:
         messages: Original messages list
         provider_model: The provider/model string (e.g., "openai/gpt-5")
 
     Returns:
-        Modified messages list with additional instruction for GPT models
+        Modified messages list with additional instruction for OpenAI models
     """
     if not _should_enforce_single_tool_call():
         return messages
 
-    # Only modify for OpenAI GPT models, not Claude models
-    if not provider_model.startswith("openai"):
+    # Only modify for OpenAI models, not Claude models
+    if not provider_model.startswith("openai/"):
         return messages
 
     # Create a copy of messages to avoid modifying the original
@@ -96,8 +96,8 @@ class CustomLLMRouter(CustomLLM):
         provider_model, extra_params = route_model(model)
         optional_params.update(extra_params)
 
-        # Modify messages for GPT models if enforcement is enabled
-        modified_messages = _modify_messages_for_gpt(messages, provider_model)
+        # Modify messages for OpenAI models if enforcement is enabled
+        modified_messages = _modify_messages_for_openai(messages, provider_model)
 
         try:
             response = litellm.completion(
@@ -136,8 +136,8 @@ class CustomLLMRouter(CustomLLM):
         provider_model, extra_params = route_model(model)
         optional_params.update(extra_params)
 
-        # Modify messages for GPT models if enforcement is enabled
-        modified_messages = _modify_messages_for_gpt(messages, provider_model)
+        # Modify messages for OpenAI models if enforcement is enabled
+        modified_messages = _modify_messages_for_openai(messages, provider_model)
 
         try:
             response = await litellm.acompletion(
@@ -174,8 +174,8 @@ class CustomLLMRouter(CustomLLM):
     ) -> Generator[GenericStreamingChunk, None, None]:
         provider_model, extra_params = route_model(model)
 
-        # Modify messages for GPT models if enforcement is enabled
-        modified_messages = _modify_messages_for_gpt(messages, provider_model)
+        # Modify messages for OpenAI models if enforcement is enabled
+        modified_messages = _modify_messages_for_openai(messages, provider_model)
 
         optional_params.update(extra_params)
         optional_params["stream"] = True
@@ -217,8 +217,8 @@ class CustomLLMRouter(CustomLLM):
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         provider_model, extra_params = route_model(model)
 
-        # Modify messages for GPT models if enforcement is enabled
-        modified_messages = _modify_messages_for_gpt(messages, provider_model)
+        # Modify messages for OpenAI models if enforcement is enabled
+        modified_messages = _modify_messages_for_openai(messages, provider_model)
 
         optional_params.update(extra_params)
         optional_params["stream"] = True
