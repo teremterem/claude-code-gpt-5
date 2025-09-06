@@ -23,6 +23,38 @@ if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
         litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
 
 
+_SINGLE_TOOL_INSTR = (
+    "IMPORTANT: Always call only one tool at a time per response. "
+    "Never call multiple tools in a single response. "
+    "The CLI cannot handle multiple tool calls in a single response."
+)
+
+
+def _env_true(name: str, default: bool = True) -> bool:
+    val = os.getenv(name)
+    if val is None:
+        return default
+    return val.strip().lower() not in {"0", "false", "no", "off", ""}
+
+
+def _needs_enforcement(provider_model: str) -> bool:
+    return provider_model.startswith("openai/") and _env_true("GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", True)
+
+
+def _append_enforcement_message(messages: list) -> list:
+    last = messages[-1] if messages else None
+    if (
+        isinstance(last, dict)
+        and last.get("role") == "system"
+        and isinstance(last.get("content"), str)
+        and _SINGLE_TOOL_INSTR in last.get("content")
+    ):
+        return messages
+    new_messages = list(messages)
+    new_messages.append({"role": "system", "content": _SINGLE_TOOL_INSTR})
+    return new_messages
+
+
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
@@ -51,6 +83,8 @@ class CustomLLMRouter(CustomLLM):
     ) -> ModelResponse:
         model, extra_params = route_model(model)
         optional_params.update(extra_params)
+        if _needs_enforcement(model):
+            messages = _append_enforcement_message(messages)
 
         try:
             response = litellm.completion(
@@ -88,6 +122,8 @@ class CustomLLMRouter(CustomLLM):
     ) -> ModelResponse:
         model, extra_params = route_model(model)
         optional_params.update(extra_params)
+        if _needs_enforcement(model):
+            messages = _append_enforcement_message(messages)
 
         try:
             response = await litellm.acompletion(
@@ -125,6 +161,8 @@ class CustomLLMRouter(CustomLLM):
         model, extra_params = route_model(model)
 
         optional_params.update(extra_params)
+        if _needs_enforcement(model):
+            messages = _append_enforcement_message(messages)
         optional_params["stream"] = True
 
         try:
@@ -165,6 +203,8 @@ class CustomLLMRouter(CustomLLM):
         model, extra_params = route_model(model)
 
         optional_params.update(extra_params)
+        if _needs_enforcement(model):
+            messages = _append_enforcement_message(messages)
         optional_params["stream"] = True
 
         try:
