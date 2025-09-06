@@ -6,8 +6,8 @@ This repository lets you use **Anthropic's Claude Code** with **OpenAI's GPT-5**
 
 ### Prerequisites
 
-- [OpenAI API](https://platform.openai.com/docs/api-reference) key 🔑
-- [Anthropic API](https://console.anthropic.com/) key 🔑
+- [OpenAI API key](https://platform.openai.com/settings/organization/api-keys) 🔑
+- [Anthropic API key](https://console.anthropic.com/settings/keys) 🔑
 
 **Why the Anthropic API key is still required**
 
