@@ -9,6 +9,20 @@ from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
+if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
+    try:
+        import langfuse  # pylint: disable=unused-import
+    except ImportError:
+        print(
+            "\033[1;31mLangfuse is not installed. Please install it with either `uv sync --extra langfuse` or "
+            "`uv sync --all-extras`.\033[0m"
+        )
+    else:
+        print("\033[1;34mEnabling Langfuse logging...\033[0m")
+        litellm.success_callback = ["langfuse"]
+        litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
+
+
 def _should_enforce_single_tool_call() -> bool:
     """
     Check if OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE is enabled (default: true).
@@ -51,20 +65,6 @@ def _modify_messages_for_openai(messages: list, provider_model: str) -> list:
 
     modified_messages.append(tool_instruction)
     return modified_messages
-
-
-if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
-    try:
-        import langfuse  # pylint: disable=unused-import
-    except ImportError:
-        print(
-            "\033[1;31mLangfuse is not installed. Please install it with either `uv sync --extra langfuse` or "
-            "`uv sync --all-extras`.\033[0m"
-        )
-    else:
-        print("\033[1;34mEnabling Langfuse logging...\033[0m")
-        litellm.success_callback = ["langfuse"]
-        litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
 
 
 class CustomLLMRouter(CustomLLM):
