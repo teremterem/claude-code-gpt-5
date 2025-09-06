@@ -9,6 +9,40 @@ from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
+def _should_enforce_single_tool_call() -> bool:
+    """Return True if we should append an instruction enforcing a single tool call per response.
+
+    Defaults to True when env var is unset. Accept typical falsy values to disable.
+    """
+    val = os.getenv("GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").strip().lower()
+    return val not in {"false", "0", "no", "off"}
+
+
+def _append_single_tool_instruction_if_needed(provider_model: str, messages: list) -> list:
+    """Append a final system instruction for GPT models to ensure only one tool call per response.
+
+    - Only applies when env flag is enabled and provider is OpenAI (GPT), not Anthropic.
+    - Appends as the last message to the LLM input.
+    """
+    # Quick return if disabled
+    if not _should_enforce_single_tool_call():
+        return messages
+
+    # Only enforce for OpenAI/GPT models; skip Anthropic/Claude
+    if not provider_model.startswith("openai/"):
+        return messages
+
+    # Create a shallow copy to avoid mutating caller-provided list in place
+    new_messages = list(messages)
+
+    instruction = (
+        "Important: When using tools, call at most one tool per response. "
+        "Never attempt multiple tool calls in a single response; the CLI cannot handle it."
+    )
+    new_messages.append({"role": "system", "content": instruction})
+    return new_messages
+
+
 if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     try:
         import langfuse  # pylint: disable=unused-import
@@ -52,6 +86,9 @@ class CustomLLMRouter(CustomLLM):
         model, extra_params = route_model(model)
         optional_params.update(extra_params)
 
+        # Ensure single-tool-call instruction is appended for GPT models when enabled
+        messages = _append_single_tool_instruction_if_needed(model, messages)
+
         try:
             response = litellm.completion(
                 model=model,
@@ -88,6 +125,9 @@ class CustomLLMRouter(CustomLLM):
     ) -> ModelResponse:
         model, extra_params = route_model(model)
         optional_params.update(extra_params)
+
+        # Ensure single-tool-call instruction is appended for GPT models when enabled
+        messages = _append_single_tool_instruction_if_needed(model, messages)
 
         try:
             response = await litellm.acompletion(
@@ -126,6 +166,9 @@ class CustomLLMRouter(CustomLLM):
 
         optional_params.update(extra_params)
         optional_params["stream"] = True
+
+        # Ensure single-tool-call instruction is appended for GPT models when enabled
+        messages = _append_single_tool_instruction_if_needed(model, messages)
 
         try:
             response = litellm.completion(
@@ -166,6 +209,9 @@ class CustomLLMRouter(CustomLLM):
 
         optional_params.update(extra_params)
         optional_params["stream"] = True
+
+        # Ensure single-tool-call instruction is appended for GPT models when enabled
+        messages = _append_single_tool_instruction_if_needed(model, messages)
 
         try:
             response = await litellm.acompletion(
