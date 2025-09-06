@@ -1952,7 +1952,7 @@ proxy = [
     { name = "pyyaml" },
     { name = "rich" },
     { name = "rq", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "rq", version = "2.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "rq", version = "2.6.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
     { name = "uvicorn" },
     { name = "uvloop", marker = "sys_platform != 'win32'" },
     { name = "websockets" },
@@ -4207,7 +4207,7 @@ wheels = [
 
 [[package]]
 name = "rq"
-version = "2.5.0"
+version = "2.6.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -4221,9 +4221,9 @@ dependencies = [
     { name = "croniter", marker = "python_full_version >= '3.9'" },
     { name = "redis", version = "6.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/48/1c/1c390fd8594e7367c1ee672297f7a877c0982b9c26877242c5a509ad27c0/rq-2.5.0.tar.gz", hash = "sha256:b55d328fcaeaf25823b8b8450283225f8048bd1c52abaaca192c99201ab5c687", size = 666978, upload-time = "2025-08-15T10:41:34.84Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8e/f5/46e39abc46ff6ff4f3151ee4fd2c1bf7601a8d26bd30fd951c5496b1e6c6/rq-2.6.0.tar.gz", hash = "sha256:92ad55676cda14512c4eea5782f398a102dc3af108bea197c868c4c50c5d3e81", size = 675315, upload-time = "2025-09-06T03:15:12.854Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/36/8917bcfc9794cbc4dd984962feb401f2dfeee0d89e1e40e3367420996f42/rq-2.5.0-py3-none-any.whl", hash = "sha256:90c74eb5b5793ff08e6c3391fd6deb7151f308ac8f04b6831580b38e90688155", size = 108377, upload-time = "2025-08-15T10:41:21.792Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/66/6cf141584526e3ed5b57a194e09cbdf7058334bd3926bb3f96e2453cf053/rq-2.6.0-py3-none-any.whl", hash = "sha256:be5ccc0f0fc5f32da0999648340e31476368f08067f0c3fce6768d00064edbb5", size = 112533, upload-time = "2025-09-06T03:15:09.894Z" },
 ]
 
 [[package]]
