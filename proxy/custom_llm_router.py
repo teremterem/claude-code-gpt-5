@@ -9,6 +9,50 @@ from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
+def _should_enforce_single_tool_call() -> bool:
+    """
+    Check if GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE is enabled (default: true).
+    """
+    env_value = os.getenv("GPT_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower()
+    return env_value in ("true", "1", "yes", "on")
+
+
+def _modify_messages_for_gpt(messages: list, provider_model: str) -> list:
+    """
+    Add instruction to enforce single tool call per response for GPT models.
+
+    Args:
+        messages: Original messages list
+        provider_model: The provider/model string (e.g., "openai/gpt-5")
+
+    Returns:
+        Modified messages list with additional instruction for GPT models
+    """
+    if not _should_enforce_single_tool_call():
+        return messages
+
+    # Only modify for OpenAI GPT models, not Claude models
+    if not provider_model.startswith("openai/gpt"):
+        return messages
+
+    # Create a copy of messages to avoid modifying the original
+    modified_messages = messages.copy()
+
+    # Add the single tool call instruction as the last message
+    tool_instruction = {
+        "role": "system",
+        "content": (
+            "IMPORTANT: You MUST call only ONE tool at a time per response. "
+            "Never call multiple tools in a single response, as the CLI cannot handle "
+            "multiple tool calls simultaneously. Wait for the tool result before making "
+            "any additional tool calls."
+        ),
+    }
+
+    modified_messages.append(tool_instruction)
+    return modified_messages
+
+
 if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     try:
         import langfuse  # pylint: disable=unused-import
@@ -49,13 +93,16 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
-        model, extra_params = route_model(model)
+        provider_model, extra_params = route_model(model)
         optional_params.update(extra_params)
+
+        # Modify messages for GPT models if enforcement is enabled
+        modified_messages = _modify_messages_for_gpt(messages, provider_model)
 
         try:
             response = litellm.completion(
-                model=model,
-                messages=messages,
+                model=provider_model,
+                messages=modified_messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
@@ -86,13 +133,16 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
-        model, extra_params = route_model(model)
+        provider_model, extra_params = route_model(model)
         optional_params.update(extra_params)
+
+        # Modify messages for GPT models if enforcement is enabled
+        modified_messages = _modify_messages_for_gpt(messages, provider_model)
 
         try:
             response = await litellm.acompletion(
-                model=model,
-                messages=messages,
+                model=provider_model,
+                messages=modified_messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
@@ -122,15 +172,18 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
-        model, extra_params = route_model(model)
+        provider_model, extra_params = route_model(model)
+
+        # Modify messages for GPT models if enforcement is enabled
+        modified_messages = _modify_messages_for_gpt(messages, provider_model)
 
         optional_params.update(extra_params)
         optional_params["stream"] = True
 
         try:
             response = litellm.completion(
-                model=model,
-                messages=messages,
+                model=provider_model,
+                messages=modified_messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
@@ -162,15 +215,18 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
-        model, extra_params = route_model(model)
+        provider_model, extra_params = route_model(model)
+
+        # Modify messages for GPT models if enforcement is enabled
+        modified_messages = _modify_messages_for_gpt(messages, provider_model)
 
         optional_params.update(extra_params)
         optional_params["stream"] = True
 
         try:
             response = await litellm.acompletion(
-                model=model,
-                messages=messages,
+                model=provider_model,
+                messages=modified_messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
