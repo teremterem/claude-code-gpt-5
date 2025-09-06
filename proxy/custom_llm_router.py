@@ -32,7 +32,7 @@ def _modify_messages_for_gpt(messages: list, provider_model: str) -> list:
         return messages
 
     # Only modify for OpenAI GPT models, not Claude models
-    if not provider_model.startswith("openai/gpt"):
+    if not provider_model.startswith("openai"):
         return messages
 
     # Create a copy of messages to avoid modifying the original
