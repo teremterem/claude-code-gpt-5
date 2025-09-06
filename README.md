@@ -112,15 +112,4 @@ API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-An
 
 **The `Fetch` tool DOES work, though (getting web content from specific URLs).**
 
-## Adding More Models 🔧
-
-To support additional models beyond the pre-configured GPT-5 variants, you can modify the `config.yaml` file. Simply add new entries to the `model_list` following the existing format:
-
-```yaml
-- model_name: your-custom-model-name
-  litellm_params:
-    model: provider/model-name
-    # additional parameters as needed
-```
-
 ## P. S. You are very welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
