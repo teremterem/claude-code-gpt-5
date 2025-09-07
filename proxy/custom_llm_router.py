@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator, Callable, Generator, Optional, Union
+from typing import Any, AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
@@ -25,15 +25,16 @@ if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
         litellm.failure_callback = ["langfuse"]  # logs errors to langfuse
 
 
-def _should_enforce_single_tool_call() -> bool:
-    """
-    Check if OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE is enabled (default: true).
-    """
-    env_value = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower()
-    return env_value in ("true", "1", "on", "yes", "y")
+SHOULD_ENFORCE_SINGLE_TOOL_CALL = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower() in (
+    "true",
+    "1",
+    "on",
+    "yes",
+    "y",
+)
 
 
-def _modify_messages_for_openai(messages: list, provider_model: str) -> list:
+def _modify_messages_for_openai(messages: list[dict[str, Any]], provider_model: str) -> list[dict[str, Any]]:
     """
     Add instruction to enforce single tool call per response for OpenAI models.
 
@@ -44,7 +45,7 @@ def _modify_messages_for_openai(messages: list, provider_model: str) -> list:
     Returns:
         Modified messages list with additional instruction for OpenAI models
     """
-    if not _should_enforce_single_tool_call():
+    if not SHOULD_ENFORCE_SINGLE_TOOL_CALL:
         return messages
 
     # Only modify for OpenAI models, not Claude models
