@@ -105,7 +105,7 @@ class CustomLLMRouter(CustomLLM):
         provider_model, extra_params = route_model(model)
         optional_params.update(extra_params)
 
-        # Modify messages for OpenAI models if enforcement is enabled
+        # Adapt messages for OpenAI models if needed
         modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
 
         try:
@@ -145,7 +145,7 @@ class CustomLLMRouter(CustomLLM):
         provider_model, extra_params = route_model(model)
         optional_params.update(extra_params)
 
-        # Modify messages for OpenAI models if enforcement is enabled
+        # Adapt messages for OpenAI models if needed
         modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
 
         try:
@@ -182,12 +182,11 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         provider_model, extra_params = route_model(model)
-
-        # Modify messages for OpenAI models if enforcement is enabled
-        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
-
         optional_params.update(extra_params)
         optional_params["stream"] = True
+
+        # Adapt messages for OpenAI models if needed
+        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
 
         try:
             response = litellm.completion(
@@ -225,12 +224,11 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         provider_model, extra_params = route_model(model)
-
-        # Modify messages for OpenAI models if enforcement is enabled
-        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
-
         optional_params.update(extra_params)
         optional_params["stream"] = True
+
+        # Adapt messages for OpenAI models if needed
+        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
 
         try:
             response = await litellm.acompletion(
