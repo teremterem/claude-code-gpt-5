@@ -58,10 +58,10 @@ def _modify_messages_for_openai(messages: list, provider_model: str) -> list:
     tool_instruction = {
         "role": "system",
         "content": (
-            "IMPORTANT: You MUST call only ONE tool at a time per response. "
-            "Never call multiple tools in a single response, as the CLI cannot handle "
-            "multiple tool calls simultaneously. Wait for the tool result before making "
-            "any additional tool calls."
+            "IMPORTANT: When using tools, call AT MOST one tool per response. Never attempt multiple tool calls in a "
+            "single response. The client does not support multiple tool calls in a single response. If multiple "
+            "tools are needed, choose the next best single tool, return exactly one tool call, and wait for the next "
+            "turn."
         ),
     }
 
