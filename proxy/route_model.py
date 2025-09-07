@@ -4,10 +4,11 @@ from typing import Any
 
 def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
     # TODO TODO TODO
-    return resolve_requested_model(requested_model)
+    return resolve_gpt_5_alias(requested_model)
 
 
-def resolve_requested_model(requested_model: str) -> tuple[str, dict[str, Any]]:
+def resolve_gpt_5_alias(requested_model: str) -> tuple[str, dict[str, Any]]:
+    # TODO TODO TODO
     """
     Map a friendly model alias to a provider model and extra params.
 
