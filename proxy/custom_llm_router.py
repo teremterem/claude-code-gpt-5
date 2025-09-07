@@ -8,6 +8,8 @@ from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse
 from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
+# We don't have to do `dotenv.load_dotenv()` - litellm does this for us upon import
+
 
 if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     try:
@@ -28,7 +30,7 @@ def _should_enforce_single_tool_call() -> bool:
     Check if OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE is enabled (default: true).
     """
     env_value = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower()
-    return env_value in ("true", "1", "yes", "on")
+    return env_value in ("true", "1", "on", "yes", "y")
 
 
 def _modify_messages_for_openai(messages: list, provider_model: str) -> list:
