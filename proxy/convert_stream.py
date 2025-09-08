@@ -180,7 +180,7 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
         raise RuntimeError(f"Failed to convert ModelResponseStream to GenericStreamingChunk: {e}") from e
 
     return {
-        "text": text,
+        "txt": text,  # TODO Revert this key back to "text" after you debug the unspecific token level errors
         "is_finished": is_finished,
         "finish_reason": finish_reason,
         "usage": None,  # TODO Do we have to put anything here ?
@@ -188,3 +188,7 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
         "tool_use": tool_use,
         "provider_specific_fields": provider_specific_fields,
     }
+
+
+# TODO Vibe-code a function that converts a complete ModelResponse into a GenericStreamingChunk as a single token
+#  containing the entire response for debugging purposes ?
