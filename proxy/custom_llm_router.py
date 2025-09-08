@@ -198,11 +198,10 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+            for chunk in response:
+                yield to_generic_streaming_chunk(chunk)
         except Exception as e:
             raise RuntimeError(f"[STREAMING] Error calling litellm.completion: {e}") from e
-
-        for chunk in response:
-            yield to_generic_streaming_chunk(chunk)
 
     async def astreaming(
         self,
@@ -240,11 +239,10 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+            async for chunk in response:
+                yield to_generic_streaming_chunk(chunk)
         except Exception as e:
             raise RuntimeError(f"[ASTREAMING] Error calling litellm.acompletion: {e}") from e
-
-        async for chunk in response:
-            yield to_generic_streaming_chunk(chunk)
 
 
 custom_llm_router = CustomLLMRouter()
