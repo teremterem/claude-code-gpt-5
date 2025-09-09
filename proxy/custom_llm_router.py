@@ -4,7 +4,7 @@ import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from proxy.config import SHOULD_ENFORCE_SINGLE_TOOL_CALL
+from proxy.config import OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
 from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
@@ -22,7 +22,7 @@ def _modify_messages_for_openai(messages: list, provider_model: str, optional_pa
     Returns:
         Modified messages list with additional instruction for OpenAI models
     """
-    if not SHOULD_ENFORCE_SINGLE_TOOL_CALL:
+    if not OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
         return messages
 
     # Only modify for OpenAI models, not Claude models

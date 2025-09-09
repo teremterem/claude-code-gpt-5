@@ -19,30 +19,30 @@ def resolve_gpt_5_alias(requested_model: str) -> tuple[str, dict[str, Any]]:
 
     Returns a tuple of (provider_model, extra_params)
     """
-    model = requested_model.strip()
+    requested_model = requested_model.strip()
 
     # Claude passthrough (kept for Claude Code fast model usage)
-    if model.startswith("claude-"):
-        final = f"anthropic/{model}"
+    if requested_model.startswith("claude-"):
+        final_model = f"anthropic/{requested_model}"
         # TODO Make it possible to disable this print ? (turn it into a log record ?)
-        print(f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final}\033[0m")
-        return final, {}
+        print(f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final_model}\033[0m")
+        return final_model, {}
 
     # GPT-5 family with reasoning effort
     m = re.fullmatch(
         r"gpt-5(?P<variant>-(mini|nano))?-reason-(?P<effort>minimal|low|medium|high)",
-        model,
+        requested_model,
     )
     if m:
         variant = m.group("variant") or ""
         effort = m.group("effort")
-        provider_model = f"openai/gpt-5{variant or ''}"
+        final_model = f"openai/gpt-5{variant or ''}"
         # TODO Make it possible to disable this print ? (turn it into a log record ?)
         print(
-            f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{provider_model}\033[0m "
+            f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final_model}\033[0m "
             f"[\033[1m\033[33mreasoning_effort: {effort}\033[0m]"
         )
-        return provider_model, {"reasoning_effort": effort}
+        return final_model, {"reasoning_effort": effort}
 
     raise ValueError(
         f"Unknown model alias '{requested_model}'. Supported patterns: "

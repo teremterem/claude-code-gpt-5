@@ -19,8 +19,12 @@ if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
         litellm.success_callback = ["langfuse"]
         litellm.failure_callback = ["langfuse"]
 
+REMAP_CLAUDE_HAIKU_TO = os.getenv("REMAP_CLAUDE_HAIKU_TO")
+REMAP_CLAUDE_SONNET_TO = os.getenv("REMAP_CLAUDE_SONNET_TO")
+REMAP_CLAUDE_OPUS_TO = os.getenv("REMAP_CLAUDE_OPUS_TO")
+MODEL_FOR_WEB_SEARCH = os.getenv("MODEL_FOR_WEB_SEARCH")
 
-SHOULD_ENFORCE_SINGLE_TOOL_CALL = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower() in (
+OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower() in (
     "true",
     "1",
     "on",
