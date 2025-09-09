@@ -188,7 +188,3 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
         "tool_use": tool_use,
         "provider_specific_fields": provider_specific_fields,
     }
-
-
-# TODO Vibe-code a function that converts a complete ModelResponse into a GenericStreamingChunk as a single token
-#  containing the entire response for debugging purposes ?

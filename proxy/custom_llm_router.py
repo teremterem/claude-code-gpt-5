@@ -160,7 +160,6 @@ class CustomLLMRouter(CustomLLM):
             )
         except Exception as e:
             raise RuntimeError(f"[ACOMPLETION] Error calling litellm.acompletion: {e}") from e
-
         return response
 
     def streaming(
