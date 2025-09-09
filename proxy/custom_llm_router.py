@@ -94,7 +94,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
         except Exception as e:
-            raise RuntimeError(f"[COMPLETION] Error calling litellm.completion: {e}") from e
+            raise RuntimeError(f"[CUSTOM_LLM_ROUTER.COMPLETION] Error calling litellm.completion: {e}") from e
 
         return response
 
@@ -134,7 +134,8 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
         except Exception as e:
-            raise RuntimeError(f"[ACOMPLETION] Error calling litellm.acompletion: {e}") from e
+            raise RuntimeError(f"[CUSTOM_LLM_ROUTER.ACOMPLETION] Error calling litellm.acompletion: {e}") from e
+
         return response
 
     def streaming(
@@ -174,7 +175,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
         except Exception as e:
-            raise RuntimeError(f"[STREAMING] Error calling litellm.completion: {e}") from e
+            raise RuntimeError(f"[CUSTOM_LLM_ROUTER.STREAMING] Error calling litellm.completion: {e}") from e
 
         for chunk in response:
             yield to_generic_streaming_chunk(chunk)
@@ -216,7 +217,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
         except Exception as e:
-            raise RuntimeError(f"[ASTREAMING] Error calling litellm.acompletion: {e}") from e
+            raise RuntimeError(f"[CUSTOM_LLM_ROUTER.ASTREAMING] Error calling litellm.acompletion: {e}") from e
 
         async for chunk in response:
             yield to_generic_streaming_chunk(chunk)
