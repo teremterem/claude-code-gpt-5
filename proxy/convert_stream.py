@@ -180,7 +180,7 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
         raise RuntimeError(f"Failed to convert ModelResponseStream to GenericStreamingChunk: {e}") from e
 
     return {
-        "txt": text,  # TODO Revert this key back to "text" after you debug the unspecific token level errors
+        "txt": text,  # TODO Use this change, which breaks tokens, to verify that token related errors are informative
         "is_finished": is_finished,
         "finish_reason": finish_reason,
         "usage": None,  # TODO Do we have to put anything here ?
