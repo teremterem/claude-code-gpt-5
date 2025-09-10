@@ -102,13 +102,13 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
-        provider_model, extra_params = route_model(model)
-        optional_params.update(extra_params)
-
-        # Adapt messages for OpenAI models if needed
-        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
-
         try:
+            provider_model, extra_params = route_model(model)
+            optional_params.update(extra_params)
+
+            # Adapt messages for OpenAI models if needed
+            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+
             response = litellm.completion(
                 model=provider_model,
                 messages=modified_messages,
@@ -118,10 +118,10 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+            return response
+
         except Exception as e:
             raise RuntimeError(f"[COMPLETION] Error calling litellm.completion: {e}") from e
-
-        return response
 
     async def acompletion(
         self,
@@ -142,13 +142,13 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
-        provider_model, extra_params = route_model(model)
-        optional_params.update(extra_params)
-
-        # Adapt messages for OpenAI models if needed
-        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
-
         try:
+            provider_model, extra_params = route_model(model)
+            optional_params.update(extra_params)
+
+            # Adapt messages for OpenAI models if needed
+            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+
             response = await litellm.acompletion(
                 model=provider_model,
                 messages=modified_messages,
@@ -158,9 +158,10 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+            return response
+
         except Exception as e:
             raise RuntimeError(f"[ACOMPLETION] Error calling litellm.acompletion: {e}") from e
-        return response
 
     def streaming(
         self,
@@ -181,14 +182,14 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
-        provider_model, extra_params = route_model(model)
-        optional_params.update(extra_params)
-        optional_params["stream"] = True
-
-        # Adapt messages for OpenAI models if needed
-        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
-
         try:
+            provider_model, extra_params = route_model(model)
+            optional_params.update(extra_params)
+            optional_params["stream"] = True
+
+            # Adapt messages for OpenAI models if needed
+            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+
             response = litellm.completion(
                 model=provider_model,
                 messages=modified_messages,
@@ -198,11 +199,12 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+            for chunk in response:
+                generic_chunk = to_generic_streaming_chunk(chunk)
+                yield generic_chunk
+
         except Exception as e:
             raise RuntimeError(f"[STREAMING] Error calling litellm.completion: {e}") from e
-
-        for chunk in response:
-            yield to_generic_streaming_chunk(chunk)
 
     async def astreaming(
         self,
@@ -223,14 +225,14 @@ class CustomLLMRouter(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
-        provider_model, extra_params = route_model(model)
-        optional_params.update(extra_params)
-        optional_params["stream"] = True
-
-        # Adapt messages for OpenAI models if needed
-        modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
-
         try:
+            provider_model, extra_params = route_model(model)
+            optional_params.update(extra_params)
+            optional_params["stream"] = True
+
+            # Adapt messages for OpenAI models if needed
+            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+
             response = await litellm.acompletion(
                 model=provider_model,
                 messages=modified_messages,
@@ -240,11 +242,12 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+            async for chunk in response:
+                generic_chunk = to_generic_streaming_chunk(chunk)
+                yield generic_chunk
+
         except Exception as e:
             raise RuntimeError(f"[ASTREAMING] Error calling litellm.acompletion: {e}") from e
-
-        async for chunk in response:
-            yield to_generic_streaming_chunk(chunk)
 
 
 custom_llm_router = CustomLLMRouter()
