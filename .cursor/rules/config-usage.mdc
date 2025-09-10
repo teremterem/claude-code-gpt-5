@@ -1,0 +1,28 @@
+---
+alwaysApply: true
+---
+# Configuration and Environment Overrides
+
+- LiteLLM loads environment variables automatically on import; no explicit `.env` loader is needed.
+- Primary runtime config: [config.yaml](mdc:config.yaml)
+  - Registers custom provider `custom_llm_router` at `proxy.custom_llm_router.custom_llm_router`.
+  - Sets `model_list` to route all models `*` to the custom provider.
+
+## Environment Variables in `proxy/config.py`
+- `REMAP_CLAUDE_HAIKU_TO`, `REMAP_CLAUDE_SONNET_TO`, `REMAP_CLAUDE_OPUS_TO`:
+  - If set, requests to matching Claude variants are remapped in `route_model.route_model()`.
+- `MODEL_FOR_WEB_SEARCH`:
+  - Reserved for potential web-search specific routing or features.
+- `OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE` (default "true"):
+  - When true, appends a system instruction for OpenAI models if tools/functions ≥ 2.
+
+## Observability (Optional)
+- If `LANGFUSE_SECRET_KEY` or `LANGFUSE_PUBLIC_KEY` is set:
+  - The project attempts to import `langfuse`.
+  - If installed, enables LiteLLM success/failure callbacks for Langfuse logging.
+  - If not installed, a terminal message suggests installing via `uv sync --extra langfuse` or `uv sync --all-extras`.
+
+## Local Development
+- Copy `.env.template` to `.env` and fill keys as needed.
+- Run the proxy with your environment loaded: `uv run litellm --config config.yaml`.
+- Claude Code client can connect using `ANTHROPIC_BASE_URL=http://localhost:4000` and select a GPT‑5 alias model.
