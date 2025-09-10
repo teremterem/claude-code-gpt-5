@@ -8,14 +8,21 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
     final_model = requested_model.strip()
 
     if final_model.startswith("claude-"):
-        if REMAP_CLAUDE_HAIKU_TO and "haiku" in final_model:
-            final_model = REMAP_CLAUDE_HAIKU_TO
-        elif REMAP_CLAUDE_OPUS_TO and "opus" in final_model:
-            final_model = REMAP_CLAUDE_OPUS_TO
+        # If the model name contains "haiku", "opus", or "sonnet", remap it to the appropriate model (provided the
+        # remap is configured)
+        if "haiku" in final_model:
+            if REMAP_CLAUDE_HAIKU_TO:
+                final_model = REMAP_CLAUDE_HAIKU_TO
+        elif "opus" in final_model:
+            if REMAP_CLAUDE_OPUS_TO:
+                final_model = REMAP_CLAUDE_OPUS_TO
         elif REMAP_CLAUDE_SONNET_TO:
+            # Here we assume the requested model is a Sonnet model (but also fallback to this remap in case it is some
+            # new, unknown model by Anthropic)
             final_model = REMAP_CLAUDE_SONNET_TO
 
-    # Prepend the provider name and resolve to a concrete GPT-5 model configuration if it is one of our GPT-5 aliases
+    # Prepend the provider name (and resolve to a real GPT-5 model name and configuration if it is one of our GPT-5
+    # aliases with a reasoning effort specified in the alias)
     final_model, extra_params = resolve_model_for_provider(final_model)
 
     log_message = f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final_model}\033[0m"
