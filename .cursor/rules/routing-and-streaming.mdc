@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+# Routing Pipeline and Streaming Normalization
+
+## Routing Model Names
+- Entry: `proxy/custom_llm_router.py` calls `proxy/route_model.route_model(requested_model)`.
+- `route_model()`:
+  - Remaps Claude variants based on env (`REMAP_CLAUDE_*_TO`) when `requested_model` starts with `claude-`.
+  - Resolves GPT‑5 aliases with reasoning effort suffixes, e.g., `gpt-5-reason-medium` → model `gpt-5` with `reasoning_effort="medium"`.
+  - Prefixes provider: `anthropic/…` for Claude, otherwise `openai/…`.
+
+## Enforcing Single Tool Call (OpenAI)
+- `_modify_messages_for_openai(messages, provider_model, optional_params)` adds a final system message when:
+  - `OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE` is true, and
+  - `provider_model` starts with `openai/`, and
+  - total tools + functions ≥ 2.
+- This prevents clients that do not support multiple tool calls per response from breaking.
+
+## Streaming
+- Router sets `optional_params["stream"] = True` for streaming paths.
+- For each provider chunk, use `proxy/convert_stream.to_generic_streaming_chunk(chunk)` to normalize into `GenericStreamingChunk` with fields:
+  - `text`, `is_finished`, `finish_reason`, `usage` (None for incremental), `index`, `tool_use`, `provider_specific_fields`.
+- The converter supports:
+  - OpenAI-style `delta.content`, incremental `tool_calls`, and legacy `function_call` shapes.
+  - Anthropic-style `tool_use`.
+
+## Error Handling
+- Wrap provider errors with clear `RuntimeError` messages scoped to the method (e.g., `CUSTOM_LLM_ROUTER.STREAMING`).
+- Prefer raising with context rather than silent fallbacks.

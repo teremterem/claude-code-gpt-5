@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+# Python Conventions for this Repository
+
+- Python version: `>=3.8.1,<4.0.0` (see [pyproject.toml](mdc:pyproject.toml)).
+- Formatter: Black with line length 119 (see [pyproject.toml](mdc:pyproject.toml)).
+- Linting: Pylint is included in dev dependencies.
+
+## General Style
+- Prefer explicit, descriptive names (avoid 1–2 letter identifiers).
+- Add type hints for public APIs and complex functions.
+- Use guard clauses to reduce nesting and handle edge cases early.
+- Avoid catching broad exceptions unless re-raised with context.
+
+## Project-specific Patterns
+- `proxy/custom_llm_router.py` is the main integration point with LiteLLM. Keep functions focused and fail fast with clear `RuntimeError` messages when wrapping provider exceptions.
+- For streaming, always convert provider chunks to `GenericStreamingChunk` via `proxy/convert_stream.to_generic_streaming_chunk`.
+- When modifying request messages for OpenAI models, use `_modify_messages_for_openai()` and ensure modifications are conditional and minimal.
+
+## Imports and Dependencies
+- Keep imports minimal and localize optional imports (e.g., `langfuse`) behind environment checks in `proxy/config.py`.
+- Do not add new runtime dependencies unless necessary; prefer dev dependencies for tooling.
+
+## Testing & Running
+- Run the proxy: `uv run litellm --config config.yaml`.
+- Ensure environment variables are set for any features you add (see `proxy/config.py`).

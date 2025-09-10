@@ -1,0 +1,32 @@
+---
+alwaysApply: true
+---
+# Project Structure and Entry Points
+
+- The proxy is launched via LiteLLM using `config.yaml`:
+  - Run: `uv run litellm --config config.yaml`
+  - The config maps a custom provider to `proxy/custom_llm_router.py`.
+
+Key files:
+- [config.yaml](mdc:config.yaml): Registers `custom_llm_router` in LiteLLM `custom_provider_map`.
+- [proxy/custom_llm_router.py](mdc:proxy/custom_llm_router.py): Main router implementing `completion`, `acompletion`, `streaming`, `astreaming`.
+- [proxy/route_model.py](mdc:proxy/route_model.py): Maps requested model names to provider-specific models and extra params (e.g., `reasoning_effort`).
+- [proxy/convert_stream.py](mdc:proxy/convert_stream.py): Normalizes provider streaming chunks to `GenericStreamingChunk`.
+- [proxy/config.py](mdc:proxy/config.py): Environment-driven configuration (remaps, logging, enforcement flags).
+- [pyproject.toml](mdc:pyproject.toml): Python version, dependencies (`litellm[proxy]`), dev tools.
+- [README.md](mdc:README.md): Usage instructions and available GPT‑5 alias models.
+
+# How model names are handled
+- Clients pass aliases like `gpt-5-reason-medium`.
+- Routing flow:
+  1) `custom_llm_router` receives the request.
+  2) `route_model.route_model()` resolves alias → provider model (e.g., `openai/gpt-5`) and returns extra params like `reasoning_effort`.
+  3) For OpenAI models with ≥2 tools/functions, the router appends a system instruction to enforce a single tool call.
+  4) If streaming, chunks are normalized by `convert_stream.to_generic_streaming_chunk()`.
+
+# Using with Claude Code
+- Point Claude Code to the local proxy and choose a GPT‑5 alias:
+  - Example: `ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium`
+
+Notes:
+- Claude model names (e.g., `claude-3-5-sonnet`) are prefixed to `anthropic/…` and can be remapped via environment variables in `proxy/config.py`.
