@@ -100,16 +100,4 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
 
-## KNOWN PROBLEM
-
-**The `Web Search` tool currently does not work with this setup.** You may see an error like:
-
-```text
-API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-Anthropic model: litellm.BadRequestError: OpenAIException - Invalid schema for function 'web_search': 'web_search_20250305' is not valid under any of the given schemas.","type":"None","param":"None","code":"500"}}) · Retrying in 1 seconds… (attempt 1/10)
-```
-
-**WORKAROUND:** If your request requires searching the web, temporarily switch back to one of the Claude 4 models using the `/model` command in Claude Code. Claude models remain available alongside `gpt-5` and will use the Anthropic API key from your `.env`.
-
-**The `Fetch` tool DOES work, though (getting web content from specific URLs).**
-
 ## P. S. You are very welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)

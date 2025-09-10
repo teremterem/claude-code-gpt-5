@@ -1,44 +1,53 @@
 import re
 from typing import Any
 
+from proxy.config import REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_OPUS_TO, REMAP_CLAUDE_SONNET_TO
+
 
 def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
-    """
-    Map a friendly model alias to a provider model and extra params.
+    requested_model = requested_model.strip()
 
-    Supported patterns:
-    - gpt-5(-mini|-nano)?-reason-(minimal|low|medium|high)
-      -> maps to openai/gpt-5[(-mini|-nano)] with reasoning_effort
-    - claude-* -> maps directly to anthropic/claude-*
+    if requested_model.startswith("claude-"):
+        if REMAP_CLAUDE_HAIKU_TO and "haiku" in requested_model:
+            requested_model = REMAP_CLAUDE_HAIKU_TO
+        elif REMAP_CLAUDE_OPUS_TO and "opus" in requested_model:
+            requested_model = REMAP_CLAUDE_OPUS_TO
+        elif REMAP_CLAUDE_SONNET_TO:
+            requested_model = REMAP_CLAUDE_SONNET_TO
 
-    Returns a tuple of (provider_model, extra_params)
-    """
-    model = requested_model.strip()
+    # Prepend the provider name and resolve to a concrete GPT-5 model configuration if it is one of our GPT-5 aliases
+    final_model, extra_params = resolve_model_for_provider(requested_model)
 
-    # Claude passthrough (kept for Claude Code fast model usage)
-    if model.startswith("claude-"):
-        final = f"anthropic/{model}"
-        # TODO Make it possible to disable this print ? (turn it into a log record ?)
-        print(f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final}\033[0m")
-        return final, {}
+    log_message = f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final_model}\033[0m"
+    if extra_params:
+        log_message += f" [\033[1m\033[33m{repr_extra_params(extra_params)}\033[0m]"
+    # TODO Make it possible to disable this print ? (Turn it into a log record ?)
+    print(log_message)
 
-    # GPT-5 family with reasoning effort
-    m = re.fullmatch(
-        r"gpt-5(?P<variant>-(mini|nano))?-reason-(?P<effort>minimal|low|medium|high)",
-        model,
+    return final_model, extra_params
+
+
+def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any]]:
+    requested_model = requested_model.strip()
+
+    extra_params = {}
+    # Check if it is one of our GPT-5 model aliases with a reasoning effort specified in the model name
+    reasoning_effort_alias_match = re.fullmatch(
+        r"(?P<name>.+)-reason(ing)?(-effort)?-(?P<effort>\w+)",
+        requested_model,
     )
-    if m:
-        variant = m.group("variant") or ""
-        effort = m.group("effort")
-        provider_model = f"openai/gpt-5{variant or ''}"
-        # TODO Make it possible to disable this print ? (turn it into a log record ?)
-        print(
-            f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{provider_model}\033[0m "
-            f"[\033[1m\033[33mreasoning_effort: {effort}\033[0m]"
-        )
-        return provider_model, {"reasoning_effort": effort}
+    if reasoning_effort_alias_match:
+        requested_model = reasoning_effort_alias_match.group("name")
+        extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
-    raise ValueError(
-        f"Unknown model alias '{requested_model}'. Supported patterns: "
-        "'gpt-5(-mini|-nano)?-reason-(minimal|low|medium|high)' or 'claude-*'."
-    )
+    if requested_model.startswith("claude-"):
+        final_model = f"anthropic/{requested_model}"
+    else:
+        # Default to OpenAI if it is not a Claude model
+        final_model = f"openai/{requested_model}"
+
+    return final_model, extra_params
+
+
+def repr_extra_params(extra_params: dict[str, Any]) -> str:
+    return ", ".join([f"{k}: {v}" for k, v in extra_params.items()])
