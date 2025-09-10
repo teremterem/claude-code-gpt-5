@@ -84,7 +84,7 @@ class CustomLLMRouter(CustomLLM):
             # Adapt messages for OpenAI models if needed
             modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
 
-            result = litellm.completion(
+            response = litellm.completion(
                 model=provider_model,
                 messages=modified_messages,
                 logger_fn=logger_fn,
@@ -93,7 +93,7 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
-            return result
+            return response
 
         except Exception as e:
             raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.COMPLETION: {e}") from e
