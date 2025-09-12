@@ -29,8 +29,9 @@ def _modify_messages_for_openai(messages: list, provider_model: str, optional_pa
     if not provider_model.startswith("openai/"):
         return messages
 
-    # Only add the instruction if tools/functions are present in the request
-    if not (optional_params.get("tools") or optional_params.get("functions")):
+    # Only add the instruction if at least two tools and/or functions are present in the request (in total)
+    num_tools = len(optional_params.get("tools") or []) + len(optional_params.get("functions") or [])
+    if num_tools < 2:
         return messages
 
     # Create a copy of messages to avoid modifying the original
