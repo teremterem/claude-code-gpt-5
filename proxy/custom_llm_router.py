@@ -1,37 +1,12 @@
-import os
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
+from proxy.config import OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
 from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
-
-# We don't have to do `dotenv.load_dotenv()` - litellm does this for us upon import
-
-
-if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
-    try:
-        import langfuse  # pylint: disable=unused-import
-    except ImportError:
-        print(
-            "\033[1;31mLangfuse is not installed. Please install it with either `uv sync --extra langfuse` or "
-            "`uv sync --all-extras`.\033[0m"
-        )
-    else:
-        print("\033[1;34mEnabling Langfuse logging...\033[0m")
-        litellm.success_callback = ["langfuse"]
-        litellm.failure_callback = ["langfuse"]
-
-
-SHOULD_ENFORCE_SINGLE_TOOL_CALL = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower() in (
-    "true",
-    "1",
-    "on",
-    "yes",
-    "y",
-)
 
 
 def _modify_messages_for_openai(messages: list, provider_model: str, optional_params: dict) -> list:
@@ -47,7 +22,7 @@ def _modify_messages_for_openai(messages: list, provider_model: str, optional_pa
     Returns:
         Modified messages list with additional instruction for OpenAI models
     """
-    if not SHOULD_ENFORCE_SINGLE_TOOL_CALL:
+    if not OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
         return messages
 
     # Only modify for OpenAI models, not Claude models
@@ -121,7 +96,7 @@ class CustomLLMRouter(CustomLLM):
             return response
 
         except Exception as e:
-            raise RuntimeError(f"[COMPLETION] Error calling litellm.completion: {e}") from e
+            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.COMPLETION: {e}") from e
 
     async def acompletion(
         self,
@@ -161,7 +136,7 @@ class CustomLLMRouter(CustomLLM):
             return response
 
         except Exception as e:
-            raise RuntimeError(f"[ACOMPLETION] Error calling litellm.acompletion: {e}") from e
+            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.ACOMPLETION: {e}") from e
 
     def streaming(
         self,
@@ -204,7 +179,7 @@ class CustomLLMRouter(CustomLLM):
                 yield generic_chunk
 
         except Exception as e:
-            raise RuntimeError(f"[STREAMING] Error calling litellm.completion: {e}") from e
+            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.STREAMING: {e}") from e
 
     async def astreaming(
         self,
@@ -247,7 +222,7 @@ class CustomLLMRouter(CustomLLM):
                 yield generic_chunk
 
         except Exception as e:
-            raise RuntimeError(f"[ASTREAMING] Error calling litellm.acompletion: {e}") from e
+            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.ASTREAMING: {e}") from e
 
 
 custom_llm_router = CustomLLMRouter()

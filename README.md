@@ -112,4 +112,4 @@ API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-An
 
 **The `Fetch` tool DOES work, though (getting web content from specific URLs).**
 
-## P. S. You are very welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
+## P. S. Join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
