@@ -3,15 +3,19 @@ line-length = 119
 
 [project]
 name = "claude-code-gpt-5"
-version = "0.2.1"
+version = "0.3.0"
 description = "Connect Claude Code CLI to GPT-5"
 readme = "README.md"
 
 requires-python = ">=3.8.1,<4.0.0"
-dependencies = ["litellm[proxy]"]
+dependencies = [
+    "litellm[proxy]",
+]
 
 [project.optional-dependencies]
-langfuse = ["langfuse>=2.0.0,<3.0.0"]
+langfuse = [
+    "langfuse>=2.0.0,<3.0.0",
+]
 dev = [
     "black",
     "pre-commit",
