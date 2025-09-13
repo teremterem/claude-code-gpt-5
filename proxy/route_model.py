@@ -34,7 +34,7 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
         print(
             "\033[1;31mWARNING: It is recommended to set the REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_SONNET_TO, and "
             "REMAP_CLAUDE_OPUS_TO environment variables.\n"
-            "Please refer to .env.template for more details.\033[0m"
+            "Please refer to .env.template for details.\033[0m"
         )
 
     return final_model, extra_params
