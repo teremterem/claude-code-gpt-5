@@ -34,7 +34,7 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
         print(
             "\033[1;31mWARNING: It is recommended to set the REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_SONNET_TO, and "
             "REMAP_CLAUDE_OPUS_TO environment variables.\n"
-            "Please refer to .env.template for more information.\033[0m"
+            "Please refer to .env.template for more details.\033[0m"
         )
 
     return final_model, extra_params
@@ -51,7 +51,8 @@ def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any
         extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
     # TODO If the model already contains a provider name, don't change it (make sure that the GPT-5 aliases are still
-    #  resolved properly, though)
+    #  resolved properly, though; also, invert the request correction logic from `_adapt_for_openai_in_place` to
+    #  `_adapt_for_non_anthropic`)
     if final_model.startswith("claude-"):
         final_model = f"anthropic/{final_model}"
     else:
