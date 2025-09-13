@@ -9,33 +9,44 @@ from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
-def _modify_messages_for_openai(messages: list, provider_model: str, optional_params: dict) -> list:
+def _adapt_for_openai_in_place(provider_model: str, messages: list, optional_params: dict) -> None:
     """
-    Add instruction to enforce single tool call per response for OpenAI models,
-    but only if tools/functions are available on the request.
+    Perform necessary prompt injections to adjust certain requests to work with OpenAI models.
 
     Args:
-        messages: Original messages list
-        provider_model: The provider/model string (e.g., "openai/gpt-5")
-        optional_params: Request params which may include tools/functions
+        provider_model: The provider/model string (e.g., "openai/gpt-5") to adapt for
+        messages: Messages list to modify "in place"
+        optional_params: Request params which may include tools/functions (may also be modified "in place")
 
     Returns:
         Modified messages list with additional instruction for OpenAI models
     """
     if not OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
-        return messages
+        return
 
     # Only modify for OpenAI models, not Claude models
     if not provider_model.startswith("openai/"):
-        return messages
+        return
+
+    if (
+        optional_params.get("max_tokens") == 1
+        and len(messages) == 1
+        and messages[0].get("role") == "user"
+        and messages[0].get("content") == "test"
+    ):
+        # This is a "connectivity test" request for Anthropic models, but OpenAI models respond to it differently =>
+        # let's modify the request to make it work with OpenAI models too
+        optional_params["max_tokens"] = 100
+        messages[0]["role"] = "system"
+        messages[0][
+            "content"
+        ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
+        return
 
     # Only add the instruction if at least two tools and/or functions are present in the request (in total)
     num_tools = len(optional_params.get("tools") or []) + len(optional_params.get("functions") or [])
     if num_tools < 2:
-        return messages
-
-    # Create a copy of messages to avoid modifying the original
-    modified_messages = messages.copy()
+        return
 
     # Add the single tool call instruction as the last message
     tool_instruction = {
@@ -47,9 +58,7 @@ def _modify_messages_for_openai(messages: list, provider_model: str, optional_pa
             "turn."
         ),
     }
-
-    modified_messages.append(tool_instruction)
-    return modified_messages
+    messages.append(tool_instruction)
 
 
 class CustomLLMRouter(CustomLLM):
@@ -82,16 +91,21 @@ class CustomLLMRouter(CustomLLM):
             provider_model, extra_params = route_model(model)
             optional_params.update(extra_params)
 
-            # Adapt messages for OpenAI models if needed
-            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+            # Adapt request for OpenAI models if needed
+            _adapt_for_openai_in_place(
+                provider_model=provider_model,
+                messages=messages,
+                optional_params=optional_params,
+            )
 
             response = litellm.completion(
                 model=provider_model,
-                messages=modified_messages,
+                messages=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
+                drop_params=True,  # Drop any params which are not supported by the provider
                 **optional_params,
             )
             return response
@@ -122,16 +136,21 @@ class CustomLLMRouter(CustomLLM):
             provider_model, extra_params = route_model(model)
             optional_params.update(extra_params)
 
-            # Adapt messages for OpenAI models if needed
-            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+            # Adapt request for OpenAI models if needed
+            _adapt_for_openai_in_place(
+                provider_model=provider_model,
+                messages=messages,
+                optional_params=optional_params,
+            )
 
             response = await litellm.acompletion(
                 model=provider_model,
-                messages=modified_messages,
+                messages=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
+                drop_params=True,  # Drop any params which are not supported by the provider
                 **optional_params,
             )
             return response
@@ -163,16 +182,21 @@ class CustomLLMRouter(CustomLLM):
             optional_params.update(extra_params)
             optional_params["stream"] = True
 
-            # Adapt messages for OpenAI models if needed
-            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+            # Adapt request for OpenAI models if needed
+            _adapt_for_openai_in_place(
+                provider_model=provider_model,
+                messages=messages,
+                optional_params=optional_params,
+            )
 
             response = litellm.completion(
                 model=provider_model,
-                messages=modified_messages,
+                messages=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
+                drop_params=True,  # Drop any params which are not supported by the provider
                 **optional_params,
             )
             for chunk in response:
@@ -206,16 +230,21 @@ class CustomLLMRouter(CustomLLM):
             optional_params.update(extra_params)
             optional_params["stream"] = True
 
-            # Adapt messages for OpenAI models if needed
-            modified_messages = _modify_messages_for_openai(messages, provider_model, optional_params)
+            # Adapt request for OpenAI models if needed
+            _adapt_for_openai_in_place(
+                provider_model=provider_model,
+                messages=messages,
+                optional_params=optional_params,
+            )
 
             response = await litellm.acompletion(
                 model=provider_model,
-                messages=modified_messages,
+                messages=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
+                drop_params=True,  # Drop any params which are not supported by the provider
                 **optional_params,
             )
             async for chunk in response:

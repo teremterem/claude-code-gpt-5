@@ -44,6 +44,8 @@ def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any
         final_model = reasoning_effort_alias_match.group("name")
         extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
+    # TODO If the model already contains a provider name, don't change it (but make sure GPT-5 aliases are still
+    #  resolved properly)
     if final_model.startswith("claude-"):
         final_model = f"anthropic/{final_model}"
     else:
