@@ -23,10 +23,12 @@ REMAP_CLAUDE_HAIKU_TO = os.getenv("REMAP_CLAUDE_HAIKU_TO")
 REMAP_CLAUDE_SONNET_TO = os.getenv("REMAP_CLAUDE_SONNET_TO")
 REMAP_CLAUDE_OPUS_TO = os.getenv("REMAP_CLAUDE_OPUS_TO")
 
-OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE", "true").lower() in (
-    "true",
-    "1",
-    "on",
-    "yes",
-    "y",
+RECOMMEND_SETTING_REMAPS = (
+    "REMAP_CLAUDE_HAIKU_TO" not in os.environ
+    and "REMAP_CLAUDE_SONNET_TO" not in os.environ
+    and "REMAP_CLAUDE_OPUS_TO" not in os.environ
 )
+
+OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (
+    os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE") or "true"
+).lower() in ("true", "1", "on", "yes", "y")

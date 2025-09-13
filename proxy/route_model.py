@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from proxy.config import REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_OPUS_TO, REMAP_CLAUDE_SONNET_TO
+from proxy.config import RECOMMEND_SETTING_REMAPS, REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_OPUS_TO, REMAP_CLAUDE_SONNET_TO
 
 
 def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
@@ -28,8 +28,14 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
     log_message = f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final_model}\033[0m"
     if extra_params:
         log_message += f" [\033[1m\033[33m{repr_extra_params(extra_params)}\033[0m]"
-    # TODO Make it possible to disable this print ? (Turn it into a log record ?)
+    # TODO Make it possible to disable these prints ? (Turn them into log records ?)
     print(log_message)
+    if RECOMMEND_SETTING_REMAPS:
+        print(
+            "\033[1;31mWARNING: It is recommended to set the REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_SONNET_TO, and "
+            "REMAP_CLAUDE_OPUS_TO environment variables.\n"
+            "Please refer to .env.template for more information.\033[0m"
+        )
 
     return final_model, extra_params
 
@@ -44,8 +50,8 @@ def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any
         final_model = reasoning_effort_alias_match.group("name")
         extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
-    # TODO If the model already contains a provider name, don't change it (but make sure GPT-5 aliases are still
-    #  resolved properly)
+    # TODO If the model already contains a provider name, don't change it (make sure that the GPT-5 aliases are still
+    #  resolved properly, though)
     if final_model.startswith("claude-"):
         final_model = f"anthropic/{final_model}"
     else:
