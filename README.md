@@ -96,26 +96,27 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-low
    ```
 
-   **Available aliases for GPT-5 models:**
-   - **GPT-5**:
-      - `gpt-5-reason-minimal`
-      - `gpt-5-reason-low`
-      - `gpt-5-reason-medium`
-      - `gpt-5-reason-high`
-   - **GPT-5-mini**:
-      - `gpt-5-mini-reason-minimal`
-      - `gpt-5-mini-reason-low`
-      - `gpt-5-mini-reason-medium`
-      - `gpt-5-mini-reason-high`
-   - **GPT-5-nano**:
-      - `gpt-5-nano-reason-minimal`
-      - `gpt-5-nano-reason-low`
-      - `gpt-5-nano-reason-medium`
-      - `gpt-5-nano-reason-high`
-
-   **NOTE:** Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.
-
 3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
+
+### Available GPT-5 model aliases
+
+- **GPT-5**:
+   - `gpt-5-reason-minimal`
+   - `gpt-5-reason-low`
+   - `gpt-5-reason-medium`
+   - `gpt-5-reason-high`
+- **GPT-5-mini**:
+   - `gpt-5-mini-reason-minimal`
+   - `gpt-5-mini-reason-low`
+   - `gpt-5-mini-reason-medium`
+   - `gpt-5-mini-reason-high`
+- **GPT-5-nano**:
+   - `gpt-5-nano-reason-minimal`
+   - `gpt-5-nano-reason-low`
+   - `gpt-5-nano-reason-medium`
+   - `gpt-5-nano-reason-high`
+
+**NOTE:** Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.
 
 ## KNOWN PROBLEM
 
