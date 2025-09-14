@@ -7,11 +7,11 @@ This repository lets you use **Anthropic's Claude Code** with **OpenAI's GPT-5**
 ### Prerequisites
 
 - [OpenAI API key](https://platform.openai.com/settings/organization/api-keys) 🔑
-- [Anthropic API key](https://console.anthropic.com/settings/keys) 🔑
+- [Anthropic API key](https://console.anthropic.com/settings/keys) (optional) 🔑
 
-**Why the Anthropic API key is still required**
+**Anthropic API key is optional**
 
-Claude Code uses two models: a fast model (for quick actions) and a slow “smart” model. This setup only replaces the slow model with GPT‑5 via the proxy; the fast model still runs on Anthropic, hence the need for the Anthropic API key.
+By default, the provided .env template remaps Claude models (haiku/sonnet/opus) to GPT‑5 equivalents, so all requests go to OpenAI. If you want to keep using Anthropic for any calls, set ANTHROPIC_API_KEY and adjust or remove the REMAP_* variables in .env.
 
 **First time using GPT-5 via API?**
 
@@ -61,7 +61,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    Edit `.env` and add your API keys:
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
-   ANTHROPIC_API_KEY=your-anthropic-api-key-here
+   # optional if you plan to use Anthropic models:
+   # ANTHROPIC_API_KEY=your-anthropic-api-key-here
    ```
 
 4. **Run the server**:
@@ -78,10 +79,10 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 2. **Connect to your proxy to use GPT-5 variants**:
    ```bash
-   ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
+   ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   **Available models for the `--model` parameter:**
+   **Alternatively, to force a specific GPT‑5 variant, you can pass `--model` with one of:**
    - **GPT-5**:
       - `gpt-5-reason-minimal`
       - `gpt-5-reason-low`
