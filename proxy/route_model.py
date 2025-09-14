@@ -1,7 +1,13 @@
 import re
 from typing import Any
 
-from proxy.config import REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_OPUS_TO, REMAP_CLAUDE_SONNET_TO
+from proxy.config import (
+    RECOMMEND_SETTING_REMAPS,
+    REMAP_CLAUDE_HAIKU_TO,
+    REMAP_CLAUDE_OPUS_TO,
+    REMAP_CLAUDE_SONNET_TO,
+    recommend_setting_remaps,
+)
 
 
 def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
@@ -31,6 +37,9 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
     # TODO Make it possible to disable this print ? (Turn it into a log record ?)
     print(log_message)
 
+    if RECOMMEND_SETTING_REMAPS:
+        recommend_setting_remaps()
+
     return final_model, extra_params
 
 
@@ -44,6 +53,13 @@ def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any
         final_model = reasoning_effort_alias_match.group("name")
         extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
+<<<<<<< HEAD
+=======
+    # TODO If the model already contains a provider name, don't change it (make sure that the GPT-5 aliases are still
+    #  resolved properly, though; also, invert the request correction logic from `_adapt_for_openai_in_place` to
+    #  `_adapt_for_non_anthropic`)
+    # TODO Autocorrect `gpt5` to `gpt-5` for convience
+>>>>>>> release-0.3.0
     if final_model.startswith("claude-"):
         final_model = f"anthropic/{final_model}"
     else:
