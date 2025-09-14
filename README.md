@@ -91,7 +91,12 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   **Alternatively, to force a specific GPT‑5 variant, you can pass `--model` with one of:**
+   **Alternatively, you can override the default model on the side of the CLI using the `--model` parameter:**
+   ```bash
+   ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-low
+   ```
+
+   **Available aliases for GPT-5 models:**
    - **GPT-5**:
       - `gpt-5-reason-minimal`
       - `gpt-5-reason-low`
@@ -108,6 +113,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       - `gpt-5-nano-reason-medium`
       - `gpt-5-nano-reason-high`
 
+   **Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.**
+
 3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
 
 ## KNOWN PROBLEM
@@ -118,8 +125,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-Anthropic model: litellm.BadRequestError: OpenAIException - Invalid schema for function 'web_search': 'web_search_20250305' is not valid under any of the given schemas.","type":"None","param":"None","code":"500"}}) · Retrying in 1 seconds… (attempt 1/10)
 ```
 
-**WORKAROUND:** If your request requires searching the web, temporarily switch back to one of the Claude 4 models using the `/model` command in Claude Code. Claude models remain available alongside `gpt-5` and will use the Anthropic API key from your `.env`.
+This is planned to be fixed soon.
 
-**The `Fetch` tool DOES work, though (getting web content from specific URLs).**
+**NOTE:** The `Fetch` tool (getting web content from specific URLs) is not affected and works normally.
 
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
