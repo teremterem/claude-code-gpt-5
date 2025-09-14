@@ -113,7 +113,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       - `gpt-5-nano-reason-medium`
       - `gpt-5-nano-reason-high`
 
-   **Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.**
+   **NOTE:** Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.
 
 3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
 
