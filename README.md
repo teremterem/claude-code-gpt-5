@@ -116,7 +116,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    - `gpt-5-nano-reason-medium`
    - `gpt-5-nano-reason-high`
 
-**NOTE:** Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.
+> **NOTE:** Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.
 
 ## KNOWN PROBLEM
 
@@ -128,6 +128,6 @@ API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-An
 
 This is planned to be fixed soon.
 
-**NOTE:** The `Fetch` tool (getting web content from specific URLs) is not affected and works normally.
+> **NOTE:** The `Fetch` tool (getting web content from specific URLs) is not affected and works normally.
 
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
