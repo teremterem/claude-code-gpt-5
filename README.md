@@ -7,11 +7,9 @@ This repository lets you use **Anthropic's Claude Code** with **OpenAI's GPT-5**
 ### Prerequisites
 
 - [OpenAI API key](https://platform.openai.com/settings/organization/api-keys) 🔑
-- [Anthropic API key](https://console.anthropic.com/settings/keys) 🔑
+- [Anthropic API key](https://console.anthropic.com/settings/keys) — optional 🔑
 
-**Why the Anthropic API key is still required**
-
-Claude Code uses two models: a fast model (for quick actions) and a slow “smart” model. This setup only replaces the slow model with GPT‑5 via the proxy; the fast model still runs on Anthropic, hence the need for the Anthropic API key.
+By default in v0.3.0, Claude models are remapped to GPT‑5 variants via the proxy. This means an Anthropic API key is not required unless you want to use real Claude models sometimes (see “Claude model remaps” below).
 
 **First time using GPT-5 via API?**
 
@@ -58,10 +56,27 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```bash
    cp .env.template .env
    ```
-   Edit `.env` and add your API keys:
+   Edit `.env` and add your API keys and preferences:
    ```dotenv
+   # Required
    OPENAI_API_KEY=your-openai-api-key-here
-   ANTHROPIC_API_KEY=your-anthropic-api-key-here
+
+   # Optional — only needed if you want to use real Claude models sometimes
+   # (e.g., when you disable remaps below)
+   #ANTHROPIC_API_KEY=your-anthropic-api-key-here
+
+   # Claude model remaps (default: map to GPT‑5 variants)
+   # Tip: leave these as-is to make built-in Claude Code agents use GPT‑5 too
+   REMAP_CLAUDE_HAIKU_TO=gpt-5-nano-reason-minimal
+   REMAP_CLAUDE_SONNET_TO=gpt-5-reason-medium
+   REMAP_CLAUDE_OPUS_TO=gpt-5-reason-high
+
+   # Advanced: base URLs (usually not needed to change)
+   #OPENAI_BASE_URL=https://api.openai.com/v1
+   #ANTHROPIC_BASE_URL=https://api.anthropic.com
+
+   # Recommended: keep the OpenAI single-tool-call guard on
+   #OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE=true
    ```
 
 4. **Run the server**:
@@ -99,6 +114,19 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       - `gpt-5-nano-reason-high`
 
 3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
+
+### Claude model remaps (new in 0.3.0)
+
+- By default, Claude model names used by Claude Code (e.g., haiku/sonnet/opus) are remapped by the proxy to GPT‑5 variants:
+  - `claude-*-haiku` → `gpt-5-nano-reason-minimal`
+  - `claude-*-sonnet` → `gpt-5-reason-medium`
+  - `claude-*-opus` → `gpt-5-reason-high`
+- This helps when Claude Code’s built-in agents hardcode Anthropic models, ensuring GPT‑5 is used consistently.
+- Customize or disable:
+  - Change the `REMAP_CLAUDE_*_TO` variables in `.env` to your preferred models.
+  - To use real Claude models, set the remap value(s) to empty strings or comment them out, and provide `ANTHROPIC_API_KEY`.
+
+Note: When calling `claude`, prefer configuring remaps rather than relying only on `--model`, since some built-in agents don’t inherit the global CLI model.
 
 ## KNOWN PROBLEM
 
