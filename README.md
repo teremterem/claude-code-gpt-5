@@ -1,17 +1,17 @@
 ![Claude Code with GPT-5](claude-code-gpt-5.jpeg)
 
-This repository lets you use **Anthropic's Claude Code** with **OpenAI's GPT-5** as the "smart" model via a local LiteLLM proxy.
+This repository lets you use **Anthropic's Claude Code CLI** with **OpenAI's GPT-5** via a local LiteLLM proxy.
 
 ## Quick Start ⚡
 
 ### Prerequisites
 
 - [OpenAI API key](https://platform.openai.com/settings/organization/api-keys) 🔑
-- [Anthropic API key](https://console.anthropic.com/settings/keys) (optional) 🔑
+- [Anthropic API key](https://console.anthropic.com/settings/keys) - optional 🔑
 
-**Anthropic API key is optional**
+**About the Anthropic API key**
 
-By default, the provided .env template remaps Claude models (haiku/sonnet/opus) to GPT‑5 equivalents, so all requests go to OpenAI. If you want to keep using Anthropic for any calls, set ANTHROPIC_API_KEY and adjust or remove the REMAP_* variables in .env.
+By default, the provided `.env` template (`.env.template` that you will have to copy to `.env`) remaps Claude models (haiku/sonnet/opus) to GPT‑5 equivalents, so all requests go to OpenAI. If you want to keep using Anthropic for any calls, set `ANTHROPIC_API_KEY` and adjust the `REMAP_*` variables in `.env` (or set some/all of them to empty strings).
 
 **First time using GPT-5 via API?**
 
@@ -61,8 +61,17 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    Edit `.env` and add your API keys:
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
-   # optional if you plan to use Anthropic models:
+   # Optional: only needed if you plan to use Anthropic models
    # ANTHROPIC_API_KEY=your-anthropic-api-key-here
+
+   # Recommended: remap Claude models to GPT‑5 variants to ensure all
+   # built-in agents in Claude Code also use GPT‑5
+   REMAP_CLAUDE_HAIKU_TO=gpt-5-nano-reason-minimal
+   REMAP_CLAUDE_SONNET_TO=gpt-5-reason-medium
+   REMAP_CLAUDE_OPUS_TO=gpt-5-reason-high
+
+   # Some other optional settings (see .env.template for details)
+   ...
    ```
 
 4. **Run the server**:
