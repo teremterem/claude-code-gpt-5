@@ -1,17 +1,17 @@
 ![Claude Code with GPT-5](claude-code-gpt-5.jpeg)
 
-This repository lets you use **Anthropic's Claude Code** with **OpenAI's GPT-5** as the "smart" model via a local LiteLLM proxy.
+This repository lets you use **Anthropic's Claude Code CLI** with **OpenAI's GPT-5** via a local LiteLLM proxy.
 
 ## Quick Start ⚡
 
 ### Prerequisites
 
 - [OpenAI API key](https://platform.openai.com/settings/organization/api-keys) 🔑
-- [Anthropic API key](https://console.anthropic.com/settings/keys) 🔑
+- [Anthropic API key](https://console.anthropic.com/settings/keys) - optional 🔑
 
-**Why the Anthropic API key is still required**
+**About the Anthropic API key**
 
-Claude Code uses two models: a fast model (for quick actions) and a slow “smart” model. This setup only replaces the slow model with GPT‑5 via the proxy; the fast model still runs on Anthropic, hence the need for the Anthropic API key.
+By default, the provided `.env` template (`.env.template` that you will have to copy to `.env`) remaps Claude models (haiku/sonnet/opus) to GPT‑5 equivalents, so all requests go to OpenAI. If you want to keep using Anthropic for any calls, set `ANTHROPIC_API_KEY` and adjust the `REMAP_*` variables in `.env` (or set some/all of them to empty strings).
 
 **First time using GPT-5 via API?**
 
@@ -61,7 +61,17 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    Edit `.env` and add your API keys:
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
-   ANTHROPIC_API_KEY=your-anthropic-api-key-here
+   # Optional: only needed if you plan to use Anthropic models
+   # ANTHROPIC_API_KEY=your-anthropic-api-key-here
+
+   # Recommended: remap Claude models to GPT‑5 variants to ensure all
+   # built-in agents in Claude Code also use GPT‑5
+   REMAP_CLAUDE_HAIKU_TO=gpt-5-nano-reason-minimal
+   REMAP_CLAUDE_SONNET_TO=gpt-5-reason-medium
+   REMAP_CLAUDE_OPUS_TO=gpt-5-reason-high
+
+   # Some more optional settings (see .env.template for details)
+   ...
    ```
 
 4. **Run the server**:
@@ -78,27 +88,35 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 2. **Connect to your proxy to use GPT-5 variants**:
    ```bash
-   ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
+   ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   **Available models for the `--model` parameter:**
-   - **GPT-5**:
-      - `gpt-5-reason-minimal`
-      - `gpt-5-reason-low`
-      - `gpt-5-reason-medium`
-      - `gpt-5-reason-high`
-   - **GPT-5-mini**:
-      - `gpt-5-mini-reason-minimal`
-      - `gpt-5-mini-reason-low`
-      - `gpt-5-mini-reason-medium`
-      - `gpt-5-mini-reason-high`
-   - **GPT-5-nano**:
-      - `gpt-5-nano-reason-minimal`
-      - `gpt-5-nano-reason-low`
-      - `gpt-5-nano-reason-medium`
-      - `gpt-5-nano-reason-high`
+   **Alternatively, you can override the default model on the side of the CLI using the `--model` parameter:**
+   ```bash
+   ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-low
+   ```
 
 3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
+
+### Available GPT-5 model aliases
+
+- **GPT-5**:
+   - `gpt-5-reason-minimal`
+   - `gpt-5-reason-low`
+   - `gpt-5-reason-medium`
+   - `gpt-5-reason-high`
+- **GPT-5-mini**:
+   - `gpt-5-mini-reason-minimal`
+   - `gpt-5-mini-reason-low`
+   - `gpt-5-mini-reason-medium`
+   - `gpt-5-mini-reason-high`
+- **GPT-5-nano**:
+   - `gpt-5-nano-reason-minimal`
+   - `gpt-5-nano-reason-low`
+   - `gpt-5-nano-reason-medium`
+   - `gpt-5-nano-reason-high`
+
+> **NOTE:** Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.
 
 ## KNOWN PROBLEM
 
@@ -108,8 +126,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-Anthropic model: litellm.BadRequestError: OpenAIException - Invalid schema for function 'web_search': 'web_search_20250305' is not valid under any of the given schemas.","type":"None","param":"None","code":"500"}}) · Retrying in 1 seconds… (attempt 1/10)
 ```
 
-**WORKAROUND:** If your request requires searching the web, temporarily switch back to one of the Claude 4 models using the `/model` command in Claude Code. Claude models remain available alongside `gpt-5` and will use the Anthropic API key from your `.env`.
+This is planned to be fixed soon.
 
-**The `Fetch` tool DOES work, though (getting web content from specific URLs).**
+> **NOTE:** The `Fetch` tool (getting web content from specific URLs) is not affected and works normally.
 
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
