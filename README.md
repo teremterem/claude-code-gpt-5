@@ -70,7 +70,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    REMAP_CLAUDE_SONNET_TO=gpt-5-reason-medium
    REMAP_CLAUDE_OPUS_TO=gpt-5-reason-high
 
-   # Some other optional settings (see .env.template for details)
+   # Some more optional settings (see .env.template for details)
    ...
    ```
 
