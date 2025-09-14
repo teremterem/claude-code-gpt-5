@@ -183,7 +183,7 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
         "txt": text,  # TODO Use this change, which breaks tokens, to verify that token related errors are informative
         "is_finished": is_finished,
         "finish_reason": finish_reason,
-        "usage": None,  # TODO Do we have to put anything here ?
+        "usage": None,  # TODO Do we have to put anything in here ?
         "index": index,
         "tool_use": tool_use,
         "provider_specific_fields": provider_specific_fields,
