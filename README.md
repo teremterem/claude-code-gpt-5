@@ -116,7 +116,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    - `gpt-5-nano-reason-medium`
    - `gpt-5-nano-reason-high`
 
-> **NOTE:** Apart from the aliases above, you can also use arbitrary model names from OpenAI or Anthropic.
+> **NOTE:** Generally, you can use arbitrary models from [arbitrary providers](https://docs.litellm.ai/docs/providers), but for providers other than OpenAI or Anthropic, you will need to specify the provider in the model name, e.g. `gemini/gemini-pro`, `gemini/gemini-pro-reason-disable` etc. (as well as set the respective API keys along with any other environment variables that the provider might require in your `.env` file).
 
 ## KNOWN PROBLEM
 
