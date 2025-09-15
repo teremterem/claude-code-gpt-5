@@ -21,6 +21,7 @@ def _adapt_for_openai_in_place(provider_model: str, messages: list, optional_par
     Returns:
         Modified messages list with additional instruction for OpenAI models
     """
+    # TODO Invert the request correction logic from `_adapt_for_openai_in_place` to `_adapt_for_non_anthropic_models`
     if not OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
         return
 

@@ -54,8 +54,7 @@ def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any
         extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
     # TODO If the model already contains a provider name, don't change it (make sure that the GPT-5 aliases are still
-    #  resolved properly, though; also, invert the request correction logic from `_adapt_for_openai_in_place` to
-    #  `_adapt_for_non_anthropic`)
+    #  resolved properly, though)
     # TODO Autocorrect `gpt5` to `gpt-5` for convience
     if final_model.startswith("claude-"):
         final_model = f"anthropic/{final_model}"
