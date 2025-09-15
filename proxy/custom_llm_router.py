@@ -110,7 +110,7 @@ class CustomLLMRouter(CustomLLM):
             return response
 
         except Exception as e:
-            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.COMPLETION: {e}") from e
+            raise ProxyError(e) from e
 
     async def acompletion(
         self,
@@ -154,7 +154,7 @@ class CustomLLMRouter(CustomLLM):
             return response
 
         except Exception as e:
-            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.ACOMPLETION: {e}") from e
+            raise ProxyError(e) from e
 
     def streaming(
         self,
@@ -201,7 +201,7 @@ class CustomLLMRouter(CustomLLM):
                 yield generic_chunk
 
         except Exception as e:
-            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.STREAMING: {e}") from e
+            raise ProxyError(e) from e
 
     async def astreaming(
         self,
@@ -248,7 +248,13 @@ class CustomLLMRouter(CustomLLM):
                 yield generic_chunk
 
         except Exception as e:
-            raise RuntimeError(f"[PROXY FAILURE] CUSTOM_LLM_ROUTER.ASTREAMING: {e}") from e
+            raise ProxyError(e) from e
 
 
 custom_llm_router = CustomLLMRouter()
+
+
+class ProxyError(RuntimeError):
+    def __init__(self, error: BaseException):
+        # Highlight the error message in red, so the actual problem is easier to spot in the long traceback
+        super().__init__(f"\033[1;31m{error}\033[0m")
