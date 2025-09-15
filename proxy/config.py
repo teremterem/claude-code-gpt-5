@@ -16,9 +16,13 @@ RECOMMEND_SETTING_REMAPS = (
     or "REMAP_CLAUDE_OPUS_TO" not in os.environ
 )
 
-OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (
-    os.getenv("OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE") or "true"
-).lower() in ("true", "1", "on", "yes", "y")
+ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPONSE") or "true").lower() in (
+    "true",
+    "1",
+    "on",
+    "yes",
+    "y",
+)
 
 if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     try:

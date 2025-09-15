@@ -4,14 +4,14 @@ import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from proxy.config import OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
+from proxy.config import ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
 from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
 
-def _adapt_for_openai_in_place(provider_model: str, messages: list, optional_params: dict) -> None:
+def _adapt_for_non_anthropic_models(provider_model: str, messages: list, optional_params: dict) -> None:
     """
-    Perform necessary prompt injections to adjust certain requests to work with OpenAI models.
+    Perform necessary prompt injections to adjust certain requests to work with non-Anthropic models.
 
     Args:
         provider_model: The provider/model string (e.g., "openai/gpt-5") to adapt for
@@ -19,14 +19,13 @@ def _adapt_for_openai_in_place(provider_model: str, messages: list, optional_par
         optional_params: Request params which may include tools/functions (may also be modified "in place")
 
     Returns:
-        Modified messages list with additional instruction for OpenAI models
+        Modified messages list with additional instruction for non-Anthropic models
     """
-    # TODO Invert the request correction logic from `_adapt_for_openai_in_place` to `_adapt_for_non_anthropic_models`
-    if not OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
+    if not ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
         return
 
-    # Only modify for OpenAI models, not Claude models
-    if not provider_model.startswith("openai/"):
+    if provider_model.startswith("anthropic/"):
+        # Do not alter requests for Anthropic models
         return
 
     if (
@@ -35,8 +34,8 @@ def _adapt_for_openai_in_place(provider_model: str, messages: list, optional_par
         and messages[0].get("role") == "user"
         and messages[0].get("content") == "test"
     ):
-        # This is a "connectivity test" request for Anthropic models, but OpenAI models respond to it differently =>
-        # let's modify the request to make it work with OpenAI models too
+        # This is a "connectivity test" request by Claude Code => we need to make sure non-Anthropic models don't fail
+        # because of exceeding max_tokens
         optional_params["max_tokens"] = 100
         messages[0]["role"] = "system"
         messages[0][
@@ -93,7 +92,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.update(extra_params)
 
             # Adapt request for OpenAI models if needed
-            _adapt_for_openai_in_place(
+            _adapt_for_non_anthropic_models(
                 provider_model=provider_model,
                 messages=messages,
                 optional_params=optional_params,
@@ -138,7 +137,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.update(extra_params)
 
             # Adapt request for OpenAI models if needed
-            _adapt_for_openai_in_place(
+            _adapt_for_non_anthropic_models(
                 provider_model=provider_model,
                 messages=messages,
                 optional_params=optional_params,
@@ -184,7 +183,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params["stream"] = True
 
             # Adapt request for OpenAI models if needed
-            _adapt_for_openai_in_place(
+            _adapt_for_non_anthropic_models(
                 provider_model=provider_model,
                 messages=messages,
                 optional_params=optional_params,
@@ -232,7 +231,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params["stream"] = True
 
             # Adapt request for OpenAI models if needed
-            _adapt_for_openai_in_place(
+            _adapt_for_non_anthropic_models(
                 provider_model=provider_model,
                 messages=messages,
                 optional_params=optional_params,
