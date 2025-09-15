@@ -4,7 +4,7 @@ import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from proxy.config import ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
+from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
 from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
@@ -24,7 +24,7 @@ def _adapt_for_non_anthropic_models(provider_model: str, messages: list, optiona
     if not ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
         return
 
-    if provider_model.startswith("anthropic/"):
+    if provider_model.startswith(f"{ANTHROPIC}/"):
         # Do not alter requests for Anthropic models
         return
 

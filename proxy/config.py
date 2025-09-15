@@ -24,6 +24,9 @@ ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPO
     "y",
 )
 
+ANTHROPIC = "anthropic"
+OPENAI = "openai"
+
 if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
     try:
         import langfuse  # pylint: disable=unused-import

@@ -2,6 +2,8 @@ import re
 from typing import Any
 
 from proxy.config import (
+    ANTHROPIC,
+    OPENAI,
     RECOMMEND_SETTING_REMAPS,
     REMAP_CLAUDE_HAIKU_TO,
     REMAP_CLAUDE_OPUS_TO,
@@ -57,10 +59,10 @@ def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any
     #  resolved properly, though)
     # TODO Autocorrect `gpt5` to `gpt-5` for convience
     if final_model.startswith("claude-"):
-        final_model = f"anthropic/{final_model}"
+        final_model = f"{ANTHROPIC}/{final_model}"
     else:
         # Default to OpenAI if it is not a Claude model
-        final_model = f"openai/{final_model}"
+        final_model = f"{OPENAI}/{final_model}"
 
     return final_model, extra_params
 
