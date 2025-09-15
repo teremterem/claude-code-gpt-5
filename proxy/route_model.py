@@ -46,23 +46,31 @@ def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
 
 
 def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any]]:
-    final_model = requested_model.strip()
+    model_name_only = requested_model.strip()
+    if "/" in model_name_only:
+        explicit_provider, model_name_only = model_name_only.split("/", 1)
+    else:
+        explicit_provider = None
 
     extra_params = {}
     # Check if it is one of our GPT-5 model aliases with a reasoning effort specified in the model name
-    reasoning_effort_alias_match = re.fullmatch(r"(?P<name>.+)-reason(ing)?(-effort)?-(?P<effort>\w+)", final_model)
+    reasoning_effort_alias_match = re.fullmatch(
+        r"(?P<name>.+)-reason(ing)?(-effort)?-(?P<effort>\w+)", model_name_only
+    )
     if reasoning_effort_alias_match:
-        final_model = reasoning_effort_alias_match.group("name")
+        model_name_only = reasoning_effort_alias_match.group("name")
         extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
-    # TODO If the model already contains a provider name, don't change it (make sure that the GPT-5 aliases are still
-    #  resolved properly, though)
-    # TODO Autocorrect `gpt5` to `gpt-5` for convience
-    if final_model.startswith("claude-"):
-        final_model = f"{ANTHROPIC}/{final_model}"
+    # Autocorrect `gpt5` to `gpt-5` for convenience
+    model_name_only = re.sub(r"\bgpt5\b", "gpt-5", model_name_only)
+
+    if explicit_provider:
+        final_model = f"{explicit_provider}/{model_name_only}"
+    elif model_name_only.startswith("claude-"):
+        final_model = f"{ANTHROPIC}/{model_name_only}"
     else:
-        # Default to OpenAI if it is not a Claude model
-        final_model = f"{OPENAI}/{final_model}"
+        # Default to OpenAI if it is not a Claude model (and the provider was not specified explicitly)
+        final_model = f"{OPENAI}/{model_name_only}"
 
     return final_model, extra_params
 
