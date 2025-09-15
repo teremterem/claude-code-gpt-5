@@ -42,10 +42,11 @@ if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
 
 
 def recommend_setting_remaps():
+    # TODO Turn this print into a log record ? Or, maybe, into a Python warning ?
     print(
         "\033[1;31mWARNING: It is recommended to set the REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_SONNET_TO, and "
         "REMAP_CLAUDE_OPUS_TO environment variables.\n"
-        "Please refer to .env.template for details.\033[0m"
+        "Please refer to .env.template for recommended values (and an explanation).\033[0m"
     )
 
 
