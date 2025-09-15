@@ -16,6 +16,19 @@ RECOMMEND_SETTING_REMAPS = (
     or "REMAP_CLAUDE_OPUS_TO" not in os.environ
 )
 
+
+class ProxyError(RuntimeError):
+    def __init__(self, error: BaseException | str):
+        # Highlight error messages in red, so the actual problems are easier to spot in long tracebacks
+        super().__init__(f"\033[1;31m{error}\033[0m")
+
+
+if "OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE" in os.environ:
+    raise ProxyError(
+        "The OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE environment variable is no longer supported. "
+        "Please use the ENFORCE_ONE_TOOL_CALL_PER_RESPONSE environment variable instead."
+    )
+
 ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPONSE") or "true").lower() in (
     "true",
     "1",

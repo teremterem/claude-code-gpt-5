@@ -4,7 +4,7 @@ import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
+from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, ProxyError
 from proxy.convert_stream import to_generic_streaming_chunk
 from proxy.route_model import route_model
 
@@ -252,9 +252,3 @@ class CustomLLMRouter(CustomLLM):
 
 
 custom_llm_router = CustomLLMRouter()
-
-
-class ProxyError(RuntimeError):
-    def __init__(self, error: BaseException):
-        # Highlight the error message in red, so the actual problem is easier to spot in the long traceback
-        super().__init__(f"\033[1;31m{error}\033[0m")
