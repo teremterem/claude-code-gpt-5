@@ -22,12 +22,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 1. **Clone this repository**:
    ```bash
-   # Original repository
    git clone https://github.com/teremterem/claude-code-gpt-5.git
-   cd claude-code-gpt-5
-
-   # Or use the fork with Docker support
-   git clone https://github.com/amit-lavi/claude-code-gpt-5.git
    cd claude-code-gpt-5
    ```
 
