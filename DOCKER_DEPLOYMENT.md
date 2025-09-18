@@ -150,6 +150,10 @@ docker-compose down
 If you need to build the image yourself:
 
 ```bash
+# TODO TODO TODO
+# TODO docker buildx build --platform linux/amd64,linux/arm64 ...
+# TODO TODO TODO
+
 # Build the image
 docker build --platform linux/amd64 -t claude-code-gpt5 .
 
