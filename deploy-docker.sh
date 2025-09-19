@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Deploy claude-code-gpt-5 Docker container
-# This script pulls and runs the Docker image from GCR
+# This script pulls and runs the Docker image from GHCR
 
 set -e
 
-PROJECT_ID="neat-scheme-463713-p9"
-IMAGE_NAME="claude-code-gpt-5"
+DOCKER_IMAGE="ghcr.io/teremterem/claude-code-gpt-5:latest"
 CONTAINER_NAME="claude-code-gpt-5"
 PORT="4000"
 
@@ -20,8 +19,8 @@ if docker ps -a --format 'table {{.Names}}' | grep -q "^${CONTAINER_NAME}$"; the
 fi
 
 # Pull the latest image
-echo "⬇️  Pulling latest image from GCR..."
-docker pull gcr.io/${PROJECT_ID}/${IMAGE_NAME}:latest
+echo "⬇️  Pulling latest image from GHCR..."
+docker pull ${DOCKER_IMAGE}
 
 # Run the container
 echo "▶️  Starting container..."
@@ -33,7 +32,7 @@ docker run -d \
     -e ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}" \
     -e OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE=true \
     --restart unless-stopped \
-    gcr.io/${PROJECT_ID}/${IMAGE_NAME}:latest
+    ${DOCKER_IMAGE}
 
 echo "✅ Claude Code GPT-5 Proxy deployed successfully!"
 echo "🔗 Proxy URL: http://localhost:${PORT}"

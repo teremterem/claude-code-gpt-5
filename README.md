@@ -124,14 +124,14 @@ For production deployment or easier setup, you can use Docker:
 
 ### Quick Docker Start
 ```bash
-# Pull and run from Google Container Registry
+# Pull and run from GitHub Container Registry
 docker run -d \
   --name claude-code-gpt-5 \
   --platform linux/amd64 \
   -p 4000:4000 \
   -e OPENAI_API_KEY="your-openai-api-key" \
   -e ANTHROPIC_API_KEY="your-anthropic-api-key" \
-  gcr.io/neat-scheme-463713-p9/claude-code-gpt-5:latest
+  ghcr.io/teremterem/claude-code-gpt-5:latest
 ```
 
 ### Docker Compose
