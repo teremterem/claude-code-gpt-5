@@ -120,27 +120,27 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 ## 🐳 Docker Deployment
 
-For production deployment or easier setup, you can use Docker:
+For production deployment or easier setup, you can use Docker.
 
-### Quick Docker Start
+### Option 1: Quick Docker Start
+
+**NOTE: Make sure to set up your `.env` file as described earlier in the README (or supply the environment variables individually in the command line via `-e`, instead of `--env-file .env`).**
+
+Pull and run from GitHub Container Registry
 ```bash
-# Pull and run from GitHub Container Registry
 docker run -d \
   --name claude-code-gpt-5 \
-  --platform linux/amd64 \
   -p 4000:4000 \
-  -e OPENAI_API_KEY="your-openai-api-key" \
-  -e ANTHROPIC_API_KEY="your-anthropic-api-key" \
+  --env-file .env \
+  --restart unless-stopped \
   ghcr.io/teremterem/claude-code-gpt-5:latest
 ```
 
-### Docker Compose
-```bash
-# Set environment variables
-echo "OPENAI_API_KEY=your-key" > .env
-echo "ANTHROPIC_API_KEY=your-key" >> .env
+### Option 2: Docker Compose
 
-# Start with docker-compose
+**NOTE: Before running the command below, make sure to export the environment variables for Claude Code GPT-5 proxy in your shell.**
+
+```bash
 docker-compose up -d
 ```
 

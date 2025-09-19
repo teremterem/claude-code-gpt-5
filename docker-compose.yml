@@ -4,6 +4,16 @@ services:
     container_name: claude-code-gpt-5
     ports:
       - "4000:4000"
-    env_file:
-      - .env
     restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      REMAP_CLAUDE_HAIKU_TO: ${REMAP_CLAUDE_HAIKU_TO-gpt-5-nano-reason-minimal}
+      REMAP_CLAUDE_SONNET_TO: ${REMAP_CLAUDE_SONNET_TO-gpt-5-reason-medium}
+      REMAP_CLAUDE_OPUS_TO: ${REMAP_CLAUDE_OPUS_TO-gpt-5-reason-high}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL-https://api.openai.com/v1}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL-https://api.anthropic.com}
+      ENFORCE_ONE_TOOL_CALL_PER_RESPONSE: ${ENFORCE_ONE_TOOL_CALL_PER_RESPONSE-true}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_HOST: ${LANGFUSE_HOST-https://cloud.langfuse.com}
