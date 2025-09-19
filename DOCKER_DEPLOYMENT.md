@@ -1,16 +1,15 @@
 # Docker Deployment Guide for Claude Code GPT-5
 
-This guide explains how to deploy the Claude Code GPT-5 proxy using Docker and Google Container Registry (GCR).
+This guide explains how to deploy the Claude Code GPT-5 proxy using Docker and GitHub Container Registry (GHCR).
 
 **Repository**: This is a fork of the original [claude-code-gpt-5](https://github.com/teremterem/claude-code-gpt-5) with added Docker support.
 
 ## 🐳 Available Docker Images
 
-The Docker images are available in Google Container Registry:
+The Docker images are available in GitHub Container Registry:
 
 ```
-gcr.io/neat-scheme-463713-p9/claude-code-gpt5:latest
-gcr.io/neat-scheme-463713-p9/claude-code-gpt5:v1.0.0
+ghcr.io/teremterem/claude-code-gpt-5:latest
 ```
 
 ## 🚀 Quick Start
@@ -50,15 +49,15 @@ gcr.io/neat-scheme-463713-p9/claude-code-gpt5:v1.0.0
 
 ```bash
 docker run -d \
-  --name claude-code-gpt5-proxy \
+  --name claude-code-gpt-5 \
   --platform linux/amd64 \
   -p 4000:4000 \
-  -e OPENAI_API_KEY="your-openai-api-key" \
-  -e ANTHROPIC_API_KEY="your-anthropic-api-key" \
-  -e OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE=true \
+  --env-file .env \
   --restart unless-stopped \
-  gcr.io/neat-scheme-463713-p9/claude-code-gpt5:latest
+  ghcr.io/teremterem/claude-code-gpt-5:latest
 ```
+
+*TODO Describe optionally setting up LITELLM_MASTER_KEY ? Will Claude Code be able to work with it ?*
 
 ## 📋 Environment Variables
 
@@ -98,29 +97,29 @@ curl http://localhost:4000/health
 
 ### View container logs:
 ```bash
-docker logs -f claude-code-gpt5-proxy
+docker logs -f claude-code-gpt-5
 ```
 
 ### Check container status:
 ```bash
-docker ps | grep claude-code-gpt5
+docker ps | grep claude-code-gpt-5
 ```
 
 ### Monitor resource usage:
 ```bash
-docker stats claude-code-gpt5-proxy
+docker stats claude-code-gpt-5
 ```
 
 ## 🛑 Stopping and Cleanup
 
 ### Stop the container:
 ```bash
-docker stop claude-code-gpt5-proxy
+docker stop claude-code-gpt-5
 ```
 
 ### Remove the container:
 ```bash
-docker rm claude-code-gpt5-proxy
+docker rm claude-code-gpt-5
 ```
 
 ### Using Docker Compose:
@@ -133,7 +132,7 @@ docker-compose down
 ### Container won't start
 1. Check if port 4000 is available: `lsof -i :4000`
 2. Verify environment variables are set correctly
-3. Check container logs: `docker logs claude-code-gpt5-proxy`
+3. Check container logs: `docker logs claude-code-gpt-5`
 
 ### Authentication issues
 1. Verify your API keys are valid and have sufficient credits
@@ -151,17 +150,30 @@ If you need to build the image yourself:
 
 ```bash
 # TODO TODO TODO
-# TODO docker buildx build --platform linux/amd64,linux/arm64 ...
-# TODO TODO TODO
+docker build -t claude-code-gpt-5 .
 
 # Build the image
-docker build --platform linux/amd64 -t claude-code-gpt5 .
+docker build --platform linux/amd64 -t claude-code-gpt-5 .
+# TODO TODO TODO What does -t do ?
 
-# Tag for GCR (optional)
-docker tag claude-code-gpt5:latest gcr.io/neat-scheme-463713-p9/claude-code-gpt5:latest
+# TODO TODO TODO Building for both architectures (refer to documentation on how to set up multi-arch building)
+echo <YOUR_GITHUB_PAT> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --password-stdin
 
-# Push to GCR (optional)
-docker push gcr.io/neat-scheme-463713-p9/claude-code-gpt5:latest
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t ghcr.io/teremterem/claude-code-gpt-5:<VERSION> \
+  -t ghcr.io/teremterem/claude-code-gpt-5:latest \
+  --push .
+
+# TODO TODO TODO Then make the package public
+
+# Tag for GHCR (optional)
+docker tag claude-code-gpt-5:latest ghcr.io/teremterem/claude-code-gpt-5:latest
+
+# Push to GHCR (optional)
+docker push ghcr.io/teremterem/claude-code-gpt-5:latest
+
+# TODO TODO TODO Mention how to do all of the above in one go ?
 ```
 
 ## 🔐 Security Notes
