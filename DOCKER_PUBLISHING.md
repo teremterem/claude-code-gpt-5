@@ -25,3 +25,5 @@ docker buildx build \
   -t ghcr.io/teremterem/claude-code-gpt-5:latest \
   --push .
 ```
+
+NOTE: If publishing for the first time, then, after you published it with the command above, make sure to make the package public in [GHCR package settings](https://github.com/users/teremterem/packages/container/claude-code-gpt-5/settings) and [connect it to the project repository](https://github.com/users/teremterem/packages/container/package/claude-code-gpt-5).
