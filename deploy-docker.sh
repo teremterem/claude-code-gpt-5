@@ -26,11 +26,8 @@ docker pull ${DOCKER_IMAGE}
 echo "▶️  Starting container..."
 docker run -d \
     --name ${CONTAINER_NAME} \
-    --platform linux/amd64 \
     -p ${PORT}:4000 \
-    -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
-    -e ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}" \
-    -e OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE=true \
+    --env-file .env \
     --restart unless-stopped \
     ${DOCKER_IMAGE}
 

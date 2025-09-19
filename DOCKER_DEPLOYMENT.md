@@ -50,7 +50,6 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 ```bash
 docker run -d \
   --name claude-code-gpt-5 \
-  --platform linux/amd64 \
   -p 4000:4000 \
   --env-file .env \
   --restart unless-stopped \
