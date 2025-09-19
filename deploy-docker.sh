@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Deploy claude-code-gpt5 Docker container
+# Deploy claude-code-gpt-5 Docker container
 # This script pulls and runs the Docker image from GCR
 
 set -e
 
 PROJECT_ID="neat-scheme-463713-p9"
-IMAGE_NAME="claude-code-gpt5"
-CONTAINER_NAME="claude-code-gpt5-proxy"
+IMAGE_NAME="claude-code-gpt-5"
+CONTAINER_NAME="claude-code-gpt-5"
 PORT="4000"
 
 echo "🚀 Deploying Claude Code GPT-5 Proxy..."
