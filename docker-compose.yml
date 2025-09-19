@@ -1,23 +1,9 @@
 services:
   claude-code-gpt-5:
-
-    build: .
-    # # If you want to use a pre-built image, comment out the `build:` line
-    # # above and uncomment the `image:` line below (AND comment out both
-    # # `volumes:` sections further down!)
-    # image: ghcr.io/teremterem/claude-code-gpt-5:latest
-
+    image: ghcr.io/teremterem/claude-code-gpt-5:latest
     container_name: claude-code-gpt-5
     ports:
       - "4000:4000"
     env_file:
       - .env
-    volumes:
-      - .:/app
-      - app-venv:/app/.venv
-      - uv-cache:/root/.cache/uv  # To boost performance of `uv sync` operation
     restart: unless-stopped
-
-volumes:
-  app-venv:
-  uv-cache:
