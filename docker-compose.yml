@@ -1,6 +1,11 @@
 services:
   claude-code-gpt-5:
+
     image: ghcr.io/teremterem/claude-code-gpt-5:latest
+    # # If you want to build the image from source, comment out the line above
+    # # and uncomment the line below
+    # build: .
+
     container_name: claude-code-gpt-5
     ports:
       - "4000:4000"
