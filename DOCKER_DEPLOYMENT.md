@@ -35,7 +35,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 2. **Start the service**:
    ```bash
-   docker-compose up -d
+   docker-compose up -d --build
    ```
 
 3. **Check the logs**:
@@ -73,14 +73,8 @@ Once the proxy is running, use it with Claude Code:
 npm install -g @anthropic-ai/claude-code
 
 # Use with GPT-5 via the proxy
-ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
+ANTHROPIC_BASE_URL=http://localhost:4000 claude
 ```
-
-### Available GPT-5 Models
-
-- **GPT-5**: `gpt-5-reason-minimal`, `gpt-5-reason-low`, `gpt-5-reason-medium`, `gpt-5-reason-high`
-- **GPT-5 Mini**: `gpt-5-mini-reason-minimal`, `gpt-5-mini-reason-low`, `gpt-5-mini-reason-medium`, `gpt-5-mini-reason-high`
-- **GPT-5 Nano**: `gpt-5-nano-reason-minimal`, `gpt-5-nano-reason-low`, `gpt-5-nano-reason-medium`, `gpt-5-nano-reason-high`
 
 ## 🏥 Health Check
 
@@ -133,13 +127,11 @@ docker-compose down
 
 ### Authentication issues
 1. Verify your API keys are valid and have sufficient credits
-2. Check if OpenAI requires identity verification for GPT-5 access
-3. Ensure the Anthropic API key is set (required for fast model operations)
+2. Check if OpenAI requires identity verification for GPT-5 access (see [README.md](README.md), section "First time using GPT-5 via API?")
 
 ### Performance issues
-1. The container is built for `linux/amd64` architecture
-2. Ensure sufficient memory is available (recommended: 2GB+)
-3. Check network connectivity to OpenAI and Anthropic APIs
+1. Ensure sufficient memory is available (recommended: 2GB+)
+2. Check network connectivity to OpenAI and Anthropic APIs
 
 ## 🏗️ Building from Source
 
@@ -148,29 +140,6 @@ If you need to build the image yourself:
 ```bash
 # TODO TODO TODO
 docker build -t claude-code-gpt-5 .
-
-# Build the image
-docker build --platform linux/amd64 -t claude-code-gpt-5 .
-# TODO TODO TODO What does -t do ?
-
-# TODO TODO TODO Building for both architectures (refer to documentation on how to set up multi-arch building)
-echo <YOUR_GITHUB_PAT> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --password-stdin
-
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  -t ghcr.io/teremterem/claude-code-gpt-5:<VERSION> \
-  -t ghcr.io/teremterem/claude-code-gpt-5:latest \
-  --push .
-
-# TODO TODO TODO Then make the package public
-
-# Tag for GHCR (optional)
-docker tag claude-code-gpt-5:latest ghcr.io/teremterem/claude-code-gpt-5:latest
-
-# Push to GHCR (optional)
-docker push ghcr.io/teremterem/claude-code-gpt-5:latest
-
-# TODO TODO TODO Mention how to do all of the above in one go ?
 ```
 
 ## 🔐 Security Notes
@@ -184,8 +153,6 @@ docker push ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ```
 Claude Code CLI → LiteLLM Proxy (Port 4000) → OpenAI GPT-5 API
-                       ↓
-               Anthropic API (for fast model)
 ```
 
 The proxy handles model routing and ensures compatibility between Claude Code's expectations and OpenAI's GPT-5 API format.

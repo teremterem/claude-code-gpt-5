@@ -1,20 +1,23 @@
 services:
   claude-code-gpt-5:
 
-    image: ghcr.io/teremterem/claude-code-gpt-5:latest
-    # # If you want to build the image from source, comment out the line above
-    # # and uncomment the line below
-    # build: .
+    build: .
+    # # If you want to use a pre-built image, comment out the `build:` line
+    # # above and uncomment the `image:` line below (AND comment out both
+    # # `volumes:` sections further down!)
+    # image: ghcr.io/teremterem/claude-code-gpt-5:latest
 
     container_name: claude-code-gpt-5
     ports:
       - "4000:4000"
     env_file:
       - .env
+    volumes:
+      - .:/app
+      - app-venv:/app/.venv
+      - uv-cache:/root/.cache/uv  # To boost performance of `uv sync` operation
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+
+volumes:
+  app-venv:
+  uv-cache:
