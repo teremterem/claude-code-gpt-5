@@ -12,38 +12,45 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ## 🚀 Quick Start
 
+### Set up environment variables
+
+First of all, you need to create an `.env` file, **REGARDLESS of which method you use to deploy the container.**
+
+Copy `.env.template` to `.env` to use it as a starting point:
+```bash
+cp .env.template .env
+```
+
+Then, edit `.env` and add your API key(s):
+```dotenv
+OPENAI_API_KEY=your-openai-api-key-here
+# Optional: only needed if you plan to use Anthropic models
+# ANTHROPIC_API_KEY=your-anthropic-api-key-here
+
+# More settings (see .env.template for details)
+...
+```
+
 ### Method 1: Using the deployment script
 
-1. **Set your environment variables**:
-   ```bash
-   export OPENAI_API_KEY="your-openai-api-key"
-   export ANTHROPIC_API_KEY="your-anthropic-api-key"
-   ```
-
-2. **Run the deployment script**:
-   ```bash
-   ./deploy-docker.sh
-   ```
+**Run the deployment script:**
+```bash
+./deploy-docker.sh
+```
 
 ### Method 2: Using Docker Compose
 
-1. **Create a `.env` file**:
+1. **Start the service:**
    ```bash
-   echo "OPENAI_API_KEY=your-openai-api-key" > .env
-   echo "ANTHROPIC_API_KEY=your-anthropic-api-key" >> .env
+   docker-compose up -d
    ```
 
-2. **Start the service**:
-   ```bash
-   docker-compose up -d --build
-   ```
-
-3. **Check the logs**:
+2. **Check the logs:**
    ```bash
    docker-compose logs -f
    ```
 
-### Method 3: Direct Docker Run
+### Method 3: Direct Docker run
 
 ```bash
 docker run -d \
@@ -54,27 +61,19 @@ docker run -d \
   ghcr.io/teremterem/claude-code-gpt-5:latest
 ```
 
-*TODO Describe optionally setting up LITELLM_MASTER_KEY ? Will Claude Code be able to work with it ?*
-
-## 📋 Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OPENAI_API_KEY` | ✅ | - | Your OpenAI API key for GPT-5 access |
-| `ANTHROPIC_API_KEY` | ✅ | - | Your Anthropic API key for Claude models |
-| `OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE` | ❌ | `true` | Enforces single tool calls per response |
-
 ## 🔧 Usage with Claude Code
 
 Once the proxy is running, use it with Claude Code:
 
-```bash
-# Install Claude Code (if not already installed)
-npm install -g @anthropic-ai/claude-code
+1. **Install Claude Code** (if not already installed):
+   ```bash
+   npm install -g @anthropic-ai/claude-code
+   ```
 
-# Use with GPT-5 via the proxy
-ANTHROPIC_BASE_URL=http://localhost:4000 claude
-```
+2. **Use with GPT-5 via the proxy:**
+   ```bash
+   ANTHROPIC_BASE_URL=http://localhost:4000 claude
+   ```
 
 ## 🏥 Health Check
 
@@ -135,12 +134,33 @@ docker-compose down
 
 ## 🏗️ Building from Source
 
-If you need to build the image yourself:
+If you need to build the image yourself.
 
+### Direct Docker build
+
+1. First build the image:
+   ```bash
+   docker build -t claude-code-gpt-5 .
+   ```
+
+2. Then run the container:
+   ```bash
+   docker run -d \
+     --name claude-code-gpt-5 \
+     -p 4000:4000 \
+     --env-file .env \
+     --restart unless-stopped \
+     claude-code-gpt-5
+   ```
+
+### Docker Compose build
+
+Overlay with the dev version of the compose file when building and running:
 ```bash
-# TODO TODO TODO
-docker build -t claude-code-gpt-5 .
+docker-compose -f docker-compose.dev.yml up -d --build
 ```
+
+This will also map the current directory to the container.
 
 ## 🔐 Security Notes
 
@@ -155,4 +175,4 @@ docker build -t claude-code-gpt-5 .
 Claude Code CLI → LiteLLM Proxy (Port 4000) → OpenAI GPT-5 API
 ```
 
-The proxy handles model routing and ensures compatibility between Claude Code's expectations and OpenAI's GPT-5 API format.
+The proxy handles model routing and ensures compatibility between Claude Code's expectations and OpenAI's GPT-5 responses.

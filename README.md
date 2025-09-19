@@ -58,7 +58,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```bash
    cp .env.template .env
    ```
-   Edit `.env` and add your API keys:
+   Edit `.env` and add your API key(s):
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
    # Optional: only needed if you plan to use Anthropic models
@@ -74,7 +74,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ...
    ```
 
-4. **Run the server**:
+4. **Run the server:**
    ```bash
    uv run litellm --config config.yaml
    ```
@@ -86,7 +86,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    npm install -g @anthropic-ai/claude-code
    ```
 
-2. **Connect to your proxy to use GPT-5 variants**:
+2. **Connect to your proxy to use GPT-5 variants:**
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
