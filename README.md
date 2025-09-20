@@ -146,7 +146,7 @@ docker run -d \
 
 ### Option 2: Docker Compose
 
-> **NOTE:** Before running the command below, make sure to export necessary environment variables for Claude Code GPT-5 proxy in the shell you're starting Docker Compose from, because the default Docker Compose file is not configured to load them from the `.env` file. **(At the very least, export `OPENAI_API_KEY`, as the rest of the env vars have defaults.)**
+> **NOTE:** Before running the command below, make sure to export necessary environment variables for Claude Code GPT-5 proxy in the shell, because the default Compose configuration does not load the `.env` file. **At the very least, export `OPENAI_API_KEY`, as other env vars have defaults.**
 
 **Start the service:**
 ```bash
