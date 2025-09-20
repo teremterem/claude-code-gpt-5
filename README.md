@@ -150,7 +150,9 @@ docker run -d \
 docker-compose up -d
 ```
 
-*For more detailed instructions and more Docker deployment options (like building the image yourself), see* ***[DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)***
+---
+
+For more detailed Docker deployment instructions and more Docker deployment options (like building the image yourself), see **[DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)**
 
 ## KNOWN PROBLEM
 
