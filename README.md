@@ -57,7 +57,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ./deploy-docker.sh
    ```
 
-   > **NOTE:** For more detailed `Docker` deployment instructions and more deployment options with `Docker` (like using `Docker Compose`, building the image yourself, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+   > **NOTE:** For more detailed `Docker` deployment instructions and more deployment options (like using `Docker Compose`, building the image yourself, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 
@@ -73,10 +73,12 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   Optionally, you can override the default model on the side of the CLI (less desirable, as relying solely on remap env vars from above removes confusion when it comes to built-in CLI agents hardwired to always use specific Claude models):
+   Optionally, you can override the default model on the CLI side with:
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
    ```
+
+   > **NOTE:** The former is more desirable than the latter - relying solely on the remap env vars and not explicitly setting the model in the CLI eliminates confusion when it comes to CLI's built-in agents, which are hardwired to always use a specific Claude model and will ignore the CLI's global model choice anyway.
 
 4. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant(s)** with your chosen reasoning effort level(s). 🎯
 
