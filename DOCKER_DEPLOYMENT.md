@@ -19,7 +19,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    cp .env.template .env
    ```
 
-2. **Edit `.env` and add your API key(s):**
+2. **Edit `.env` and add your OpenAI API key:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
 
@@ -39,7 +39,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ### Method 2: Using Docker Compose
 
-1. **Export your API key(s) as environment variables** (the default Compose file DOES NOT load env vars from `.env`, it takes them from the external environment):
+1. **Export your OpenAI API key as an env var**, as well as any other vars from `.env.template` if you would like to modify the defaults (our default Compose setup DOES NOT load env vars from `.env`):
    ```bash
    export OPENAI_API_KEY=your-openai-api-key-here
    ```
@@ -61,7 +61,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    cp .env.template .env
    ```
 
-2. **Edit `.env` and add your API key(s):**
+2. **Edit `.env` and add your OpenAI API key:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
 
@@ -78,6 +78,8 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    --restart unless-stopped \
    ghcr.io/teremterem/claude-code-gpt-5:latest
    ```
+
+   > **NOTE:** You can also supply the environment variables individually via the `-e` parameter, instead of `--env-file .env`
 
 4. **Check the logs:**
    ```bash
@@ -165,7 +167,7 @@ docker-compose -f docker-compose.dev.yml up -d --build
 
 This will also map the current directory to the container.
 
-> **NOTE:** The dev version of the Compose file DOES use the `.env` file, so you will need to set up your environment variables in `.env`.
+> **NOTE:** The dev version of the Compose setup DOES use the `.env` file, so you will need to set up your environment variables in `.env`
 
 ## 🔧 Troubleshooting
 

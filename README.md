@@ -29,7 +29,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```bash
    cp .env.template .env
    ```
-   Edit `.env` and add your API key(s):
+   Edit `.env` and add your OpenAI API key:
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
    # Optional: only needed if you plan to use Anthropic models
