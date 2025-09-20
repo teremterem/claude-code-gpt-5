@@ -6,12 +6,9 @@ This repository lets you use **Anthropic's Claude Code CLI** with **OpenAI's GPT
 
 ### Prerequisites
 
-- [OpenAI API key](https://platform.openai.com/settings/organization/api-keys) 🔑
-- [Anthropic API key](https://console.anthropic.com/settings/keys) - optional 🔑
-
-**About the Anthropic API key**
-
-By default, the provided `.env` template (`.env.template` that you will have to copy to `.env`) remaps Claude models (haiku/sonnet/opus) to GPT‑5 equivalents, so all requests go to OpenAI. If you want to keep using Anthropic for any calls, set `ANTHROPIC_API_KEY` and adjust the `REMAP_*` variables in `.env` (or set some/all of them to empty strings).
+- [OpenAI API key 🔑](https://platform.openai.com/settings/organization/api-keys)
+- [Anthropic API key 🔑](https://console.anthropic.com/settings/keys) - optional (if you decide not to remap to OpenAI in certain scenarios)
+- Either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [Docker Desktop](https://docs.docker.com/desktop/), depending on your preferred setup method
 
 **First time using GPT-5 via API?**
 
@@ -26,34 +23,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    cd claude-code-gpt-5
    ```
 
-2. **Install [uv](https://docs.astral.sh/uv/)** (if you haven't already):
-
-   **macOS/Linux:**
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
-
-   **macOS (using [Homebrew](https://brew.sh/)):**
-   ```bash
-   brew install uv
-   ```
-
-   **Windows (using PowerShell):**
-   ```powershell
-   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-   ```
-
-   **Windows (using Scoop):**
-   ```bash
-   scoop install uv
-   ```
-
-   **Alternative: pip install**
-   ```bash
-   pip install uv
-   ```
-
-3. **Configure Environment Variables**:
+2. **Configure Environment Variables**:
 
    Copy the template file to create your `.env`:
    ```bash
@@ -75,10 +45,19 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ...
    ```
 
-4. **Run the server:**
+3. **Run the server:**
+
+   Either via `uv`:
    ```bash
    uv run litellm --config config.yaml
    ```
+
+   Or via `Docker`:
+   ```bash
+   ./deploy-docker.sh
+   ```
+
+   > **NOTE:** For more detailed `Docker` deployment instructions and more deployment options with `Docker` (like using `Docker Compose`, building the image yourself, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 
@@ -120,42 +99,6 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    - `gpt-5-nano-reason-high`
 
 > **NOTE:** Generally, you can use arbitrary models from [arbitrary providers](https://docs.litellm.ai/docs/providers), but for providers other than OpenAI or Anthropic, you will need to specify the provider in the model name, e.g. `gemini/gemini-pro`, `gemini/gemini-pro-reason-disable` etc. (as well as set the respective API keys along with any other environment variables that the provider might require in your `.env` file).
-
-## 🐳 Docker Deployment
-
-For production deployment or easier setup, you can use Docker.
-
-### Option 1: Quick Docker Start
-
-> **NOTE:** Make sure to set up your `.env` file as described earlier in the README (or supply the environment variables individually in the command line via `-e`, instead of `--env-file .env`).
-
-**Pull and run from GitHub Container Registry the deployment script:**
-```bash
-./deploy-docker.sh
-```
-
-**Alternatively, you can use the direct Docker run command:**
-```bash
-docker run -d \
-  --name claude-code-gpt-5 \
-  -p 4000:4000 \
-  --env-file .env \
-  --restart unless-stopped \
-  ghcr.io/teremterem/claude-code-gpt-5:latest
-```
-
-### Option 2: Docker Compose
-
-> **NOTE:** Before running the command below, make sure to export necessary environment variables for Claude Code GPT-5 proxy in the shell, because the default Compose configuration does not load the `.env` file. **At the very least, export `OPENAI_API_KEY`, as other env vars have defaults.**
-
-**Start the service:**
-```bash
-docker-compose up -d
-```
-
----
-
-For more detailed Docker deployment instructions and more Docker deployment options (like building the image yourself), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ## KNOWN PROBLEM
 
