@@ -126,12 +126,12 @@ For production deployment or easier setup, you can use Docker.
 
 > **NOTE:** Make sure to set up your `.env` file as described earlier in the README (or supply the environment variables individually in the command line via `-e`, instead of `--env-file .env`).
 
-Pull and run from GitHub Container Registry the deployment script:
+**Pull and run from GitHub Container Registry the deployment script:**
 ```bash
 ./deploy-docker.sh
 ```
 
-Alternatively, you can use the direct Docker run command:
+**Alternatively, you can use the direct Docker run command:**
 ```bash
 docker run -d \
   --name claude-code-gpt-5 \
@@ -143,7 +143,7 @@ docker run -d \
 
 ### Option 2: Docker Compose
 
-> **NOTE:** Before running the command below, make sure to export necessary environment variables for Claude Code GPT-5 proxy in the shell you're starting Docker Compose from, because the default Docker Compose file is not configured to load them from the `.env` file. (At the very least, `OPENAI_API_KEY` - other variables have defaults.)
+> **NOTE:** Before running the command below, make sure to export necessary environment variables for Claude Code GPT-5 proxy in the shell you're starting Docker Compose from, because the default Docker Compose file is not configured to load them from the `.env` file. **(At the very least, export `OPENAI_API_KEY`, as the rest of the env vars have defaults.)**
 
 ```bash
 docker-compose up -d
@@ -153,7 +153,7 @@ For more detailed instructions and more Docker deployment options (like building
 
 ## KNOWN PROBLEM
 
-**The `Web Search` tool currently does not work with this setup.** You may see an error like:
+The `Web Search` tool currently does not work with this setup. You may see an error like:
 
 ```text
 API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-Anthropic model: litellm.BadRequestError: OpenAIException - Invalid schema for function 'web_search': 'web_search_20250305' is not valid under any of the given schemas.","type":"None","param":"None","code":"500"}}) · Retrying in 1 seconds… (attempt 1/10)
