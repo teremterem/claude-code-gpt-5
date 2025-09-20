@@ -22,12 +22,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 1. **Clone this repository**:
    ```bash
-   # Original repository
    git clone https://github.com/teremterem/claude-code-gpt-5.git
-   cd claude-code-gpt-5
-
-   # Or use the fork with Docker support
-   git clone https://github.com/amit-lavi/claude-code-gpt-5.git
    cd claude-code-gpt-5
    ```
 
@@ -59,11 +54,12 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```
 
 3. **Configure Environment Variables**:
+
    Copy the template file to create your `.env`:
    ```bash
    cp .env.template .env
    ```
-   Edit `.env` and add your API keys:
+   Edit `.env` and add your API key(s):
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
    # Optional: only needed if you plan to use Anthropic models
@@ -79,7 +75,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ...
    ```
 
-4. **Run the server**:
+4. **Run the server:**
    ```bash
    uv run litellm --config config.yaml
    ```
@@ -91,17 +87,19 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    npm install -g @anthropic-ai/claude-code
    ```
 
-2. **Connect to your proxy to use GPT-5 variants**:
+2. **Connect to GPT-5 instead of Claude:**
+
+   Recommended:
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   **Alternatively, you can override the default model on the side of the CLI using the `--model` parameter:**
+   Optionally, you can override the default model on the side of the CLI (less desirable, as relying solely on remap env vars from above removes confusion when it comes to built-in CLI agents hardwired to always use specific Claude models):
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
    ```
 
-3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
+4. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant(s)** with your chosen reasoning effort level(s). 🎯
 
 ### Available GPT-5 model aliases
 
@@ -125,35 +123,43 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 ## 🐳 Docker Deployment
 
-For production deployment or easier setup, you can use Docker:
+For production deployment or easier setup, you can use Docker.
 
-### Quick Docker Start
+### Option 1: Quick Docker Start
+
+> **NOTE:** Make sure to set up your `.env` file as described earlier in the README (or supply the environment variables individually in the command line via `-e`, instead of `--env-file .env`).
+
+**Pull and run from GitHub Container Registry the deployment script:**
 ```bash
-# Pull and run from Google Container Registry
-docker run -d \
-  --name claude-code-gpt5-proxy \
-  --platform linux/amd64 \
-  -p 4000:4000 \
-  -e OPENAI_API_KEY="your-openai-api-key" \
-  -e ANTHROPIC_API_KEY="your-anthropic-api-key" \
-  gcr.io/neat-scheme-463713-p9/claude-code-gpt5:latest
+./deploy-docker.sh
 ```
 
-### Docker Compose
+**Alternatively, you can use the direct Docker run command:**
 ```bash
-# Set environment variables
-echo "OPENAI_API_KEY=your-key" > .env
-echo "ANTHROPIC_API_KEY=your-key" >> .env
+docker run -d \
+  --name claude-code-gpt-5 \
+  -p 4000:4000 \
+  --env-file .env \
+  --restart unless-stopped \
+  ghcr.io/teremterem/claude-code-gpt-5:latest
+```
 
-# Start with docker-compose
+### Option 2: Docker Compose
+
+> **NOTE:** Before running the command below, make sure to export necessary environment variables for Claude Code GPT-5 proxy in the shell you're starting Docker Compose from, because the default Docker Compose file is not configured to load them from the `.env` file. **(At the very least, export `OPENAI_API_KEY`, as the rest of the env vars have defaults.)**
+
+**Start the service:**
+```bash
 docker-compose up -d
 ```
 
-For detailed Docker deployment instructions, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
+---
+
+For more detailed Docker deployment instructions and more Docker deployment options (like building the image yourself), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ## KNOWN PROBLEM
 
-**The `Web Search` tool currently does not work with this setup.** You may see an error like:
+The `Web Search` tool currently does not work with this setup. You may see an error like:
 
 ```text
 API Error (500 {"error":{"message":"Error calling litellm.acompletion for non-Anthropic model: litellm.BadRequestError: OpenAIException - Invalid schema for function 'web_search': 'web_search_20250305' is not valid under any of the given schemas.","type":"None","param":"None","code":"500"}}) · Retrying in 1 seconds… (attempt 1/10)

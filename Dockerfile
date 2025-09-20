@@ -1,5 +1,4 @@
-# Use Python 3.11 slim image for amd64
-FROM --platform=linux/amd64 python:3.11-slim
+FROM python:3.13-slim
 
 # Set working directory
 WORKDIR /app
@@ -13,24 +12,25 @@ RUN apt-get update && apt-get install -y \
 # Install uv
 RUN pip install uv
 
-# Copy project files
-COPY . .
+COPY .python-version ./
+COPY uv.lock ./
+COPY pyproject.toml ./
 
-# Install Python dependencies using uv
+# Install Python dependencies using uv (before copying other project files,
+# so this layer is rebuilt less often during development)
 RUN uv sync --frozen
 
-# Create .env template if it doesn't exist
-RUN if [ ! -f .env ]; then \
-    echo "OPENAI_API_KEY=" > .env && \
-    echo "ANTHROPIC_API_KEY=" >> .env && \
-    echo "OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE=true" >> .env; \
-    fi
+# Set up the environment variable defaults
+COPY .env.template .env
+
+# Copy all the project files
+COPY . .
 
 # Expose port 4000 (default LiteLLM proxy port)
 EXPOSE 4000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:4000/health || exit 1
 
 # Default command to run the LiteLLM proxy

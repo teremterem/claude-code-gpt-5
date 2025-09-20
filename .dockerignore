@@ -44,7 +44,7 @@ Thumbs.db
 # Logs
 *.log
 
-# Environment files (we'll create them in the container)
+# Environment files (env vars are meant to be supplied by the user upon deployment)
 .env
 
 # Development files
@@ -52,6 +52,4 @@ Thumbs.db
 .pylintrc
 
 # Documentation
-README.md
 claude-code-gpt-5.jpeg
-LICENSE
