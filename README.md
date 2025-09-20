@@ -86,17 +86,17 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    npm install -g @anthropic-ai/claude-code
    ```
 
-2. **Connect to your proxy to use GPT-5 variants:**
+2. **Connect to your proxy to GPT-5 instead of Claude:**
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   **Alternatively, you can override the default model on the side of the CLI using the `--model` parameter:**
+   **You can also override the default model on the side of the CLI, using the `--model` parameter:**
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
    ```
 
-3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant** with your chosen reasoning effort level. 🎯
+3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant(s)** with your chosen reasoning effort level(s). 🎯
 
 ### Available GPT-5 model aliases
 
@@ -124,7 +124,7 @@ For production deployment or easier setup, you can use Docker.
 
 ### Option 1: Quick Docker Start
 
-**NOTE: Make sure to set up your `.env` file as described earlier in the README (or supply the environment variables individually in the command line via `-e`, instead of `--env-file .env`).**
+> **NOTE:** Make sure to set up your `.env` file as described earlier in the README (or supply the environment variables individually in the command line via `-e`, instead of `--env-file .env`).
 
 Pull and run from GitHub Container Registry
 ```bash
@@ -138,13 +138,13 @@ docker run -d \
 
 ### Option 2: Docker Compose
 
-**NOTE: Before running the command below, make sure to export the environment variables for Claude Code GPT-5 proxy in your shell.**
+> **NOTE:** Before running the command below, make sure to export necessary environment variables for Claude Code GPT-5 proxy in the shell you're starting Docker Compose from, because the default Docker Compose file is not configured to load them from the `.env` file. (At the very least, `OPENAI_API_KEY` - other variables have defaults.)
 
 ```bash
 docker-compose up -d
 ```
 
-For detailed Docker deployment instructions, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
+For more detailed instructions and more Docker deployment options (like building the image yourself), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
 
 ## KNOWN PROBLEM
 
