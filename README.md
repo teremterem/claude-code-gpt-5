@@ -22,7 +22,12 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 1. **Clone this repository**:
    ```bash
+   # Original repository
    git clone https://github.com/teremterem/claude-code-gpt-5.git
+   cd claude-code-gpt-5
+
+   # Or use the fork with Docker support
+   git clone https://github.com/amit-lavi/claude-code-gpt-5.git
    cd claude-code-gpt-5
    ```
 
@@ -117,6 +122,34 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    - `gpt-5-nano-reason-high`
 
 > **NOTE:** Generally, you can use arbitrary models from [arbitrary providers](https://docs.litellm.ai/docs/providers), but for providers other than OpenAI or Anthropic, you will need to specify the provider in the model name, e.g. `gemini/gemini-pro`, `gemini/gemini-pro-reason-disable` etc. (as well as set the respective API keys along with any other environment variables that the provider might require in your `.env` file).
+
+## 🐳 Docker Deployment
+
+For production deployment or easier setup, you can use Docker:
+
+### Quick Docker Start
+```bash
+# Pull and run from Google Container Registry
+docker run -d \
+  --name claude-code-gpt5-proxy \
+  --platform linux/amd64 \
+  -p 4000:4000 \
+  -e OPENAI_API_KEY="your-openai-api-key" \
+  -e ANTHROPIC_API_KEY="your-anthropic-api-key" \
+  gcr.io/neat-scheme-463713-p9/claude-code-gpt5:latest
+```
+
+### Docker Compose
+```bash
+# Set environment variables
+echo "OPENAI_API_KEY=your-key" > .env
+echo "ANTHROPIC_API_KEY=your-key" >> .env
+
+# Start with docker-compose
+docker-compose up -d
+```
+
+For detailed Docker deployment instructions, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md).
 
 ## KNOWN PROBLEM
 

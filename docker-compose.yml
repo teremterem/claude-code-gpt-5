@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  claude-code-gpt5:
+    image: gcr.io/neat-scheme-463713-p9/claude-code-gpt5:latest
+    platform: linux/amd64
+    container_name: claude-code-gpt5-proxy
+    ports:
+      - "4000:4000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - claude-gpt5-network
+
+networks:
+  claude-gpt5-network:
+    driver: bridge
