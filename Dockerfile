@@ -20,6 +20,9 @@ COPY pyproject.toml ./
 # so this layer is rebuilt less often during development)
 RUN uv sync --frozen
 
+# Set up the environment variable defaults
+COPY .env.template .env
+
 # Copy all the project files
 COPY . .
 
