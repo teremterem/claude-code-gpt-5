@@ -160,7 +160,7 @@ If you need to build the image yourself.
 
 ### Docker Compose build
 
-Overlay with the dev version of the Compose file when building and running:
+Build and run, but overlay with the dev version of Compose setup:
 ```bash
 docker-compose -f docker-compose.dev.yml up -d --build
 ```
