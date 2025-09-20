@@ -94,7 +94,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   Optionally, you can override the default model on the side of the CLI (less desirable, as relying solely on remap env vars from above produces behaviour more consistent with built-in agents hardwired to only use specific Claude models):
+   Optionally, you can override the default model on the side of the CLI (less desirable, as relying solely on remap env vars from above removes confusion when it comes to built-in CLI agents hardwired to always use specific Claude models):
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
    ```
