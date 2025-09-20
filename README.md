@@ -87,17 +87,19 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    npm install -g @anthropic-ai/claude-code
    ```
 
-2. **Connect to your proxy to GPT-5 instead of Claude:**
+2. **Connect to GPT-5 instead of Claude:**
+
+   Recommended:
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   **You can also override the default model on the side of the CLI, using the `--model` parameter:**
+   Optionally, you can override the default model on the side of the CLI (less desirable, as relying solely on remap env vars from above produces behaviour more consistent with built-in agents hardwired to only use specific Claude models):
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium
    ```
 
-3. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant(s)** with your chosen reasoning effort level(s). 🎯
+4. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant(s)** with your chosen reasoning effort level(s). 🎯
 
 ### Available GPT-5 model aliases
 
@@ -153,7 +155,7 @@ docker-compose up -d
 
 ---
 
-For more detailed Docker deployment instructions and more Docker deployment options (like building the image yourself), see **[DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)**
+For more detailed Docker deployment instructions and more Docker deployment options (like building the image yourself), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ## KNOWN PROBLEM
 
