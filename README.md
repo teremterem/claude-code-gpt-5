@@ -54,6 +54,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```
 
 3. **Configure Environment Variables**:
+
    Copy the template file to create your `.env`:
    ```bash
    cp .env.template .env

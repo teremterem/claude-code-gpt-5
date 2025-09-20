@@ -12,54 +12,77 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ## 🚀 Quick Start
 
-### Set up environment variables
-
-First of all, you need to create an `.env` file, **REGARDLESS of which method you use to deploy the container.**
-
-Copy `.env.template` to `.env` to use it as a starting point:
-```bash
-cp .env.template .env
-```
-
-Then, edit `.env` and add your API key(s):
-```dotenv
-OPENAI_API_KEY=your-openai-api-key-here
-# Optional: only needed if you plan to use Anthropic models
-# ANTHROPIC_API_KEY=your-anthropic-api-key-here
-
-# More settings (see .env.template for details)
-...
-```
-
 ### Method 1: Using the deployment script
 
-**Run the deployment script:**
-```bash
-./deploy-docker.sh
-```
+1. **Copy `.env.template` to `.env`:**
+   ```bash
+   cp .env.template .env
+   ```
+
+2. **Edit `.env` and add your API key(s):**
+   ```dotenv
+   OPENAI_API_KEY=your-openai-api-key-here
+
+   # More settings (see .env.template for details)
+   ...
+   ```
+
+3. **Run the deployment script:**
+   ```bash
+   ./deploy-docker.sh
+   ```
+
+4. **Check the logs:**
+   ```bash
+   docker logs -f claude-code-gpt-5
+   ```
 
 ### Method 2: Using Docker Compose
 
-1. **Start the service:**
+1. **Export your API key(s) as environment variables** (the default Compose file DOES NOT load env vars from `.env`, it takes them from the external environment):
+   ```bash
+   export OPENAI_API_KEY=your-openai-api-key-here
+   ```
+
+2. **Start the service:**
    ```bash
    docker-compose up -d
    ```
 
-2. **Check the logs:**
+3. **Check the logs:**
    ```bash
    docker-compose logs -f
    ```
 
 ### Method 3: Direct Docker run
 
-```bash
-docker run -d \
-  --name claude-code-gpt-5 \
-  -p 4000:4000 \
-  --env-file .env \
-  --restart unless-stopped \
-  ghcr.io/teremterem/claude-code-gpt-5:latest
-```
+1. **Copy `.env.template` to `.env`:**
+   ```bash
+   cp .env.template .env
+   ```
+
+2. **Edit `.env` and add your API key(s):**
+   ```dotenv
+   OPENAI_API_KEY=your-openai-api-key-here
+
+   # More settings (see .env.template for details)
+   ...
+   ```
+
+3. **Run the container:**
+   ```bash
+   docker run -d \
+   --name claude-code-gpt-5 \
+   -p 4000:4000 \
+   --env-file .env \
+   --restart unless-stopped \
+   ghcr.io/teremterem/claude-code-gpt-5:latest
+   ```
+
+4. **Check the logs:**
+   ```bash
+   docker logs -f claude-code-gpt-5
+   ```
 
 ## 🔧 Usage with Claude Code
 
@@ -75,20 +98,7 @@ Once the proxy is running, use it with Claude Code:
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-## 🏥 Health Check
-
-The container includes a health check endpoint:
-
-```bash
-curl http://localhost:4000/health
-```
-
 ## 📊 Monitoring
-
-### View container logs:
-```bash
-docker logs -f claude-code-gpt-5
-```
 
 ### Check container status:
 ```bash
@@ -115,6 +125,14 @@ docker rm claude-code-gpt-5
 ### Using Docker Compose:
 ```bash
 docker-compose down
+```
+
+## 🏥 Health Check
+
+The container includes a health check endpoint:
+
+```bash
+curl http://localhost:4000/health
 ```
 
 ## 🔧 Troubleshooting
@@ -155,12 +173,14 @@ If you need to build the image yourself.
 
 ### Docker Compose build
 
-Overlay with the dev version of the compose file when building and running:
+Overlay with the dev version of the Compose file when building and running:
 ```bash
 docker-compose -f docker-compose.dev.yml up -d --build
 ```
 
 This will also map the current directory to the container.
+
+> **NOTE:** The dev version of the Compose file DOES use the `.env` file, so you will need to set up your environment variables in `.env`.
 
 ## 🔐 Security Notes
 
