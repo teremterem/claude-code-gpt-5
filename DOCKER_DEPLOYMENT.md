@@ -135,21 +135,6 @@ The container includes a health check endpoint:
 curl http://localhost:4000/health
 ```
 
-## 🔧 Troubleshooting
-
-### Container won't start
-1. Check if port 4000 is available: `lsof -i :4000`
-2. Verify environment variables are set correctly
-3. Check container logs: `docker logs claude-code-gpt-5`
-
-### Authentication issues
-1. Verify your API keys are valid and have sufficient credits
-2. Check if OpenAI requires identity verification for GPT-5 access (see [README.md](README.md), section "First time using GPT-5 via API?")
-
-### Performance issues
-1. Ensure sufficient memory is available (recommended: 2GB+)
-2. Check network connectivity to OpenAI and Anthropic APIs
-
 ## 🏗️ Building from Source
 
 If you need to build the image yourself.
@@ -181,6 +166,21 @@ docker-compose -f docker-compose.dev.yml up -d --build
 This will also map the current directory to the container.
 
 > **NOTE:** The dev version of the Compose file DOES use the `.env` file, so you will need to set up your environment variables in `.env`.
+
+## 🔧 Troubleshooting
+
+### Container won't start
+1. Check if port 4000 is available: `lsof -i :4000`
+2. Verify environment variables are set correctly
+3. Check container logs: `docker logs -f claude-code-gpt-5`
+
+### Authentication issues
+1. Verify your API keys are valid and have sufficient credits
+2. Check if OpenAI requires identity verification for GPT-5 access (see [README.md](README.md), section "First time using GPT-5 via API?")
+
+### Performance issues
+1. Ensure sufficient memory is available (recommended: 2GB+)
+2. Check network connectivity to OpenAI and Anthropic APIs
 
 ## 🔐 Security Notes
 
