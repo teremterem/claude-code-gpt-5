@@ -126,7 +126,12 @@ For production deployment or easier setup, you can use Docker.
 
 > **NOTE:** Make sure to set up your `.env` file as described earlier in the README (or supply the environment variables individually in the command line via `-e`, instead of `--env-file .env`).
 
-Pull and run from GitHub Container Registry
+Pull and run from GitHub Container Registry the deployment script:
+```bash
+./deploy-docker.sh
+```
+
+Alternatively, you can use the direct Docker run command:
 ```bash
 docker run -d \
   --name claude-code-gpt-5 \
