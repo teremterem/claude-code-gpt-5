@@ -22,6 +22,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 2. **Edit `.env` and add your OpenAI API key:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
+   LITELLM_MASTER_KEY=your-shared-secret
 
    # More settings (see .env.template for details)
    ...
@@ -49,6 +50,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 1. **Export your OpenAI API key as an env var**, as well as any other vars from `.env.template` if you would like to modify the defaults (our default Compose setup DOES NOT load env vars from `.env`):
    ```bash
    export OPENAI_API_KEY=your-openai-api-key-here
+   export LITELLM_MASTER_KEY=your-shared-secret
    ```
 
 2. **Start the service:**
@@ -72,6 +74,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 2. **Edit `.env` and add your OpenAI API key:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
+   LITELLM_MASTER_KEY=your-shared-secret
 
    # More settings (see .env.template for details)
    ...
@@ -109,6 +112,11 @@ Once the proxy is running, use it with Claude Code:
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
+
+## 🔑 LiteLLM Master Key
+
+- `LITELLM_MASTER_KEY` enables a lightweight auth check. When set on the container, the proxy rejects traffic that does not send the same value in the `x-litellm-master-key` header. Use a strong, secret value before exposing the service outside of a local machine.
+- The same value can be forwarded automatically from the Claude Code CLI by launching it as `ANTHROPIC_API_KEY=$LITELLM_MASTER_KEY claude`. Make sure to log out of Claude Code first so the CLI picks up the new `ANTHROPIC_API_KEY` value instead of its cached credentials.
 
 ## 📊 Monitoring
 
