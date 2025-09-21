@@ -162,7 +162,7 @@ If you need to build the image yourself.
 
 Build and run, but overlay with the dev version of Compose setup:
 ```bash
-docker-compose -f docker-compose.dev.yml up -d --build
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
 This will also map the current directory to the container.

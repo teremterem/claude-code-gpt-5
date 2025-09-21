@@ -967,7 +967,7 @@ langfuse = [
 requires-dist = [
     { name = "black", marker = "extra == 'dev'" },
     { name = "langfuse", marker = "extra == 'langfuse'", specifier = ">=2.0.0,<3.0.0" },
-    { name = "litellm", extras = ["proxy"] },
+    { name = "litellm", extras = ["proxy"], specifier = "!=1.77.3" },
     { name = "pre-commit", marker = "extra == 'dev'" },
     { name = "pylint", marker = "extra == 'dev'" },
 ]

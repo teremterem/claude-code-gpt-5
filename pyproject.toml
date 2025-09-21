@@ -9,7 +9,7 @@ readme = "README.md"
 
 requires-python = ">=3.8.1,<4.0.0"
 dependencies = [
-    "litellm[proxy]",
+    "litellm[proxy]!=1.77.3",  # https://github.com/BerriAI/litellm/issues/14762
 ]
 
 [project.optional-dependencies]
