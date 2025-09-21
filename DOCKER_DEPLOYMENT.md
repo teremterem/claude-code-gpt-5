@@ -110,6 +110,8 @@ Once the proxy is running, use it with Claude Code:
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
+> Tip: If Claude Code is currently logged-in to Anthropic, you may need to log out in the CLI so it stops using Anthropic's cloud. You can then run with `ANTHROPIC_BASE_URL` pointing to your local proxy. You can also set `ANTHROPIC_API_KEY` inline before the command to ensure the CLI always includes an API key (some flows require it), e.g. `ANTHROPIC_API_KEY=dummy ANTHROPIC_BASE_URL=http://localhost:4000 claude`.
+
 ## 📊 Monitoring
 
 ### Check container status:
@@ -203,6 +205,45 @@ This will also map the current directory to the container.
 - Use environment variables or Docker secrets for sensitive data
 - Consider running the container in a restricted network environment
 - Regularly update the image to get security patches
+
+### Optional proxy authentication (master key)
+
+If you set the `LITELLM_MASTER_KEY` environment variable, the proxy will require clients to authenticate on every request.
+
+- Server-side: set `LITELLM_MASTER_KEY` (e.g., in `.env` or your environment)
+- Client-side: send either header with the same value
+  - `Authorization: Bearer <LITELLM_MASTER_KEY>`
+  - `X-API-KEY: <LITELLM_MASTER_KEY>`
+
+Example with Docker Compose (env already passed through by default compose file):
+
+```bash
+export LITELLM_MASTER_KEY=super-secret
+docker-compose up -d
+```
+
+Example direct Docker run:
+
+```bash
+docker run -d \
+  --name claude-code-gpt-5 \
+  -p 4000:4000 \
+  -e LITELLM_MASTER_KEY=super-secret \
+  --env-file .env \
+  --restart unless-stopped \
+  ghcr.io/teremterem/claude-code-gpt-5:latest
+```
+
+When using Claude Code CLI, add the header via environment variable pass-through:
+
+```bash
+ANTHROPIC_BASE_URL=http://localhost:4000 \
+ANTHROPIC_API_KEY=dummy \
+LITELLM_MASTER_KEY=super-secret \
+claude
+```
+
+Claude Code reads `ANTHROPIC_API_KEY` for authentication even when talking to a self-hosted proxy. Any non-empty value works if your proxy enforces `LITELLM_MASTER_KEY`; the real access control is performed by the proxy using the header derived from these variables.
 
 ## 📝 Architecture
 
