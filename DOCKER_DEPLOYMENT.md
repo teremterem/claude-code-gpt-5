@@ -110,6 +110,28 @@ Once the proxy is running, use it with Claude Code:
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
+## 🔐 Authentication with LITELLM_MASTER_KEY
+
+- Optional master key for your self-hosted LiteLLM proxy
+- When set, the proxy requires clients to send: Authorization: Bearer <LITELLM_MASTER_KEY>
+- Set in .env:
+  ```dotenv
+  LITELLM_MASTER_KEY=your-strong-random-string
+  ```
+- Pass through in Docker Compose (already included in docker-compose.yml):
+  ```yaml
+  services:
+    claude-code-gpt-5:
+      environment:
+        LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
+  ```
+- Dev compose overlay loads .env via env_file; ensure the key is present there when using the dev setup.
+- To run a single CLI command against Anthropic directly, you can prefix the command with your key:
+  ```bash
+  ANTHROPIC_API_KEY=... claude <args>
+  ```
+  If you are logged into Claude Code, run `claude logout` first so the prefixed key is used.
+
 ## 📊 Monitoring
 
 ### Check container status:
