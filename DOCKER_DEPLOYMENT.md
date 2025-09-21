@@ -204,6 +204,38 @@ This will also map the current directory to the container.
 - Consider running the container in a restricted network environment
 - Regularly update the image to get security patches
 
+### Enabling proxy authentication (recommended for shared/remote)
+
+- Set LITELLM_MASTER_KEY in the container so the proxy requires Authorization: Bearer <key> on every request.
+  - With Docker Compose:
+    ```bash
+    export LITELLM_MASTER_KEY=your-strong-random-key
+    docker-compose up -d
+    ```
+  - With direct docker run:
+    ```bash
+    docker run -d \
+      --name claude-code-gpt-5 \
+      -p 4000:4000 \
+      --env-file .env \
+      -e LITELLM_MASTER_KEY=$LITELLM_MASTER_KEY \
+      --restart unless-stopped \
+      ghcr.io/teremterem/claude-code-gpt-5:latest
+    ```
+
+- Clients must present this key via the Authorization header. When using Claude Code CLI, set ANTHROPIC_BASE_URL to the proxy and use ANTHROPIC_API_KEY to carry the same master key:
+  ```bash
+  ANTHROPIC_BASE_URL=http://localhost:4000 \
+  ANTHROPIC_API_KEY=$LITELLM_MASTER_KEY \
+  claude
+  ```
+
+- To bypass the proxy and talk to Anthropic directly from the CLI for troubleshooting, you can prefix the command with your real Anthropic key:
+  ```bash
+  ANTHROPIC_API_KEY=sk-ant-... claude
+  ```
+  Note: log out of Claude Code first if you are already logged in for this to take effect.
+
 ## 📝 Architecture
 
 ```
