@@ -96,6 +96,13 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
+   If you set `LITELLM_MASTER_KEY` to protect the proxy, pass it to Claude Code via `ANTHROPIC_API_KEY` when launching. If already logged in, run `claude logout` first so the CLI uses your env var:
+   ```bash
+   ANTHROPIC_BASE_URL=http://localhost:4000 \
+   ANTHROPIC_API_KEY="$LITELLM_MASTER_KEY" \
+   claude
+   ```
+
    Optionally, you can override the default model on the CLI side with:
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude --model gpt-5-reason-medium

@@ -110,6 +110,15 @@ Once the proxy is running, use it with Claude Code:
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
+   If you set `LITELLM_MASTER_KEY` to protect the proxy, pass the same value to
+   Claude Code via `ANTHROPIC_API_KEY` when launching. If you previously logged in,
+   run `claude logout` first so the CLI uses your env var instead of a cached key:
+   ```bash
+   ANTHROPIC_BASE_URL=http://localhost:4000 \
+   ANTHROPIC_API_KEY="$LITELLM_MASTER_KEY" \
+   claude
+   ```
+
 ## 📊 Monitoring
 
 ### Check container status:
@@ -203,6 +212,7 @@ This will also map the current directory to the container.
 - Use environment variables or Docker secrets for sensitive data
 - Consider running the container in a restricted network environment
 - Regularly update the image to get security patches
+- To require authentication to the proxy, set `LITELLM_MASTER_KEY` (e.g. in `.env` or exported) and pass the same value from Claude Code via `ANTHROPIC_API_KEY` when launching. If you’ve previously logged in, run `claude logout` so the CLI uses the env var.
 
 ## 📝 Architecture
 
