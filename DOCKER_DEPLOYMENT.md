@@ -110,6 +110,12 @@ Once the proxy is running, use it with Claude Code:
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
+   **Alternative:** You can also use your Anthropic API key directly:
+   ```bash
+   ANTHROPIC_API_KEY=your-anthropic-key claude
+   ```
+   > **Note:** If already logged into Claude Code, logout first: `claude logout`
+
 ## 📊 Monitoring
 
 ### Check container status:
@@ -203,6 +209,38 @@ This will also map the current directory to the container.
 - Use environment variables or Docker secrets for sensitive data
 - Consider running the container in a restricted network environment
 - Regularly update the image to get security patches
+
+### LiteLLM Master Key Configuration
+
+The `LITELLM_MASTER_KEY` is an optional but recommended security feature for production deployments:
+
+**Purpose:**
+- Serves as the Proxy Admin authentication key
+- Secures the LiteLLM proxy server admin interface
+- Required for generating and managing API keys via `/key/generate` endpoint
+- Enables administrative operations authentication
+
+**Configuration:**
+1. Add to your `.env` file:
+   ```dotenv
+   LITELLM_MASTER_KEY=sk-your-secure-master-key-here
+   ```
+   > **Note:** The key must start with `sk-`
+
+2. The key will be automatically passed through Docker Compose via the environment variables
+
+**Security Best Practices:**
+- Use a strong, randomly generated key for production
+- Store the key securely (consider using Docker secrets for production)
+- Never expose the master key in logs or commit it to version control
+- For local development, this key is optional
+
+**Alternative Authentication:**
+You can also authenticate directly with Claude Code CLI using the `ANTHROPIC_API_KEY` environment variable:
+```bash
+ANTHROPIC_API_KEY=your-anthropic-key claude
+```
+> **Note:** You'll need to logout of Claude Code first if already logged in: `claude logout`
 
 ## 📝 Architecture
 

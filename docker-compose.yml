@@ -1,3 +1,7 @@
+# Docker Compose configuration for Claude Code GPT-5 Proxy
+#
+# Usage: docker-compose up -d
+# Alternative authentication: ANTHROPIC_API_KEY=your-key claude (logout first if already logged in)
 services:
   claude-code-gpt-5:
     image: ghcr.io/teremterem/claude-code-gpt-5:latest
@@ -11,6 +15,7 @@ services:
       REMAP_CLAUDE_HAIKU_TO: ${REMAP_CLAUDE_HAIKU_TO}
       REMAP_CLAUDE_SONNET_TO: ${REMAP_CLAUDE_SONNET_TO}
       REMAP_CLAUDE_OPUS_TO: ${REMAP_CLAUDE_OPUS_TO}
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL}
       ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL}
       ENFORCE_ONE_TOOL_CALL_PER_RESPONSE: ${ENFORCE_ONE_TOOL_CALL_PER_RESPONSE}
