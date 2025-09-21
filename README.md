@@ -52,7 +52,12 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    uv run litellm --config config.yaml
    ```
 
-   Or via `Docker`:
+   Or via `Docker` (will run in the foreground):
+   ```bash
+   ./run-docker.sh
+   ```
+
+   To deploy to the background instead, use:
    ```bash
    ./deploy-docker.sh
    ```

@@ -28,11 +28,18 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    ```
 
 3. **Run the deployment script:**
+
+   Run in the foreground:
+   ```bash
+   ./run-docker.sh
+   ```
+
+   Alternatively, to run in the background:
    ```bash
    ./deploy-docker.sh
    ```
 
-4. **Check the logs:**
+4. **Check the logs** (if you ran in the background):
    ```bash
    docker logs -f claude-code-gpt-5
    ```
@@ -48,6 +55,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    ```bash
    docker-compose up -d
    ```
+   > **NOTE:** To run in the foreground, remove the `-d` flag.
 
 3. **Check the logs:**
    ```bash
@@ -80,6 +88,8 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    ```
 
    > **NOTE:** You can also supply the environment variables individually via the `-e` parameter, instead of `--env-file .env`
+
+   > **NOTE:** To run in the foreground, remove the `-d` flag.
 
 4. **Check the logs:**
    ```bash
@@ -157,6 +167,7 @@ If you need to build the image yourself.
      --restart unless-stopped \
      claude-code-gpt-5
    ```
+   > **NOTE:** To run in the foreground, remove the `-d` flag.
 
 ### Docker Compose build
 
@@ -168,6 +179,8 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 This will also map the current directory to the container.
 
 > **NOTE:** The dev version of the Compose setup DOES use the `.env` file, so you will need to set up your environment variables in `.env`
+
+> **NOTE:** To run in the foreground, remove the `-d` flag.
 
 ## 🔧 Troubleshooting
 
