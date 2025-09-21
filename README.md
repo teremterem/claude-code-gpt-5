@@ -47,29 +47,29 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 3. **Run the proxy EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
-   **OPTION 1:** use a script:
+   **OPTION 1:** Use a script:
    ```bash
    ./uv-run.sh
    ```
 
-   **OPTION 2:** run via direct command:
+   **OPTION 2:** Run via direct command:
    ```bash
    uv run litellm --config config.yaml
    ```
 
    **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
 
-   **OPTION 3:** run in the foreground:
+   **OPTION 3:** Run in the foreground:
    ```bash
    ./run-docker.sh
    ```
 
-   **OPTION 4:** run in the background:
+   **OPTION 4:** Run in the background:
    ```bash
    ./deploy-docker.sh
    ```
 
-   **OPTION 5:** run via direct command:
+   **OPTION 5:** Run via direct command:
    ```bash
    docker run -d \
       --name claude-code-gpt-5 \
@@ -78,9 +78,9 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       --restart unless-stopped \
       ghcr.io/teremterem/claude-code-gpt-5:latest
    ```
-   > **NOTE:** To run via direct command in the foreground, remove the `-d` flag.
+   > **NOTE:** To run via direct command in the foreground instead of the background, remove the `-d` flag.
 
-> **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore the files of your local repo. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+   > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 
