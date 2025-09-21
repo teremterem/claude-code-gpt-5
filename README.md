@@ -10,7 +10,7 @@ This repository lets you use **Anthropic's Claude Code CLI** with **OpenAI's GPT
 - [Anthropic API key 🔑](https://console.anthropic.com/settings/keys) - optional (if you decide not to remap to OpenAI in certain scenarios)
 - Either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [Docker Desktop](https://docs.docker.com/desktop/), depending on your preferred setup method
 
-**First time using GPT-5 via API?**
+### First time using GPT-5 via API?
 
 If you are going to use GPT-5 via API for the first time, **OpenAI may require you to verify your identity via Persona.** You may encounter an OpenAI error asking you to “verify your organization.” To resolve this, you can go through the verification process here:
 - [OpenAI developer platform - Organization settings](https://platform.openai.com/settings/organization/general)
