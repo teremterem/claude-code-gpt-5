@@ -45,24 +45,42 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ...
    ```
 
-3. **Run the server:**
+3. **Run the proxy EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
-   Either via `uv`:
+   **OPTION 1:** use a script:
+   ```bash
+   ./uv-run.sh
+   ```
+
+   **OPTION 2:** run via direct command:
    ```bash
    uv run litellm --config config.yaml
    ```
 
-   Or via `Docker` (will run in the foreground):
+   **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
+
+   **OPTION 3:** run in the foreground:
    ```bash
    ./run-docker.sh
    ```
 
-   To deploy to the background instead, use:
+   **OPTION 4:** run in the background:
    ```bash
    ./deploy-docker.sh
    ```
 
-   > **NOTE:** For more detailed `Docker` deployment instructions and more deployment options (like using `Docker Compose`, building the image yourself, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+   **OPTION 5:** run via direct command:
+   ```bash
+   docker run -d \
+      --name claude-code-gpt-5 \
+      -p 4000:4000 \
+      --env-file .env \
+      --restart unless-stopped \
+      ghcr.io/teremterem/claude-code-gpt-5:latest
+   ```
+   > **NOTE:** To run via direct command in the foreground, remove the `-d` flag.
+
+> **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore the files of your local repo. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 
