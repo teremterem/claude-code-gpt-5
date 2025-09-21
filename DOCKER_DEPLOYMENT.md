@@ -19,9 +19,12 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    cp .env.template .env
    ```
 
-2. **Edit `.env` and add your OpenAI API key:**
+2. **Edit `.env` and add your API keys:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
+
+   # Optional: LiteLLM Master Key for proxy authentication
+   LITELLM_MASTER_KEY=your-litellm-master-key-here
 
    # More settings (see .env.template for details)
    ...
@@ -46,9 +49,11 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ### Method 2: Using Docker Compose
 
-1. **Export your OpenAI API key as an env var**, as well as any other vars from `.env.template` if you would like to modify the defaults (our default Compose setup DOES NOT load env vars from `.env`):
+1. **Export your API keys as env vars**, as well as any other vars from `.env.template` if you would like to modify the defaults (our default Compose setup DOES NOT load env vars from `.env`):
    ```bash
    export OPENAI_API_KEY=your-openai-api-key-here
+   # Optional: LiteLLM Master Key for proxy authentication
+   export LITELLM_MASTER_KEY=your-litellm-master-key-here
    ```
 
 2. **Start the service:**
@@ -69,9 +74,12 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    cp .env.template .env
    ```
 
-2. **Edit `.env` and add your OpenAI API key:**
+2. **Edit `.env` and add your API keys:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
+
+   # Optional: LiteLLM Master Key for proxy authentication
+   LITELLM_MASTER_KEY=your-litellm-master-key-here
 
    # More settings (see .env.template for details)
    ...
@@ -109,6 +117,12 @@ Once the proxy is running, use it with Claude Code:
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
+
+   **Alternative:** You can also prepend `ANTHROPIC_API_KEY=` before the `claude` CLI command:
+   ```bash
+   ANTHROPIC_API_KEY=your-anthropic-key ANTHROPIC_BASE_URL=http://localhost:4000 claude
+   ```
+   > **Note:** If you're already logged into Claude Code, you'll need to logout first when using this approach.
 
 ## 📊 Monitoring
 
