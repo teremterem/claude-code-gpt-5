@@ -35,6 +35,9 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    # Optional: only needed if you plan to use Anthropic models
    # ANTHROPIC_API_KEY=your-anthropic-api-key-here
 
+   # Optional (see .env.template for details):
+   # LITELLM_MASTER_KEY=your-master-key-here
+
    # Recommended: remap Claude models to GPT‑5 variants to ensure all
    # built-in agents in Claude Code also use GPT‑5
    REMAP_CLAUDE_HAIKU_TO=gpt-5-nano-reason-minimal
