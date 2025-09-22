@@ -47,7 +47,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 3. **Run the proxy:**
 
-   a) **EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
+   1) **EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
       **OPTION 1:** Use a script for `uv`:
       ```bash
@@ -59,7 +59,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       uv run litellm --config config.yaml
       ```
 
-   b) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
+   2) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
 
       **OPTION 3:** Run `Docker` in the foreground:
       ```bash
