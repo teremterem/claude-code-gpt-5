@@ -103,6 +103,15 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
    > **NOTE:** The former is more desirable than the latter - relying solely on the remap env vars and not explicitly setting the model in the CLI eliminates confusion when it comes to CLI's built-in agents, which are hardwired to always use a specific Claude model and will ignore the CLI's global model choice anyway.
 
+
+   If you set `LITELLM_MASTER_KEY` for the proxy (see `.env.template` for details), pass it as the Anthropic API key for the CLI:
+   ```bash
+   ANTHROPIC_API_KEY="<LITELLM_MASTER_KEY>" \
+   ANTHROPIC_BASE_URL=http://localhost:4000 \
+   claude
+   ```
+   > **NOTE:** In this case, if you've previously authenticated, run `claude /logout` first.
+
 4. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant(s)** with your chosen reasoning effort level(s). 🎯
 
 ### Available GPT-5 model aliases
