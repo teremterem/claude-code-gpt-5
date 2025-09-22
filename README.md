@@ -47,29 +47,29 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 3. **Run the proxy EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
-   **OPTION 1:** Use a script:
+   **OPTION 1:** Use a script for `uv`:
    ```bash
    ./uv-run.sh
    ```
 
-   **OPTION 2:** Run via direct command:
+   **OPTION 2:** Run via a direct `uv` command:
    ```bash
    uv run litellm --config config.yaml
    ```
 
    **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
 
-   **OPTION 3:** Run in the foreground:
+   **OPTION 3:** Run `Docker` in the foreground:
    ```bash
    ./run-docker.sh
    ```
 
-   **OPTION 4:** Run in the background:
+   **OPTION 4:** Run `Docker` in the background:
    ```bash
    ./deploy-docker.sh
    ```
 
-   **OPTION 5:** Run via direct command:
+   **OPTION 5:** Run `Docker` via a direct command:
    ```bash
    docker run -d \
       --name claude-code-gpt-5 \
@@ -78,7 +78,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       --restart unless-stopped \
       ghcr.io/teremterem/claude-code-gpt-5:latest
    ```
-   > **NOTE:** To run via direct command in the foreground instead of the background, remove the `-d` flag.
+   > **NOTE:** To run `Docker` via a direct command in the foreground instead of the background, remove the `-d` flag.
 
    > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
@@ -91,7 +91,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 2. **Connect to GPT-5 instead of Claude:**
 
-   Recommended:
+   **Recommended:**
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
