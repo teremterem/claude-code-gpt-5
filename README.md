@@ -93,7 +93,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 2. **Connect to GPT-5 instead of Claude:**
 
-   **Recommended:**
+   Recommended:
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
