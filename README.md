@@ -17,13 +17,13 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 ### Setup 🛠️
 
-1. **Clone this repository**:
+1. **Clone this repository:**
    ```bash
    git clone https://github.com/teremterem/claude-code-gpt-5.git
    cd claude-code-gpt-5
    ```
 
-2. **Configure Environment Variables**:
+2. **Configure Environment Variables:**
 
    Copy the template file to create your `.env`:
    ```bash
@@ -45,42 +45,44 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ...
    ```
 
-3. **Run the proxy EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
+3. **Run the proxy:**
 
-   **OPTION 1:** Use a script for `uv`:
-   ```bash
-   ./uv-run.sh
-   ```
+   a) **EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
-   **OPTION 2:** Run via a direct `uv` command:
-   ```bash
-   uv run litellm --config config.yaml
-   ```
+      **OPTION 1:** Use a script for `uv`:
+      ```bash
+      ./uv-run.sh
+      ```
 
-   **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
+      **OPTION 2:** Run via a direct `uv` command:
+      ```bash
+      uv run litellm --config config.yaml
+      ```
 
-   **OPTION 3:** Run `Docker` in the foreground:
-   ```bash
-   ./run-docker.sh
-   ```
+   b) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
 
-   **OPTION 4:** Run `Docker` in the background:
-   ```bash
-   ./deploy-docker.sh
-   ```
+      **OPTION 3:** Run `Docker` in the foreground:
+      ```bash
+      ./run-docker.sh
+      ```
 
-   **OPTION 5:** Run `Docker` via a direct command:
-   ```bash
-   docker run -d \
-      --name claude-code-gpt-5 \
-      -p 4000:4000 \
-      --env-file .env \
-      --restart unless-stopped \
-      ghcr.io/teremterem/claude-code-gpt-5:latest
-   ```
-   > **NOTE:** To run `Docker` via this command in the foreground instead of the background, remove the `-d` flag.
+      **OPTION 4:** Run `Docker` in the background:
+      ```bash
+      ./deploy-docker.sh
+      ```
 
-   > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+      **OPTION 5:** Run `Docker` via a direct command:
+      ```bash
+      docker run -d \
+         --name claude-code-gpt-5 \
+         -p 4000:4000 \
+         --env-file .env \
+         --restart unless-stopped \
+         ghcr.io/teremterem/claude-code-gpt-5:latest
+      ```
+      > **NOTE:** To run `Docker` via this command in the foreground instead of the background, remove the `-d` flag.
+
+      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 
