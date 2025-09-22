@@ -35,7 +35,7 @@ EXPOSE 4000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:4000/health || exit 1
+    CMD curl -f -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" http://localhost:4000/health || exit 1
 
 # Default command to run the LiteLLM proxy
 CMD ["uv", "run", "litellm", "--config", "config.yaml", "--port", "4000", "--host", "0.0.0.0"]
