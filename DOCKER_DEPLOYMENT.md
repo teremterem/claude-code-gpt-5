@@ -80,11 +80,11 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 3. **Run the container:**
    ```bash
    docker run -d \
-   --name claude-code-gpt-5 \
-   -p 4000:4000 \
-   --env-file .env \
-   --restart unless-stopped \
-   ghcr.io/teremterem/claude-code-gpt-5:latest
+     --name claude-code-gpt-5 \
+     -p 4000:4000 \
+     --env-file .env \
+     --restart unless-stopped \
+     ghcr.io/teremterem/claude-code-gpt-5:latest
    ```
 
    > **NOTE:** You can also supply the environment variables individually via the `-e` parameter, instead of `--env-file .env`
