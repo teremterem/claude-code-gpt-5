@@ -19,11 +19,12 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    cp .env.template .env
    ```
 
-2. **Edit `.env` and add your OpenAI API key and master key:**
+2. **Edit `.env` and add your OpenAI API key:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
-   # A strong random key the proxy will require from clients
-   LITELLM_MASTER_KEY=your-master-key-here
+
+   # Optional (see .env.template for details):
+   # LITELLM_MASTER_KEY=your-master-key-here
 
    # More settings (see .env.template for details)
    ...
@@ -48,10 +49,12 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ### Method 2: Using Docker Compose
 
-1. **Export your OpenAI API key and master key as env vars**, as well as any other vars from `.env.template` if you would like to modify the defaults (our default Compose setup DOES NOT load env vars from `.env`):
+1. **Export your OpenAI API key as an env var**, as well as any other vars from `.env.template` if you would like to modify the defaults (our default Compose setup DOES NOT load env vars from `.env`):
    ```bash
    export OPENAI_API_KEY=your-openai-api-key-here
-   export LITELLM_MASTER_KEY=your-master-key-here
+
+   # Optional (see .env.template for details):
+   # export LITELLM_MASTER_KEY=your-master-key-here
    ```
 
 2. **Start the service:**
@@ -72,10 +75,12 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    cp .env.template .env
    ```
 
-2. **Edit `.env` and add your OpenAI API key and master key:**
+2. **Edit `.env` and add your OpenAI API key:**
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
-   LITELLM_MASTER_KEY=your-master-key-here
+
+   # Optional (see .env.template for details):
+   # LITELLM_MASTER_KEY=your-master-key-here
 
    # More settings (see .env.template for details)
    ...
@@ -111,10 +116,16 @@ Once the proxy is running, use it with Claude Code:
 
 2. **Use with GPT-5 via the proxy:**
    ```bash
-   # If you set a master key, pass it as the Anthropic API key for the CLI.
-   # If you've previously authenticated, run `claude logout` first.
-   ANTHROPIC_API_KEY="$LITELLM_MASTER_KEY" ANTHROPIC_BASE_URL=http://localhost:4000 claude
+   ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
+
+   **If you set a master key, pass it as the Anthropic API key for the CLI:**
+   ```bash
+   ANTHROPIC_API_KEY="<LITELLM_MASTER_KEY>" \
+   ANTHROPIC_BASE_URL=http://localhost:4000 \
+   claude
+   ```
+   > **NOTE:** In the latter case, if you've previously authenticated, run `claude /logout` first.
 
 ## 📊 Monitoring
 
