@@ -162,3 +162,5 @@ This is planned to be fixed soon.
 > **NOTE:** The `Fetch` tool (getting web content from specific URLs) is not affected and works normally.
 
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
+
+## And if you like the project, please give it a Star 💫
