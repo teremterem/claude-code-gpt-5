@@ -151,6 +151,8 @@ docker stop claude-code-gpt-5
 docker rm claude-code-gpt-5
 ```
 
+> **NOTE:** `./stop-docker.sh` can be used to both stop and remove the container in one go.
+
 ### Using Docker Compose:
 ```bash
 docker-compose down
