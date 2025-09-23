@@ -96,9 +96,9 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
      ghcr.io/teremterem/claude-code-gpt-5:latest
    ```
 
-   > **NOTE:** You can also supply the environment variables individually via the `-e` parameter, instead of `--env-file .env`
-
    > **NOTE:** To run in the foreground, remove the `-d` flag.
+
+   > **NOTE:** You can also supply the environment variables individually via the `-e` parameter, instead of `--env-file .env`
 
 4. **Check the logs:**
    ```bash
@@ -197,9 +197,9 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 
 This will also map the current directory to the container.
 
-> **NOTE:** The dev version of the Compose setup DOES use the `.env` file, so you will need to set up your environment variables in `.env`
-
 > **NOTE:** To run in the foreground, remove the `-d` flag.
+
+> **NOTE:** The dev version of the Compose setup DOES use the `.env` file, so you will need to set up your environment variables in `.env`
 
 ## 🔧 Troubleshooting
 
