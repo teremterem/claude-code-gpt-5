@@ -40,6 +40,48 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
         ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
         return
 
+    # Flatten any web search tools defined using nested function wrappers to a flat format
+    def _flatten_web_search_tools(tools_list):
+        if not isinstance(tools_list, list):
+            return tools_list
+        flattened_tools = []
+        for tool in tools_list:
+            try:
+                if (
+                    isinstance(tool, dict)
+                    and tool.get("type") == "function"
+                    and isinstance(tool.get("function"), dict)
+                ):
+                    fn_block = tool.get("function", {})
+                    fn_name = fn_block.get("name")
+                    params = fn_block.get("parameters")
+                    params_type = isinstance(params, dict) and params.get("type")
+                    if (
+                        fn_name == "web_search"
+                        and isinstance(params, dict)
+                        and isinstance(params_type, str)
+                        and params_type.startswith("web_search_")
+                    ):
+                        # Build flattened tool: { "type": params.type, "name": fn_name, ...params without type }
+                        flattened = {"type": params_type, "name": fn_name}
+                        for key, value in params.items():
+                            if key == "type":
+                                continue
+                            flattened[key] = value
+                        flattened_tools.append(flattened)
+                        continue
+                # Default: keep tool unchanged
+                flattened_tools.append(tool)
+            except Exception:
+                # On any unexpected structure, keep the original tool
+                flattened_tools.append(tool)
+        return flattened_tools
+
+    if "tools" in optional_params:
+        optional_params["tools"] = _flatten_web_search_tools(optional_params.get("tools") or [])
+    if "functions" in optional_params:
+        optional_params["functions"] = _flatten_web_search_tools(optional_params.get("functions") or [])
+
     if not ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
         return
 
