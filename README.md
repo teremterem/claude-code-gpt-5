@@ -85,8 +85,6 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       ```
       > **NOTE:** To run with this command in the foreground instead of the background, remove the `-d` flag.
 
-      ---
-
       To see the logs, run:
       ```bash
       docker logs -f claude-code-gpt-5
