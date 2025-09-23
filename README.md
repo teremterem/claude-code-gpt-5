@@ -85,7 +85,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       ```
       > **NOTE:** To run with this command in the foreground instead of the background, remove the `-d` flag.
 
-      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like watching logs, building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+      ---
 
       To see the logs, run:
       ```bash
@@ -96,6 +96,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       ```bash
       ./stop-docker.sh
       ```
+
+      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 
