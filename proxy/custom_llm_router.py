@@ -40,6 +40,41 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
         ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
         return
 
+    tools = optional_params.get("tools")
+    functions = optional_params.get("functions")
+    found_web = False
+    new_tools = []
+    if isinstance(tools, list):
+        for t in tools:
+            if isinstance(t, dict):
+                n = t.get("name")
+                if isinstance(n, str) and n.startswith("web_search"):
+                    found_web = True
+                    continue
+                if t.get("type") == "function":
+                    fn = t.get("function") or {}
+                    fn_name = fn.get("name")
+                    if isinstance(fn_name, str) and fn_name.startswith("web_search"):
+                        found_web = True
+                        continue
+            new_tools.append(t)
+    if isinstance(functions, list):
+        functions = [
+            f
+            for f in functions
+            if not (
+                isinstance(f, dict) and isinstance(f.get("name"), str) and f.get("name", "").startswith("web_search")
+            )
+        ]
+    if found_web:
+        new_tools.append({"type": "web_search"})
+        optional_params["tools"] = new_tools
+        if functions is not None:
+            optional_params["functions"] = functions
+        tc = optional_params.get("tool_choice")
+        if tc is not None:
+            optional_params["tool_choice"] = "auto"
+
     if not ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
         return
 
