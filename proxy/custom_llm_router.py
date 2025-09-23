@@ -90,6 +90,7 @@ class CustomLLMRouter(CustomLLM):
         try:
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
+            optional_params.pop("temperature", None)
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-completion"
@@ -100,9 +101,9 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = litellm.completion(
+            response = litellm.responses(
                 model=final_model,
-                messages=messages,
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
@@ -137,6 +138,7 @@ class CustomLLMRouter(CustomLLM):
         try:
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
+            optional_params.pop("temperature", None)
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-acompletion"
@@ -147,9 +149,9 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = await litellm.acompletion(
+            response = await litellm.aresponses(
                 model=final_model,
-                messages=messages,
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
@@ -185,6 +187,7 @@ class CustomLLMRouter(CustomLLM):
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
+            optional_params.pop("temperature", None)
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-streaming"
@@ -195,9 +198,9 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = litellm.completion(
+            response = litellm.responses(
                 model=final_model,
-                messages=messages,
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
@@ -235,6 +238,7 @@ class CustomLLMRouter(CustomLLM):
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
+            optional_params.pop("temperature", None)
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-astreaming"
@@ -245,9 +249,9 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = await litellm.acompletion(
+            response = await litellm.aresponses(
                 model=final_model,
-                messages=messages,
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
