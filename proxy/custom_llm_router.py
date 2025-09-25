@@ -91,6 +91,9 @@ class CustomLLMRouter(CustomLLM):
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
 
+            # For Langfuse
+            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-completion"
+
             _adapt_for_non_anthropic_models(
                 model=final_model,
                 messages=messages,
@@ -134,6 +137,9 @@ class CustomLLMRouter(CustomLLM):
         try:
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
+
+            # For Langfuse
+            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-acompletion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -179,6 +185,9 @@ class CustomLLMRouter(CustomLLM):
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
+
+            # For Langfuse
+            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-streaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -226,6 +235,9 @@ class CustomLLMRouter(CustomLLM):
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
+
+            # For Langfuse
+            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-astreaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,

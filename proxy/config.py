@@ -3,7 +3,11 @@ import os
 import litellm
 
 
-# We don't need to do `dotenv.load_dotenv()` - litellm does this for us upon import
+# We don't need to do `dotenv.load_dotenv()` - litellm does this for us upon
+# import.
+# TODO This would break if LITELLM_MODE env var is set to a value other than
+#  DEV (although, when it is not set, it is DEV by default). What would be the
+#  best way to adapt to the approach taken by litellm ?
 
 
 REMAP_CLAUDE_HAIKU_TO = os.getenv("REMAP_CLAUDE_HAIKU_TO")
@@ -40,7 +44,7 @@ ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPO
 ANTHROPIC = "anthropic"
 OPENAI = "openai"
 
-if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY"):
+if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY") or os.getenv("LANGFUSE_HOST"):
     try:
         import langfuse  # pylint: disable=unused-import
     except ImportError:

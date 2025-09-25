@@ -35,6 +35,9 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    # Optional: only needed if you plan to use Anthropic models
    # ANTHROPIC_API_KEY=your-anthropic-api-key-here
 
+   # Optional (see .env.template for details):
+   # LITELLM_MASTER_KEY=your-master-key-here
+
    # Recommended: remap Claude models to GPT‑5 variants to ensure all
    # built-in agents in Claude Code also use GPT‑5
    REMAP_CLAUDE_HAIKU_TO=gpt-5-nano-reason-minimal
@@ -82,7 +85,17 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       ```
       > **NOTE:** To run with this command in the foreground instead of the background, remove the `-d` flag.
 
-      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like watching logs, building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+      To see the logs, run:
+      ```bash
+      docker logs -f claude-code-gpt-5
+      ```
+
+      To stop and remove the container, run:
+      ```bash
+      ./stop-docker.sh
+      ```
+
+      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 
