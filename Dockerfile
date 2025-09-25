@@ -24,7 +24,10 @@ COPY pyproject.toml ./
 # so this layer is rebuilt less often during development)
 RUN uv sync --frozen
 
-# Set up the environment variable defaults
+# Set up the environment variable defaults.
+# NOTE: This works because python_dotenv does NOT override variables that
+# already exist in the environment; it only loads missing ones from the .env
+# file.
 COPY .env.template .env
 
 # Copy all the project files
