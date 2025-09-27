@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Deploy claude-code-gpt-5 Docker container
-# This script pulls and runs the Docker image from GHCR
+# This script pulls the Docker image from GHCR and runs it in the background
 
 set -e
 
