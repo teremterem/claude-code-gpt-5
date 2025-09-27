@@ -10,7 +10,7 @@ import json
 from litellm import GenericStreamingChunk, ModelResponse
 
 
-class ServerError(RuntimeError):
+class ProxyError(RuntimeError):
     def __init__(self, error: Union[BaseException, str], highlight: bool = True):
         if highlight:
             # Highlight error messages in red, so the actual problems are

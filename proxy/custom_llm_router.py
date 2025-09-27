@@ -4,9 +4,14 @@ import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, ProxyError
+from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
 from proxy.route_model import route_model
-from proxy.utils import to_generic_streaming_chunk
+from proxy.utils import (
+    ProxyError,
+    convert_chat_messages_to_responses_items,
+    convert_responses_to_model_response,
+    to_generic_streaming_chunk,
+)
 
 
 def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params: dict) -> None:
@@ -90,7 +95,8 @@ class CustomLLMRouter(CustomLLM):
         try:
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
-            optional_params.pop("temperature", None)
+            optional_params["stream"] = False
+            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-completion"
@@ -101,16 +107,16 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = litellm.responses(
+            response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=convert_chat_messages_to_responses_items(messages),
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                drop_params=True,  # Drop any params that are not supported by the provider
                 **optional_params,
             )
+            response = convert_responses_to_model_response(response)
             return response
 
         except Exception as e:
@@ -138,7 +144,8 @@ class CustomLLMRouter(CustomLLM):
         try:
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
-            optional_params.pop("temperature", None)
+            optional_params["stream"] = False
+            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-acompletion"
@@ -149,16 +156,16 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = await litellm.aresponses(
+            response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=convert_chat_messages_to_responses_items(messages),
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                drop_params=True,  # Drop any params that are not supported by the provider
                 **optional_params,
             )
+            response = convert_responses_to_model_response(response)
             return response
 
         except Exception as e:
@@ -187,7 +194,7 @@ class CustomLLMRouter(CustomLLM):
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
-            optional_params.pop("temperature", None)
+            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-streaming"
@@ -198,14 +205,13 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = litellm.responses(
+            response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=convert_chat_messages_to_responses_items(messages),
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                drop_params=True,  # Drop any params that are not supported by the provider
                 **optional_params,
             )
             for chunk in response:
@@ -238,7 +244,7 @@ class CustomLLMRouter(CustomLLM):
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
-            optional_params.pop("temperature", None)
+            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
             optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-astreaming"
@@ -249,14 +255,13 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            response = await litellm.aresponses(
+            response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=convert_chat_messages_to_responses_items(messages),
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                drop_params=True,  # Drop any params that are not supported by the provider
                 **optional_params,
             )
             async for chunk in response:
