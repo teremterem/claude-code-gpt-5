@@ -9,6 +9,7 @@ from proxy.route_model import route_model
 from proxy.utils import (
     ProxyError,
     convert_chat_messages_to_responses_items,
+    convert_chat_params_to_responses,
     convert_responses_to_model_response,
     to_generic_streaming_chunk,
 )
@@ -114,7 +115,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **convert_chat_params_to_responses(optional_params),
             )
             response = convert_responses_to_model_response(response)
             return response
@@ -163,7 +164,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **convert_chat_params_to_responses(optional_params),
             )
             response = convert_responses_to_model_response(response)
             return response
@@ -212,7 +213,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **convert_chat_params_to_responses(optional_params),
             )
             for chunk in response:
                 generic_chunk = to_generic_streaming_chunk(chunk)
@@ -262,7 +263,7 @@ class CustomLLMRouter(CustomLLM):
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **convert_chat_params_to_responses(optional_params),
             )
             async for chunk in response:
                 generic_chunk = to_generic_streaming_chunk(chunk)
