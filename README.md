@@ -62,7 +62,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       uv run litellm --config config.yaml
       ```
 
-   2) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) first):
+   2) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/ first):
 
       **OPTION 3:** Run `Docker` in the foreground:
       ```bash
