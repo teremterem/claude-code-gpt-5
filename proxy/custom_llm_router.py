@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
@@ -61,6 +63,9 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
     messages.append(tool_instruction)
 
 
+REQUEST_NUMBER = 0
+
+
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
@@ -88,11 +93,21 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
         try:
+            global REQUEST_NUMBER
+            REQUEST_NUMBER += 1
+            Path(f"req_{REQUEST_NUMBER:04d}_messages.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"req_{REQUEST_NUMBER:04d}_optional_params.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+            print(f"REQUEST_NUMBER: {REQUEST_NUMBER:04d}")
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-completion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-completion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -135,11 +150,23 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
         try:
+            global REQUEST_NUMBER
+            REQUEST_NUMBER += 1
+            Path(f"req_{REQUEST_NUMBER:04d}_messages.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"req_{REQUEST_NUMBER:04d}_optional_params.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+            print(f"REQUEST_NUMBER: {REQUEST_NUMBER:04d}")
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-acompletion"
+            optional_params.setdefault("metadata", {})[
+                "trace_name"
+            ] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-acompletion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -182,12 +209,22 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
+            global REQUEST_NUMBER
+            REQUEST_NUMBER += 1
+            Path(f"req_{REQUEST_NUMBER:04d}_messages.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"req_{REQUEST_NUMBER:04d}_optional_params.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+            print(f"REQUEST_NUMBER: {REQUEST_NUMBER:04d}")
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-streaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-streaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -232,12 +269,22 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
+            global REQUEST_NUMBER
+            REQUEST_NUMBER += 1
+            Path(f"req_{REQUEST_NUMBER:04d}_messages.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"req_{REQUEST_NUMBER:04d}_optional_params.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+            print(f"REQUEST_NUMBER: {REQUEST_NUMBER:04d}")
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-astreaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-astreaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
