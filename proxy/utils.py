@@ -4,9 +4,10 @@
 NOTE: The utilities in this module were mostly vibe-coded without review.
 """
 from copy import deepcopy
+import json
 from typing import Any, Optional, Union
 
-from litellm import GenericStreamingChunk
+from litellm import GenericStreamingChunk, ModelResponse
 
 
 class ProxyError(RuntimeError):
@@ -516,3 +517,166 @@ def _default_content_type_for_role(role: str) -> str:
     if role == "tool":
         return "tool_result"
     return "input_text"
+
+
+def convert_responses_to_model_response(responses_response: Any) -> ModelResponse:
+    """Best-effort convert a LiteLLM ResponsesAPIResponse into a ModelResponse."""
+
+    if responses_response is None:
+        raise ValueError("responses_response cannot be None")
+
+    def _get(obj: Any, key: str, default: Any = None) -> Any:
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return getattr(obj, key, default)
+
+    model_response: dict[str, Any] = {}
+
+    model_response["id"] = _get(responses_response, "id")
+    model_response["object"] = _get(responses_response, "object", "chat.completion")
+    model_response["created"] = _get(responses_response, "created") or _get(responses_response, "created_at")
+    model_response["model"] = _get(responses_response, "model")
+
+    metadata = _get(responses_response, "metadata")
+    if metadata is not None:
+        model_response["metadata"] = deepcopy(metadata)
+
+    usage = _get(responses_response, "usage")
+    if isinstance(usage, dict):
+        prompt_tokens = usage.get("prompt_tokens")
+        completion_tokens = usage.get("completion_tokens")
+        total_tokens = usage.get("total_tokens")
+        if prompt_tokens is not None and completion_tokens is not None:
+            total_tokens = prompt_tokens + completion_tokens
+        model_response["usage"] = {
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
+        }
+
+    text_segments: list[str] = []
+    tool_calls: list[dict[str, Any]] = []
+    function_call: Optional[dict[str, Any]] = None
+
+    output = _get(responses_response, "output")
+    if isinstance(output, list):
+        for item in output:
+            if not isinstance(item, dict):
+                continue
+            item_type = item.get("type") or item.get("event")
+            if item_type == "message":
+                content = item.get("content")
+                flattened = _flatten_responses_text(content)
+                if flattened:
+                    text_segments.append(flattened)
+            elif item_type == "tool_call":
+                maybe_tool = _convert_responses_tool_call(item)
+                if maybe_tool is not None:
+                    tool_calls.append(maybe_tool)
+            elif item_type == "function_call" and function_call is None:
+                maybe_fn = _convert_responses_tool_call(item)
+                if maybe_fn is not None:
+                    function_call = maybe_fn.get("function")
+
+    message_content = "".join(text_segments) if text_segments else ""
+
+    choice_message: dict[str, Any] = {
+        "role": "assistant",
+        "content": message_content,
+    }
+    if tool_calls:
+        choice_message["tool_calls"] = tool_calls
+    if function_call is not None:
+        choice_message["function_call"] = function_call
+
+    finish_reason: Optional[str] = None
+    status = _get(responses_response, "status")
+    if isinstance(status, str):
+        if status == "completed":
+            finish_reason = "stop"
+        elif status in {"canceled", "cancelled"}:
+            finish_reason = "cancelled"
+        elif status == "failed":
+            finish_reason = "error"
+
+    model_response["choices"] = [
+        {
+            "index": 0,
+            "finish_reason": finish_reason,
+            "message": choice_message,
+        }
+    ]
+
+    provider_fields: dict[str, Any] = {}
+    for key in ("response", "meta", "trace_id", "previous_response_id"):
+        value = _get(responses_response, key)
+        if value is not None:
+            provider_fields[key] = deepcopy(value)
+    if provider_fields:
+        model_response["provider_specific_fields"] = provider_fields
+
+    return ModelResponse(**model_response)
+
+
+def _flatten_responses_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+
+    if isinstance(content, list):
+        segments: list[str] = []
+        for part in content:
+            if isinstance(part, dict):
+                for key in ("text", "input_text", "output_text"):
+                    value = part.get(key)
+                    if isinstance(value, str):
+                        segments.append(value)
+                        break
+                else:
+                    nested = part.get("content")
+                    if nested is not None:
+                        flattened = _flatten_responses_text(nested)
+                        if flattened:
+                            segments.append(flattened)
+            elif isinstance(part, str):
+                segments.append(part)
+        return "".join(segments)
+
+    if isinstance(content, dict):
+        return _flatten_responses_text(content.get("content"))
+
+    return "" if content is None else str(content)
+
+
+def _convert_responses_tool_call(payload: dict[str, Any]) -> Optional[dict[str, Any]]:
+    name = payload.get("name") or payload.get("function_name")
+    if not isinstance(name, str) or not name:
+        return None
+
+    call_id = payload.get("id") or payload.get("call_id") or payload.get("tool_call_id")
+
+    raw_arguments = payload.get("arguments")
+    if raw_arguments is None:
+        raw_arguments = payload.get("input") or payload.get("input_arguments")
+
+    if isinstance(raw_arguments, str):
+        arguments: Optional[str] = raw_arguments
+    elif isinstance(raw_arguments, (list, dict)):
+        flattened = _flatten_responses_text(raw_arguments)
+        if flattened:
+            arguments = flattened
+        else:
+            try:
+                arguments = json.dumps(raw_arguments)
+            except Exception as exc:
+                raise ProxyError("Failed to JSON-encode Responses tool_call arguments") from exc
+    else:
+        arguments = str(raw_arguments) if raw_arguments is not None else None
+
+    return {
+        "id": call_id if isinstance(call_id, str) else None,
+        "type": "function",
+        "function": {
+            "name": name,
+            "arguments": arguments or "",
+        },
+    }
