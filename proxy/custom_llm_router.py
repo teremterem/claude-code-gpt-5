@@ -115,7 +115,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-completion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-completion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -192,7 +192,9 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-acompletion"
+            optional_params.setdefault("metadata", {})[
+                "trace_name"
+            ] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-acompletion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -268,7 +270,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-streaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-streaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -348,7 +350,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-astreaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-astreaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
