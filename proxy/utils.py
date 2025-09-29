@@ -183,6 +183,19 @@ def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
             if isinstance(idx, int):
                 index = idx
 
+        else:
+            responses_data = _try_parse_responses_chunk(chunk)
+            if responses_data is not None:
+                text = responses_data["text"]
+                finish_reason = responses_data["finish_reason"]
+                is_finished = responses_data["is_finished"]
+                index = responses_data["index"]
+                if responses_data["tool_use"] is not None:
+                    tool_use = responses_data["tool_use"]
+                new_provider_fields = responses_data["provider_specific_fields"]
+                if new_provider_fields is not None:
+                    provider_specific_fields = new_provider_fields
+
         # Fallbacks
         # TODO Are these fallbacks ok ? Should we raise errors instead ?
         if not isinstance(text, str):
@@ -517,6 +530,119 @@ def _default_content_type_for_role(role: str) -> str:
     if role == "tool":
         return "tool_result"
     return "input_text"
+
+
+def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
+    def _get(obj: Any, key: str, default: Any = None) -> Any:
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return getattr(obj, key, default)
+
+    chunk_type = _get(chunk, "type")
+    if not isinstance(chunk_type, str) or not chunk_type:
+        chunk_type = _get(chunk, "event")
+    if not isinstance(chunk_type, str) or not chunk_type:
+        return None
+    if not chunk_type.startswith("response."):
+        return None
+
+    finish_reason = _get(chunk, "finish_reason")
+    if not isinstance(finish_reason, str):
+        finish_reason = ""
+
+    index = _get(chunk, "output_index")
+    if not isinstance(index, int):
+        candidate_index = _get(chunk, "index")
+        index = candidate_index if isinstance(candidate_index, int) else 0
+
+    delta = _get(chunk, "delta")
+    text = ""
+    if isinstance(delta, str):
+        text = delta
+    elif isinstance(delta, dict):
+        delta_text = delta.get("text")
+        if isinstance(delta_text, str):
+            text = delta_text
+
+    if not text:
+        text_candidate = _get(chunk, "text")
+        if isinstance(text_candidate, str):
+            text = text_candidate
+
+    if not text:
+        content_candidate = _get(chunk, "content")
+        if isinstance(content_candidate, str):
+            text = content_candidate
+
+    if not text:
+        response_obj = _get(chunk, "response")
+        if isinstance(response_obj, dict):
+            output_text = response_obj.get("output_text")
+            if isinstance(output_text, list):
+                text = "".join([part for part in output_text if isinstance(part, str)])
+
+    tool_use = None
+    if "tool_call" in chunk_type or "function_call" in chunk_type:
+        payloads: list[dict[str, Any]] = []
+        if isinstance(delta, dict):
+            payloads.append(delta)
+        tool_payload = _get(chunk, "tool_call")
+        if isinstance(tool_payload, dict):
+            payloads.append(tool_payload)
+        fn_payload = _get(chunk, "function_call")
+        if isinstance(fn_payload, dict):
+            payloads.append(fn_payload)
+        for payload in payloads:
+            name = payload.get("name") or payload.get("function_name")
+            arguments = payload.get("arguments") or payload.get("input") or payload.get("input_json")
+            if arguments is not None and not isinstance(arguments, str):
+                try:
+                    arguments = str(arguments)
+                except Exception as exc:
+                    raise ProxyError("Failed to convert Responses tool_call arguments to string") from exc
+            call_id = payload.get("id") or payload.get("call_id") or payload.get("tool_call_id")
+            tool_use = {
+                "index": index,
+                "id": call_id if isinstance(call_id, str) else None,
+                "type": "function",
+                "function": {
+                    "name": name if isinstance(name, str) else None,
+                    "arguments": arguments if isinstance(arguments, str) else None,
+                },
+            }
+            break
+
+    terminal_suffixes = (".completed", ".failed", ".cancelled", ".canceled")
+    is_finished = any(chunk_type.endswith(suffix) for suffix in terminal_suffixes)
+    if chunk_type in {"response.completed", "response.error", "response.canceled", "response.cancelled"}:
+        is_finished = True
+
+    if chunk_type == "response.error" and not finish_reason:
+        finish_reason = "error"
+    elif is_finished and not finish_reason:
+        finish_reason = "stop"
+
+    provider_specific_fields: dict[str, Any] = {"responses_type": chunk_type}
+    for key in ("response_id", "output_index", "item_id", "id", "status"):
+        value = _get(chunk, key)
+        if value is not None:
+            provider_specific_fields[key] = deepcopy(value)
+    if isinstance(delta, dict):
+        provider_specific_fields["delta"] = deepcopy(delta)
+    if not provider_specific_fields:
+        provider_specific_fields = None
+
+    if not isinstance(text, str):
+        text = ""
+
+    return {
+        "text": text,
+        "finish_reason": finish_reason,
+        "is_finished": is_finished,
+        "index": index,
+        "tool_use": tool_use,
+        "provider_specific_fields": provider_specific_fields,
+    }
 
 
 def convert_responses_to_model_response(responses_response: Any) -> ModelResponse:
