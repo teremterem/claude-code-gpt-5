@@ -295,9 +295,19 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+
+            responses_chunks = []
+            generic_chunks = []
             for chunk in response:
+                responses_chunks.append(chunk)
                 generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunks.append(generic_chunk)
                 yield generic_chunk
+
+            with Path(f"traces/{REQUEST_NUMBER:04d}_resp.md").open("w", encoding="utf-8") as f:
+                for resp_chunk, gen_chunk in zip(responses_chunks, generic_chunks):
+                    f.write(f"Responses API Chunk:\n```json\n{resp_chunk}\n```\n")
+                    f.write(f"Generic Chunk:\n```json\n{gen_chunk}\n```\n\n")
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -365,9 +375,19 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
+
+            responses_chunks = []
+            generic_chunks = []
             async for chunk in response:
+                responses_chunks.append(chunk)
                 generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunks.append(generic_chunk)
                 yield generic_chunk
+
+            with Path(f"traces/{REQUEST_NUMBER:04d}_resp.md").open("w", encoding="utf-8") as f:
+                for resp_chunk, gen_chunk in zip(responses_chunks, generic_chunks):
+                    f.write(f"Responses API Chunk:\n```json\n{resp_chunk}\n```\n")
+                    f.write(f"Generic Chunk:\n```json\n{gen_chunk}\n```\n\n")
 
         except Exception as e:
             raise ProxyError(e) from e
