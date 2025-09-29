@@ -635,7 +635,7 @@ def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
     if not isinstance(text, str):
         text = ""
 
-    return {
+    return {  # TODO Wrap it into an actual GenericStreamingChunk object ?
         "text": text,
         "finish_reason": finish_reason,
         "is_finished": is_finished,

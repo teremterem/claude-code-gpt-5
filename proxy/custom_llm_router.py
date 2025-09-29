@@ -103,14 +103,6 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
-            os.makedirs("traces", exist_ok=True)
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
-                json.dumps(messages, indent=2), encoding="utf-8"
-            )
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
-                json.dumps(optional_params, indent=2), encoding="utf-8"
-            )
-
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = False
@@ -123,6 +115,14 @@ class CustomLLMRouter(CustomLLM):
                 model=final_model,
                 messages=messages,
                 optional_params=optional_params,
+            )
+
+            os.makedirs("traces", exist_ok=True)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
             )
 
             messages = convert_chat_messages_to_responses_items(messages)
@@ -146,12 +146,12 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             Path(f"traces/{REQUEST_NUMBER:04d}_resp_respapi.json").write_text(
-                json.dumps(response, indent=2), encoding="utf-8"
+                response.model_dump_json(indent=2), encoding="utf-8"
             )
 
             response = convert_responses_to_model_response(response)
             Path(f"traces/{REQUEST_NUMBER:04d}_resp_complapi.json").write_text(
-                json.dumps(response, indent=2), encoding="utf-8"
+                response.model_dump_json(indent=2), encoding="utf-8"
             )
             return response
 
@@ -181,14 +181,6 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
-            os.makedirs("traces", exist_ok=True)
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
-                json.dumps(messages, indent=2), encoding="utf-8"
-            )
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
-                json.dumps(optional_params, indent=2), encoding="utf-8"
-            )
-
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = False
@@ -203,6 +195,14 @@ class CustomLLMRouter(CustomLLM):
                 model=final_model,
                 messages=messages,
                 optional_params=optional_params,
+            )
+
+            os.makedirs("traces", exist_ok=True)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
             )
 
             messages = convert_chat_messages_to_responses_items(messages)
@@ -225,12 +225,12 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             Path(f"traces/{REQUEST_NUMBER:04d}_resp_respapi.json").write_text(
-                json.dumps(response, indent=2), encoding="utf-8"
+                response.model_dump_json(indent=2), encoding="utf-8"
             )
 
             response = convert_responses_to_model_response(response)
             Path(f"traces/{REQUEST_NUMBER:04d}_resp_complapi.json").write_text(
-                json.dumps(response, indent=2), encoding="utf-8"
+                response.model_dump_json(indent=2), encoding="utf-8"
             )
             return response
 
@@ -260,14 +260,6 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
-            os.makedirs("traces", exist_ok=True)
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
-                json.dumps(messages, indent=2), encoding="utf-8"
-            )
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
-                json.dumps(optional_params, indent=2), encoding="utf-8"
-            )
-
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
@@ -280,6 +272,14 @@ class CustomLLMRouter(CustomLLM):
                 model=final_model,
                 messages=messages,
                 optional_params=optional_params,
+            )
+
+            os.makedirs("traces", exist_ok=True)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
             )
 
             messages = convert_chat_messages_to_responses_items(messages)
@@ -312,8 +312,9 @@ class CustomLLMRouter(CustomLLM):
 
             with Path(f"traces/{REQUEST_NUMBER:04d}_resp.md").open("w", encoding="utf-8") as f:
                 for resp_chunk, gen_chunk in zip(responses_chunks, generic_chunks):
-                    f.write(f"Responses API Chunk:\n```json\n{resp_chunk}\n```\n")
-                    f.write(f"Generic Chunk:\n```json\n{gen_chunk}\n```\n\n")
+                    f.write(f"Responses API Chunk:\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n")
+                    # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not just a dict
+                    f.write(f"Generic Chunk:\n```json\n{json.dumps(gen_chunk, indent=2)}\n```\n\n")
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -341,14 +342,6 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
-            os.makedirs("traces", exist_ok=True)
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
-                json.dumps(messages, indent=2), encoding="utf-8"
-            )
-            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
-                json.dumps(optional_params, indent=2), encoding="utf-8"
-            )
-
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
@@ -361,6 +354,14 @@ class CustomLLMRouter(CustomLLM):
                 model=final_model,
                 messages=messages,
                 optional_params=optional_params,
+            )
+
+            os.makedirs("traces", exist_ok=True)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
             )
 
             messages = convert_chat_messages_to_responses_items(messages)
@@ -393,8 +394,9 @@ class CustomLLMRouter(CustomLLM):
 
             with Path(f"traces/{REQUEST_NUMBER:04d}_resp.md").open("w", encoding="utf-8") as f:
                 for resp_chunk, gen_chunk in zip(responses_chunks, generic_chunks):
-                    f.write(f"Responses API Chunk:\n```json\n{resp_chunk}\n```\n")
-                    f.write(f"Generic Chunk:\n```json\n{gen_chunk}\n```\n\n")
+                    f.write(f"Responses API Chunk:\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n")
+                    # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not just a dict
+                    f.write(f"Generic Chunk:\n```json\n{json.dumps(gen_chunk, indent=2)}\n```\n\n")
 
         except Exception as e:
             raise ProxyError(e) from e
