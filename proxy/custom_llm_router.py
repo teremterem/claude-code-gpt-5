@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
@@ -67,6 +69,9 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
     messages.append(tool_instruction)
 
 
+REQUEST_NUMBER = 0
+
+
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
@@ -94,6 +99,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
         try:
+            global REQUEST_NUMBER  # pylint: disable=global-statement
+            REQUEST_NUMBER += 1
+
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = False
@@ -108,16 +123,34 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages = convert_chat_messages_to_responses_items(messages)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_respapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+
+            optional_params = convert_chat_params_to_responses(optional_params)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_respapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+            print(f"REQUEST_NUMBER: {REQUEST_NUMBER:04d}")
+
             response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **optional_params,
             )
+            Path(f"traces/{REQUEST_NUMBER:04d}_resp_respapi.json").write_text(
+                json.dumps(response, indent=2), encoding="utf-8"
+            )
+
             response = convert_responses_to_model_response(response)
+            Path(f"traces/{REQUEST_NUMBER:04d}_resp_complapi.json").write_text(
+                json.dumps(response, indent=2), encoding="utf-8"
+            )
             return response
 
         except Exception as e:
@@ -143,6 +176,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
         try:
+            global REQUEST_NUMBER  # pylint: disable=global-statement
+            REQUEST_NUMBER += 1
+
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = False
@@ -157,16 +200,33 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages = convert_chat_messages_to_responses_items(messages)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_respapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+
+            optional_params = convert_chat_params_to_responses(optional_params)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_respapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+
             response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **optional_params,
             )
+            Path(f"traces/{REQUEST_NUMBER:04d}_resp_respapi.json").write_text(
+                json.dumps(response, indent=2), encoding="utf-8"
+            )
+
             response = convert_responses_to_model_response(response)
+            Path(f"traces/{REQUEST_NUMBER:04d}_resp_complapi.json").write_text(
+                json.dumps(response, indent=2), encoding="utf-8"
+            )
             return response
 
         except Exception as e:
@@ -192,6 +252,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
+            global REQUEST_NUMBER  # pylint: disable=global-statement
+            REQUEST_NUMBER += 1
+
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
@@ -206,14 +276,24 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages = convert_chat_messages_to_responses_items(messages)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_respapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+
+            optional_params = convert_chat_params_to_responses(optional_params)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_respapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+
             response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **optional_params,
             )
             for chunk in response:
                 generic_chunk = to_generic_streaming_chunk(chunk)
@@ -242,6 +322,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
+            global REQUEST_NUMBER  # pylint: disable=global-statement
+            REQUEST_NUMBER += 1
+
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_complapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
@@ -256,14 +346,24 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages = convert_chat_messages_to_responses_items(messages)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_respapi.json").write_text(
+                json.dumps(messages, indent=2), encoding="utf-8"
+            )
+
+            optional_params = convert_chat_params_to_responses(optional_params)
+            Path(f"traces/{REQUEST_NUMBER:04d}_req_params_respapi.json").write_text(
+                json.dumps(optional_params, indent=2), encoding="utf-8"
+            )
+
             response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **optional_params,
             )
             async for chunk in response:
                 generic_chunk = to_generic_streaming_chunk(chunk)
