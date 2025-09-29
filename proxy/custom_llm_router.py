@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
@@ -102,6 +103,7 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
+            os.makedirs("traces", exist_ok=True)
             Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
                 json.dumps(messages, indent=2), encoding="utf-8"
             )
@@ -179,6 +181,7 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
+            os.makedirs("traces", exist_ok=True)
             Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
                 json.dumps(messages, indent=2), encoding="utf-8"
             )
@@ -257,6 +260,7 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
+            os.makedirs("traces", exist_ok=True)
             Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
                 json.dumps(messages, indent=2), encoding="utf-8"
             )
@@ -337,6 +341,7 @@ class CustomLLMRouter(CustomLLM):
             global REQUEST_NUMBER  # pylint: disable=global-statement
             REQUEST_NUMBER += 1
 
+            os.makedirs("traces", exist_ok=True)
             Path(f"traces/{REQUEST_NUMBER:04d}_req_msgs_complapi.json").write_text(
                 json.dumps(messages, indent=2), encoding="utf-8"
             )
