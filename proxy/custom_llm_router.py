@@ -140,7 +140,7 @@ def _write_streaming_response_trace(
     generic_chunks: list,
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_resp.md").open("w", encoding="utf-8") as f:
+    with (TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Response Stream\n\n")
