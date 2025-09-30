@@ -82,58 +82,72 @@ def _generate_timestamp() -> str:
     return now.strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Remove last 3 digits to get milliseconds
 
 
-def _write_trace_files(
+def _write_request_trace(
+    *,
     timestamp: str,
+    calling_method: str,
     messages_complapi: list,
     params_complapi: dict,
     messages_respapi: list,
     params_respapi: dict,
 ) -> None:
-    """
-    Write request/response data to trace files.
-    """
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_req.md").open("w", encoding="utf-8") as f:
-        f.write("## Request Messages - Completion API\n")
+        f.write(f"# {calling_method}\n\n")
+
+        f.write("## Request Messages\n\n")
+
+        f.write("### Completion API\n")
         f.write(f"```json\n{json.dumps(messages_complapi, indent=2)}\n```\n\n")
 
-        f.write("## Request Messages - Responses API\n")
+        f.write("### Responses API\n")
         f.write(f"```json\n{json.dumps(messages_respapi, indent=2)}\n```\n\n")
 
-        f.write("## Request Params - Completion API\n")
+        f.write("## Request Params\n\n")
+
+        f.write("### Completion API\n")
         f.write(f"```json\n{json.dumps(params_complapi, indent=2)}\n```\n\n")
 
-        f.write("## Request Params - Responses API\n")
+        f.write("### Responses API\n")
         f.write(f"```json\n{json.dumps(params_respapi, indent=2)}\n```\n")
 
 
 def _write_response_trace(
     timestamp: str,
+    calling_method: str,
     response: ResponsesAPIResponse,
     response_complapi: ModelResponse,
 ) -> None:
-    """
-    Write non-streaming response data to trace files.
-    """
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_resp.md").open("w", encoding="utf-8") as f:
-        f.write("## Response - Responses API\n")
+        f.write(f"# {calling_method}\n\n")
+
+        f.write("## Response\n\n")
+
+        f.write("### Responses API\n")
         f.write(f"```json\n{response.model_dump_json(indent=2)}\n```\n\n")
 
-        f.write("## Response - Completion API\n")
+        f.write("### Completion API\n")
         f.write(f"```json\n{response_complapi.model_dump_json(indent=2)}\n```\n")
 
 
-def _write_streaming_response_trace(timestamp: str, responses_chunks: list, generic_chunks: list) -> None:
-    """
-    Write streaming response data to trace files.
-    """
+def _write_streaming_response_trace(
+    timestamp: str,
+    calling_method: str,
+    responses_chunks: list,
+    generic_chunks: list,
+) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_resp.md").open("w", encoding="utf-8") as f:
-        for resp_chunk, gen_chunk in zip(responses_chunks, generic_chunks):
-            f.write(f"Responses API Chunk:\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n")
+        f.write(f"# {calling_method}\n\n")
+
+        f.write("## Response Stream\n\n")
+
+        for idx, (resp_chunk, gen_chunk) in enumerate(zip(responses_chunks, generic_chunks)):
+            f.write(f"### Chunk #{idx}\n\n")
+            f.write(f"**Responses API Chunk:**\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n\n")
             # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not just a dict
-            f.write(f"Generic Chunk:\n```json\n{json.dumps(gen_chunk, indent=2)}\n```\n\n")
+            f.write(f"**Generic Chunk:**\n```json\n{json.dumps(gen_chunk, indent=2)}\n```\n\n")
 
 
 class CustomLLMRouter(CustomLLM):
@@ -182,8 +196,9 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_trace_files(
+            _write_request_trace(
                 timestamp=timestamp,
+                calling_method="CustomLLMRouter.completion",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -204,7 +219,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, response, response_complapi)
+            _write_response_trace(timestamp, "CustomLLMRouter.completion", response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -249,8 +264,9 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_trace_files(
+            _write_request_trace(
                 timestamp=timestamp,
+                calling_method="CustomLLMRouter.acompletion",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -270,7 +286,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, response, response_complapi)
+            _write_response_trace(timestamp, "CustomLLMRouter.acompletion", response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -315,8 +331,9 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_trace_files(
+            _write_request_trace(
                 timestamp=timestamp,
+                calling_method="CustomLLMRouter.streaming",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -344,7 +361,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, "CustomLLMRouter.streaming", responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -388,8 +405,9 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_trace_files(
+            _write_request_trace(
                 timestamp=timestamp,
+                calling_method="CustomLLMRouter.astreaming",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -417,7 +435,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, "CustomLLMRouter.astreaming", responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
