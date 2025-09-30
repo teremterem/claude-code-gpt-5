@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import litellm
 
@@ -35,6 +36,8 @@ ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPO
     "yes",
     "y",
 )
+
+TRACES_DIR = Path("traces/")
 
 ANTHROPIC = "anthropic"
 OPENAI = "openai"
