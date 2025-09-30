@@ -145,7 +145,7 @@ def _write_streaming_response_trace(
 
         for idx, (resp_chunk, gen_chunk) in enumerate(zip(responses_chunks, generic_chunks)):
             f.write(f"### Chunk #{idx}\n\n")
-            f.write(f"**Responses API Chunk:**\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n\n")
+            f.write(f"**Responses API:**\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n\n")
             # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not just a dict
             f.write(f"**Generic Chunk:**\n```json\n{json.dumps(gen_chunk, indent=2)}\n```\n\n")
 
