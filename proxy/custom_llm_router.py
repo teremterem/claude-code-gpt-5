@@ -13,7 +13,7 @@ from litellm import (
     ResponsesAPIResponse,
 )
 
-from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, TRACES_DIR
+from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, RESPAPI_TRACES_DIR, RESPAPI_TRACING_ENABLED
 from proxy.route_model import route_model
 from proxy.utils import (
     ProxyError,
@@ -93,8 +93,8 @@ def _write_request_trace(
     messages_respapi: list,
     params_respapi: dict,
 ) -> None:
-    TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
+    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
+    with (RESPAPI_TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Request Messages\n\n")
@@ -120,8 +120,8 @@ def _write_response_trace(
     response: ResponsesAPIResponse,
     response_complapi: ModelResponse,
 ) -> None:
-    TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
+    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
+    with (RESPAPI_TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Response\n\n")
@@ -139,8 +139,8 @@ def _write_streaming_response_trace(
     responses_chunks: list,
     generic_chunks: list,
 ) -> None:
-    TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
+    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
+    with (RESPAPI_TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Response Stream\n\n")
@@ -199,15 +199,15 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_complapi=messages,
-                params_complapi=optional_params,
-                messages_respapi=messages_respapi,
-                params_respapi=params_respapi,
-            )
-            print(f"TIMESTAMP: {timestamp}")
+            if RESPAPI_TRACING_ENABLED:
+                _write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
             messages = messages_respapi
             optional_params = params_respapi
@@ -222,7 +222,10 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, calling_method, response, response_complapi)
+
+            if RESPAPI_TRACING_ENABLED:
+                _write_response_trace(timestamp, calling_method, response, response_complapi)
+
             return response_complapi
 
         except Exception as e:
@@ -268,14 +271,15 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_complapi=messages,
-                params_complapi=optional_params,
-                messages_respapi=messages_respapi,
-                params_respapi=params_respapi,
-            )
+            if RESPAPI_TRACING_ENABLED:
+                _write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
             messages = messages_respapi
             optional_params = params_respapi
@@ -290,7 +294,10 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, calling_method, response, response_complapi)
+
+            if RESPAPI_TRACING_ENABLED:
+                _write_response_trace(timestamp, calling_method, response, response_complapi)
+
             return response_complapi
 
         except Exception as e:
@@ -336,14 +343,15 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_complapi=messages,
-                params_complapi=optional_params,
-                messages_respapi=messages_respapi,
-                params_respapi=params_respapi,
-            )
+            if RESPAPI_TRACING_ENABLED:
+                _write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
             messages = messages_respapi
             optional_params = params_respapi
@@ -361,12 +369,16 @@ class CustomLLMRouter(CustomLLM):
             responses_chunks = []
             generic_chunks = []
             for chunk in response:
-                responses_chunks.append(chunk)
                 generic_chunk = to_generic_streaming_chunk(chunk)
-                generic_chunks.append(generic_chunk)
+
+                if RESPAPI_TRACING_ENABLED:
+                    responses_chunks.append(chunk)
+                    generic_chunks.append(generic_chunk)
+
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
+            if RESPAPI_TRACING_ENABLED:
+                _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -411,14 +423,15 @@ class CustomLLMRouter(CustomLLM):
             messages_respapi = convert_chat_messages_to_responses_items(messages)
             params_respapi = convert_chat_params_to_responses(optional_params)
 
-            _write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_complapi=messages,
-                params_complapi=optional_params,
-                messages_respapi=messages_respapi,
-                params_respapi=params_respapi,
-            )
+            if RESPAPI_TRACING_ENABLED:
+                _write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
             messages = messages_respapi
             optional_params = params_respapi
@@ -436,12 +449,16 @@ class CustomLLMRouter(CustomLLM):
             responses_chunks = []
             generic_chunks = []
             async for chunk in response:
-                responses_chunks.append(chunk)
                 generic_chunk = to_generic_streaming_chunk(chunk)
-                generic_chunks.append(generic_chunk)
+
+                if RESPAPI_TRACING_ENABLED:
+                    responses_chunks.append(chunk)
+                    generic_chunks.append(generic_chunk)
+
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
+            if RESPAPI_TRACING_ENABLED:
+                _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e

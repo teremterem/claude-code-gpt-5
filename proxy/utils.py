@@ -20,6 +20,20 @@ class ProxyError(RuntimeError):
             super().__init__(error)
 
 
+def env_var_to_bool(value: Optional[str], default: str = "false") -> bool:
+    """
+    Convert environment variable string to boolean.
+
+    Args:
+        value: The environment variable value (or None if not set)
+        default: Default value to use if value is None
+
+    Returns:
+        True if the value (or default) is a truthy string, False otherwise
+    """
+    return (value or default).lower() in ("true", "1", "on", "yes", "y")
+
+
 def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
     """
     Best-effort convert a LiteLLM ModelResponseStream chunk into GenericStreamingChunk.

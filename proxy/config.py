@@ -3,7 +3,7 @@ from pathlib import Path
 
 import litellm
 
-from proxy.utils import ProxyError
+from proxy.utils import ProxyError, env_var_to_bool
 
 
 # We don't need to do `dotenv.load_dotenv()` - litellm does this for us upon
@@ -28,16 +28,10 @@ if "OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE" in os.environ:
         "The OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE environment variable is no longer supported. "
         "Please use the ENFORCE_ONE_TOOL_CALL_PER_RESPONSE environment variable instead."
     )
+ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = env_var_to_bool(os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPONSE"), "true")
 
-ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = (os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPONSE") or "true").lower() in (
-    "true",
-    "1",
-    "on",
-    "yes",
-    "y",
-)
-
-TRACES_DIR = Path("traces/")
+RESPAPI_TRACING_ENABLED = env_var_to_bool(os.getenv("RESPAPI_TRACING_ENABLED"), "false")
+RESPAPI_TRACES_DIR = Path("respapi_traces/")
 
 ANTHROPIC = "anthropic"
 OPENAI = "openai"
