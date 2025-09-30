@@ -1,19 +1,12 @@
-import json
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
-from litellm import (
-    CustomLLM,
-    GenericStreamingChunk,
-    HTTPHandler,
-    ModelResponse,
-    AsyncHTTPHandler,
-    ResponsesAPIResponse,
-)
+from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, RESPAPI_TRACES_DIR, RESPAPI_TRACING_ENABLED
+from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, RESPAPI_TRACING_ENABLED
+from proxy.responses_api_tracing import write_request_trace, write_response_trace, write_streaming_response_trace
 from proxy.route_model import route_model
 from proxy.utils import (
     ProxyError,
@@ -133,7 +126,7 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
-                _write_request_trace(
+                write_request_trace(
                     timestamp=timestamp,
                     calling_method=calling_method,
                     messages_complapi=messages,
@@ -142,22 +135,19 @@ class CustomLLMRouter(CustomLLM):
                     params_respapi=params_respapi,
                 )
 
-            messages = messages_respapi
-            optional_params = params_respapi
-
             response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **params_respapi,
             )
             response_complapi = convert_responses_to_model_response(response)
 
             if RESPAPI_TRACING_ENABLED:
-                _write_response_trace(timestamp, calling_method, response, response_complapi)
+                write_response_trace(timestamp, calling_method, response, response_complapi)
 
             return response_complapi
 
@@ -205,7 +195,7 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
-                _write_request_trace(
+                write_request_trace(
                     timestamp=timestamp,
                     calling_method=calling_method,
                     messages_complapi=messages,
@@ -214,22 +204,19 @@ class CustomLLMRouter(CustomLLM):
                     params_respapi=params_respapi,
                 )
 
-            messages = messages_respapi
-            optional_params = params_respapi
-
             response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **params_respapi,
             )
             response_complapi = convert_responses_to_model_response(response)
 
             if RESPAPI_TRACING_ENABLED:
-                _write_response_trace(timestamp, calling_method, response, response_complapi)
+                write_response_trace(timestamp, calling_method, response, response_complapi)
 
             return response_complapi
 
@@ -277,7 +264,7 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
-                _write_request_trace(
+                write_request_trace(
                     timestamp=timestamp,
                     calling_method=calling_method,
                     messages_complapi=messages,
@@ -286,17 +273,14 @@ class CustomLLMRouter(CustomLLM):
                     params_respapi=params_respapi,
                 )
 
-            messages = messages_respapi
-            optional_params = params_respapi
-
             response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **params_respapi,
             )
 
             responses_chunks = []
@@ -311,7 +295,7 @@ class CustomLLMRouter(CustomLLM):
                 yield generic_chunk
 
             if RESPAPI_TRACING_ENABLED:
-                _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
+                write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -357,7 +341,7 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
-                _write_request_trace(
+                write_request_trace(
                     timestamp=timestamp,
                     calling_method=calling_method,
                     messages_complapi=messages,
@@ -366,17 +350,14 @@ class CustomLLMRouter(CustomLLM):
                     params_respapi=params_respapi,
                 )
 
-            messages = messages_respapi
-            optional_params = params_respapi
-
             response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=messages,
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **optional_params,
+                **params_respapi,
             )
 
             responses_chunks = []
@@ -391,76 +372,10 @@ class CustomLLMRouter(CustomLLM):
                 yield generic_chunk
 
             if RESPAPI_TRACING_ENABLED:
-                _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
+                write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
 
 
 custom_llm_router = CustomLLMRouter()
-
-
-def _write_request_trace(
-    *,
-    timestamp: str,
-    calling_method: str,
-    messages_complapi: list,
-    params_complapi: dict,
-    messages_respapi: list,
-    params_respapi: dict,
-) -> None:
-    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (RESPAPI_TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
-        f.write(f"# {calling_method}\n\n")
-
-        f.write("## Request Messages\n\n")
-
-        f.write("### Completion API:\n")
-        f.write(f"```json\n{json.dumps(messages_complapi, indent=2)}\n```\n\n")
-
-        f.write("### Responses API:\n")
-        f.write(f"```json\n{json.dumps(messages_respapi, indent=2)}\n```\n\n")
-
-        f.write("## Request Params\n\n")
-
-        f.write("### Completion API:\n")
-        f.write(f"```json\n{json.dumps(params_complapi, indent=2)}\n```\n\n")
-
-        f.write("### Responses API:\n")
-        f.write(f"```json\n{json.dumps(params_respapi, indent=2)}\n```\n")
-
-
-def _write_response_trace(
-    timestamp: str,
-    calling_method: str,
-    response: ResponsesAPIResponse,
-    response_complapi: ModelResponse,
-) -> None:
-    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (RESPAPI_TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
-        f.write(f"# {calling_method}\n\n")
-
-        f.write("## Response\n\n")
-
-        f.write("### Responses API:\n")
-        f.write(f"```json\n{response.model_dump_json(indent=2)}\n```\n\n")
-
-        f.write("### Completion API:\n")
-        f.write(f"```json\n{response_complapi.model_dump_json(indent=2)}\n```\n")
-
-
-def _write_streaming_response_trace(
-    timestamp: str,
-    calling_method: str,
-    responses_chunks: list,
-    generic_chunks: list,
-) -> None:
-    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (RESPAPI_TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
-        f.write(f"# {calling_method}\n\n")
-
-        for idx, (resp_chunk, gen_chunk) in enumerate(zip(responses_chunks, generic_chunks)):
-            f.write(f"## Response Chunk #{idx}\n\n")
-            f.write(f"### Responses API:\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n\n")
-            # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not just a dict
-            f.write(f"### GenericStreamingChunk:\n```json\n{json.dumps(gen_chunk, indent=2)}\n```\n\n")
