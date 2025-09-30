@@ -78,10 +78,11 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
 
 def _generate_timestamp() -> str:
     """
-    Generate timestamp in format yyyymmdd_hhmmss_mmmm.
+    Generate timestamp in format YYYYmmdd_HHMMSS_ffff.
     """
     now = datetime.now(timezone.utc)
-    return now.strftime("%Y%m%d_%H%M%S_%f")[:-2]  # Remove last 3 digits to get milliseconds
+    # Remove last 2 digits to only leave milliseconds and a single highest digit of microseconds
+    return now.strftime("%Y%m%d_%H%M%S_%f")[:-2]
 
 
 class CustomLLMRouter(CustomLLM):
