@@ -180,6 +180,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> ModelResponse:
         try:
             timestamp = _generate_timestamp()
+            calling_method = "COMPLETION"
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -187,7 +188,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-completion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-completion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -200,7 +201,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="COMPLETION",
+                calling_method=calling_method,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -221,7 +222,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, "COMPLETION", response, response_complapi)
+            _write_response_trace(timestamp, calling_method, response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -248,6 +249,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> ModelResponse:
         try:
             timestamp = _generate_timestamp()
+            calling_method = "ACOMPLETION"
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -255,7 +257,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-acompletion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-acompletion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -268,7 +270,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="ACOMPLETION",
+                calling_method=calling_method,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -288,7 +290,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, "ACOMPLETION", response, response_complapi)
+            _write_response_trace(timestamp, calling_method, response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -315,6 +317,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
             timestamp = _generate_timestamp()
+            calling_method = "STREAMING"
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -322,7 +325,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-streaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-streaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -335,7 +338,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="STREAMING",
+                calling_method=calling_method,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -363,7 +366,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, "STREAMING", responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -389,6 +392,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
             timestamp = _generate_timestamp()
+            calling_method = "ASTREAMING"
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -396,7 +400,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-astreaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-astreaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -409,7 +413,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="ASTREAMING",
+                calling_method=calling_method,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -437,7 +441,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, "ASTREAMING", responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
