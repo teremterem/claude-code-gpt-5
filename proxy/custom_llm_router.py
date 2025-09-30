@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
@@ -75,11 +76,14 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
     messages.append(tool_instruction)
 
 
-REQUEST_NUMBER = 0
+def _generate_timestamp() -> str:
+    """Generate timestamp in format yyyymmdd_hhmmss_mmm."""
+    now = datetime.now(timezone.utc)
+    return now.strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Remove last 3 digits to get milliseconds
 
 
 def _write_trace_files(
-    request_number: int,
+    timestamp: str,
     messages_complapi: list,
     params_complapi: dict,
     messages_respapi: list,
@@ -89,7 +93,7 @@ def _write_trace_files(
     Write request/response data to trace files.
     """
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{request_number:04d}_req.md").open("w", encoding="utf-8") as f:
+    with (TRACES_DIR / f"{timestamp}_req.md").open("w", encoding="utf-8") as f:
         f.write("## Request Messages - Completion API\n")
         f.write(f"```json\n{json.dumps(messages_complapi, indent=2)}\n```\n\n")
 
@@ -104,7 +108,7 @@ def _write_trace_files(
 
 
 def _write_response_trace(
-    request_number: int,
+    timestamp: str,
     response: ResponsesAPIResponse,
     response_complapi: ModelResponse,
 ) -> None:
@@ -112,7 +116,7 @@ def _write_response_trace(
     Write non-streaming response data to trace files.
     """
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{request_number:04d}_resp.md").open("w", encoding="utf-8") as f:
+    with (TRACES_DIR / f"{timestamp}_resp.md").open("w", encoding="utf-8") as f:
         f.write("## Response - Responses API\n")
         f.write(f"```json\n{response.model_dump_json(indent=2)}\n```\n\n")
 
@@ -120,12 +124,12 @@ def _write_response_trace(
         f.write(f"```json\n{response_complapi.model_dump_json(indent=2)}\n```\n")
 
 
-def _write_streaming_response_trace(request_number: int, responses_chunks: list, generic_chunks: list) -> None:
+def _write_streaming_response_trace(timestamp: str, responses_chunks: list, generic_chunks: list) -> None:
     """
     Write streaming response data to trace files.
     """
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{request_number:04d}_resp.md").open("w", encoding="utf-8") as f:
+    with (TRACES_DIR / f"{timestamp}_resp.md").open("w", encoding="utf-8") as f:
         for resp_chunk, gen_chunk in zip(responses_chunks, generic_chunks):
             f.write(f"Responses API Chunk:\n```json\n{resp_chunk.model_dump_json(indent=2)}\n```\n")
             # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not just a dict
@@ -159,8 +163,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            global REQUEST_NUMBER  # pylint: disable=global-statement
-            REQUEST_NUMBER += 1
+            timestamp = _generate_timestamp()
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -168,7 +171,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-completion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-completion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -180,13 +183,13 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             _write_trace_files(
-                request_number=REQUEST_NUMBER,
+                timestamp=timestamp,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
                 params_respapi=params_respapi,
             )
-            print(f"REQUEST_NUMBER: {REQUEST_NUMBER:04d}")
+            print(f"TIMESTAMP: {timestamp}")
 
             messages = messages_respapi
             optional_params = params_respapi
@@ -201,7 +204,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(REQUEST_NUMBER, response, response_complapi)
+            _write_response_trace(timestamp, response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -227,8 +230,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            global REQUEST_NUMBER  # pylint: disable=global-statement
-            REQUEST_NUMBER += 1
+            timestamp = _generate_timestamp()
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -236,9 +238,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})[
-                "trace_name"
-            ] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-acompletion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-acompletion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -250,7 +250,7 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             _write_trace_files(
-                request_number=REQUEST_NUMBER,
+                timestamp=timestamp,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -270,7 +270,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(REQUEST_NUMBER, response, response_complapi)
+            _write_response_trace(timestamp, response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -296,8 +296,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
-            global REQUEST_NUMBER  # pylint: disable=global-statement
-            REQUEST_NUMBER += 1
+            timestamp = _generate_timestamp()
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -305,7 +304,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-streaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-streaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -317,7 +316,7 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             _write_trace_files(
-                request_number=REQUEST_NUMBER,
+                timestamp=timestamp,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -345,7 +344,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(REQUEST_NUMBER, responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -370,8 +369,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
-            global REQUEST_NUMBER  # pylint: disable=global-statement
-            REQUEST_NUMBER += 1
+            timestamp = _generate_timestamp()
 
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
@@ -379,7 +377,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{REQUEST_NUMBER:04d}-from-astreaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"OUTBOUND-{timestamp}-from-astreaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -391,7 +389,7 @@ class CustomLLMRouter(CustomLLM):
             params_respapi = convert_chat_params_to_responses(optional_params)
 
             _write_trace_files(
-                request_number=REQUEST_NUMBER,
+                timestamp=timestamp,
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -419,7 +417,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(REQUEST_NUMBER, responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
