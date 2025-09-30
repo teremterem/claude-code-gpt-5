@@ -31,7 +31,7 @@ if "OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE" in os.environ:
 ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = env_var_to_bool(os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPONSE"), "true")
 
 RESPAPI_TRACING_ENABLED = env_var_to_bool(os.getenv("RESPAPI_TRACING_ENABLED"), "false")
-RESPAPI_TRACES_DIR = Path("respapi_traces/")
+RESPAPI_TRACES_DIR = Path(".respapi_traces/")
 
 ANTHROPIC = "anthropic"
 OPENAI = "openai"
