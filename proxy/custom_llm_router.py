@@ -3,7 +3,14 @@ from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
-from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
+from litellm import (
+    CustomLLM,
+    GenericStreamingChunk,
+    HTTPHandler,
+    ModelResponse,
+    AsyncHTTPHandler,
+    ResponsesAPIResponse,
+)
 
 from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, TRACES_DIR
 from proxy.route_model import route_model
@@ -82,32 +89,35 @@ def _write_trace_files(
     Write request/response data to trace files.
     """
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    (TRACES_DIR / f"{request_number:04d}_req_msgs_complapi.json").write_text(
-        json.dumps(messages_complapi, indent=2), encoding="utf-8"
-    )
-    (TRACES_DIR / f"{request_number:04d}_req_params_complapi.json").write_text(
-        json.dumps(params_complapi, indent=2), encoding="utf-8"
-    )
-    (TRACES_DIR / f"{request_number:04d}_req_msgs_respapi.json").write_text(
-        json.dumps(messages_respapi, indent=2), encoding="utf-8"
-    )
-    (TRACES_DIR / f"{request_number:04d}_req_params_respapi.json").write_text(
-        json.dumps(params_respapi, indent=2), encoding="utf-8"
-    )
+    with (TRACES_DIR / f"{request_number:04d}_req.md").open("w", encoding="utf-8") as f:
+        f.write("## Request Messages - Completion API\n")
+        f.write(f"```json\n{json.dumps(messages_complapi, indent=2)}\n```\n\n")
+
+        f.write("## Request Messages - Responses API\n")
+        f.write(f"```json\n{json.dumps(messages_respapi, indent=2)}\n```\n\n")
+
+        f.write("## Request Params - Completion API\n")
+        f.write(f"```json\n{json.dumps(params_complapi, indent=2)}\n```\n\n")
+
+        f.write("## Request Params - Responses API\n")
+        f.write(f"```json\n{json.dumps(params_respapi, indent=2)}\n```\n")
 
 
-def _write_response_trace(request_number: int, response: ModelResponse) -> None:
+def _write_response_trace(
+    request_number: int,
+    response: ResponsesAPIResponse,
+    response_complapi: ModelResponse,
+) -> None:
     """
     Write non-streaming response data to trace files.
     """
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    (TRACES_DIR / f"{request_number:04d}_resp_respapi.json").write_text(
-        response.model_dump_json(indent=2), encoding="utf-8"
-    )
-    converted_response = convert_responses_to_model_response(response)
-    (TRACES_DIR / f"{request_number:04d}_resp_complapi.json").write_text(
-        converted_response.model_dump_json(indent=2), encoding="utf-8"
-    )
+    with (TRACES_DIR / f"{request_number:04d}_resp.md").open("w", encoding="utf-8") as f:
+        f.write("## Response - Responses API\n")
+        f.write(f"```json\n{response.model_dump_json(indent=2)}\n```\n\n")
+
+        f.write("## Response - Completion API\n")
+        f.write(f"```json\n{response_complapi.model_dump_json(indent=2)}\n```\n")
 
 
 def _write_streaming_response_trace(request_number: int, responses_chunks: list, generic_chunks: list) -> None:
@@ -190,8 +200,9 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
-            _write_response_trace(REQUEST_NUMBER, response)
-            return convert_responses_to_model_response(response)
+            response_complapi = convert_responses_to_model_response(response)
+            _write_response_trace(REQUEST_NUMBER, response, response_complapi)
+            return response_complapi
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -258,8 +269,9 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **optional_params,
             )
-            _write_response_trace(REQUEST_NUMBER, response)
-            return convert_responses_to_model_response(response)
+            response_complapi = convert_responses_to_model_response(response)
+            _write_response_trace(REQUEST_NUMBER, response, response_complapi)
+            return response_complapi
 
         except Exception as e:
             raise ProxyError(e) from e
