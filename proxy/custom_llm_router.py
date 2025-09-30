@@ -77,9 +77,11 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
 
 
 def _generate_timestamp() -> str:
-    """Generate timestamp in format yyyymmdd_hhmmss_mmm."""
+    """
+    Generate timestamp in format yyyymmdd_hhmmss_mmmm.
+    """
     now = datetime.now(timezone.utc)
-    return now.strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Remove last 3 digits to get milliseconds
+    return now.strftime("%Y%m%d_%H%M%S_%f")[:-2]  # Remove last 3 digits to get milliseconds
 
 
 def _write_request_trace(
@@ -92,7 +94,7 @@ def _write_request_trace(
     params_respapi: dict,
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_req.md").open("w", encoding="utf-8") as f:
+    with (TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Request Messages\n\n")
@@ -119,7 +121,7 @@ def _write_response_trace(
     response_complapi: ModelResponse,
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_resp.md").open("w", encoding="utf-8") as f:
+    with (TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Response\n\n")
