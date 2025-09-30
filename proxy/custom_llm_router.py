@@ -1,10 +1,12 @@
+from datetime import datetime, timezone
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
+from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, RESPAPI_TRACING_ENABLED
+from proxy.responses_api_tracing import write_request_trace, write_response_trace, write_streaming_response_trace
 from proxy.route_model import route_model
 from proxy.utils import (
     ProxyError,
@@ -67,6 +69,15 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
     messages.append(tool_instruction)
 
 
+def _generate_timestamp() -> str:
+    """
+    Generate timestamp in format YYYYmmdd_HHMMSS_ffff.
+    """
+    now = datetime.now(timezone.utc)
+    # Remove last 2 digits to only leave milliseconds and a single highest digit of microseconds
+    return now.strftime("%Y%m%d_%H%M%S_%f")[:-2]
+
+
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
@@ -94,13 +105,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
         try:
+            timestamp = _generate_timestamp()
+            calling_method = "COMPLETION"
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = False
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-completion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-completion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -108,17 +122,34 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages_respapi = convert_chat_messages_to_responses_items(messages)
+            params_respapi = convert_chat_params_to_responses(optional_params)
+
+            if RESPAPI_TRACING_ENABLED:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
+
             response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **params_respapi,
             )
-            response = convert_responses_to_model_response(response)
-            return response
+            response_complapi = convert_responses_to_model_response(response)
+
+            if RESPAPI_TRACING_ENABLED:
+                write_response_trace(timestamp, calling_method, response, response_complapi)
+
+            return response_complapi
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -143,13 +174,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
         try:
+            timestamp = _generate_timestamp()
+            calling_method = "ACOMPLETION"
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = False
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-acompletion"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-acompletion"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -157,17 +191,34 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages_respapi = convert_chat_messages_to_responses_items(messages)
+            params_respapi = convert_chat_params_to_responses(optional_params)
+
+            if RESPAPI_TRACING_ENABLED:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
+
             response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **params_respapi,
             )
-            response = convert_responses_to_model_response(response)
-            return response
+            response_complapi = convert_responses_to_model_response(response)
+
+            if RESPAPI_TRACING_ENABLED:
+                write_response_trace(timestamp, calling_method, response, response_complapi)
+
+            return response_complapi
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -192,13 +243,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
+            timestamp = _generate_timestamp()
+            calling_method = "STREAMING"
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-streaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-streaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -206,18 +260,42 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages_respapi = convert_chat_messages_to_responses_items(messages)
+            params_respapi = convert_chat_params_to_responses(optional_params)
+
+            if RESPAPI_TRACING_ENABLED:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
+
             response = litellm.responses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **params_respapi,
             )
+
+            responses_chunks = []
+            generic_chunks = []
             for chunk in response:
                 generic_chunk = to_generic_streaming_chunk(chunk)
+
+                if RESPAPI_TRACING_ENABLED:
+                    responses_chunks.append(chunk)
+                    generic_chunks.append(generic_chunk)
+
                 yield generic_chunk
+
+            if RESPAPI_TRACING_ENABLED:
+                write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -242,13 +320,16 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
+            timestamp = _generate_timestamp()
+            calling_method = "ASTREAMING"
+
             final_model, extra_params = route_model(model)
             optional_params.update(extra_params)
             optional_params["stream"] = True
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = "OUTBOUND-from-astreaming"
+            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-astreaming"
 
             _adapt_for_non_anthropic_models(
                 model=final_model,
@@ -256,18 +337,42 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
+            messages_respapi = convert_chat_messages_to_responses_items(messages)
+            params_respapi = convert_chat_params_to_responses(optional_params)
+
+            if RESPAPI_TRACING_ENABLED:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_complapi=messages,
+                    params_complapi=optional_params,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
+
             response = await litellm.aresponses(  # TODO Check all params are supported
                 model=final_model,
-                input=convert_chat_messages_to_responses_items(messages),
+                input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
                 timeout=timeout,
                 client=client,
-                **convert_chat_params_to_responses(optional_params),
+                **params_respapi,
             )
+
+            responses_chunks = []
+            generic_chunks = []
             async for chunk in response:
                 generic_chunk = to_generic_streaming_chunk(chunk)
+
+                if RESPAPI_TRACING_ENABLED:
+                    responses_chunks.append(chunk)
+                    generic_chunks.append(generic_chunk)
+
                 yield generic_chunk
+
+            if RESPAPI_TRACING_ENABLED:
+                write_streaming_response_trace(timestamp, calling_method, responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
