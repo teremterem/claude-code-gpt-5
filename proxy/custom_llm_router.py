@@ -198,7 +198,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="CustomLLMRouter.completion",
+                calling_method="COMPLETION",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -219,7 +219,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, "CustomLLMRouter.completion", response, response_complapi)
+            _write_response_trace(timestamp, "COMPLETION", response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -266,7 +266,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="CustomLLMRouter.acompletion",
+                calling_method="ACOMPLETION",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -286,7 +286,7 @@ class CustomLLMRouter(CustomLLM):
                 **optional_params,
             )
             response_complapi = convert_responses_to_model_response(response)
-            _write_response_trace(timestamp, "CustomLLMRouter.acompletion", response, response_complapi)
+            _write_response_trace(timestamp, "ACOMPLETION", response, response_complapi)
             return response_complapi
 
         except Exception as e:
@@ -333,7 +333,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="CustomLLMRouter.streaming",
+                calling_method="STREAMING",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -361,7 +361,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, "CustomLLMRouter.streaming", responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, "STREAMING", responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -407,7 +407,7 @@ class CustomLLMRouter(CustomLLM):
 
             _write_request_trace(
                 timestamp=timestamp,
-                calling_method="CustomLLMRouter.astreaming",
+                calling_method="ASTREAMING",
                 messages_complapi=messages,
                 params_complapi=optional_params,
                 messages_respapi=messages_respapi,
@@ -435,7 +435,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunks.append(generic_chunk)
                 yield generic_chunk
 
-            _write_streaming_response_trace(timestamp, "CustomLLMRouter.astreaming", responses_chunks, generic_chunks)
+            _write_streaming_response_trace(timestamp, "ASTREAMING", responses_chunks, generic_chunks)
 
         except Exception as e:
             raise ProxyError(e) from e
