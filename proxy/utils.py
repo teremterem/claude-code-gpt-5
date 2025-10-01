@@ -284,7 +284,7 @@ _FUNCTION_METADATA_KEYS = ("description", "parameters", "strict")
 _UNSUPPORTED_RESPONSES_PARAMS = {"stream_options"}
 
 
-def convert_chat_params_to_responses(optional_params: dict[str, Any]) -> dict[str, Any]:
+def convert_chat_params_to_respapi(optional_params: dict[str, Any]) -> dict[str, Any]:
     """Return a copy of optional params adjusted for the Responses API."""
 
     if optional_params is None:
@@ -324,7 +324,7 @@ def convert_chat_params_to_responses(optional_params: dict[str, Any]) -> dict[st
     return params
 
 
-def convert_chat_messages_to_responses_items(messages: list[Any]) -> list[dict[str, Any]]:
+def convert_chat_messages_to_respapi(messages: list[Any]) -> list[dict[str, Any]]:
     """Convert Chat Completions style messages into Responses API compatible items."""
 
     if not isinstance(messages, list):

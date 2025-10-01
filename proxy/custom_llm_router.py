@@ -10,8 +10,8 @@ from proxy.responses_api_tracing import write_request_trace, write_response_trac
 from proxy.route_model import route_model
 from proxy.utils import (
     ProxyError,
-    convert_chat_messages_to_responses_items,
-    convert_chat_params_to_responses,
+    convert_chat_messages_to_respapi,
+    convert_chat_params_to_respapi,
     convert_respapi_to_model_response,
     to_generic_streaming_chunk,
 )
@@ -122,8 +122,8 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            messages_respapi = convert_chat_messages_to_responses_items(messages)
-            params_respapi = convert_chat_params_to_responses(optional_params)
+            messages_respapi = convert_chat_messages_to_respapi(messages)
+            params_respapi = convert_chat_params_to_respapi(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
                 write_request_trace(
@@ -191,8 +191,8 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            messages_respapi = convert_chat_messages_to_responses_items(messages)
-            params_respapi = convert_chat_params_to_responses(optional_params)
+            messages_respapi = convert_chat_messages_to_respapi(messages)
+            params_respapi = convert_chat_params_to_respapi(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
                 write_request_trace(
@@ -260,8 +260,8 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            messages_respapi = convert_chat_messages_to_responses_items(messages)
-            params_respapi = convert_chat_params_to_responses(optional_params)
+            messages_respapi = convert_chat_messages_to_respapi(messages)
+            params_respapi = convert_chat_params_to_respapi(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
                 write_request_trace(
@@ -337,8 +337,8 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            messages_respapi = convert_chat_messages_to_responses_items(messages)
-            params_respapi = convert_chat_params_to_responses(optional_params)
+            messages_respapi = convert_chat_messages_to_respapi(messages)
+            params_respapi = convert_chat_params_to_respapi(optional_params)
 
             if RESPAPI_TRACING_ENABLED:
                 write_request_trace(
