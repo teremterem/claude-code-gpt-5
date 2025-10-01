@@ -7,7 +7,7 @@ from copy import deepcopy
 import json
 from typing import Any, Optional, Union
 
-from litellm import GenericStreamingChunk, ModelResponse
+from litellm import GenericStreamingChunk, ModelResponse, ResponsesAPIResponse
 
 
 class ProxyError(RuntimeError):
@@ -659,11 +659,11 @@ def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
     }
 
 
-def convert_responses_to_model_response(responses_response: Any) -> ModelResponse:
+def convert_respapi_to_model_response(respapi_response: ResponsesAPIResponse) -> ModelResponse:
     """Best-effort convert a LiteLLM ResponsesAPIResponse into a ModelResponse."""
 
-    if responses_response is None:
-        raise ValueError("responses_response cannot be None")
+    if respapi_response is None:
+        raise ValueError("respapi_response cannot be None")
 
     def _get(obj: Any, key: str, default: Any = None) -> Any:
         if isinstance(obj, dict):
@@ -672,16 +672,16 @@ def convert_responses_to_model_response(responses_response: Any) -> ModelRespons
 
     model_response: dict[str, Any] = {}
 
-    model_response["id"] = _get(responses_response, "id")
-    model_response["object"] = _get(responses_response, "object", "chat.completion")
-    model_response["created"] = _get(responses_response, "created") or _get(responses_response, "created_at")
-    model_response["model"] = _get(responses_response, "model")
+    model_response["id"] = _get(respapi_response, "id")
+    model_response["object"] = _get(respapi_response, "object", "chat.completion")
+    model_response["created"] = _get(respapi_response, "created") or _get(respapi_response, "created_at")
+    model_response["model"] = _get(respapi_response, "model")
 
-    metadata = _get(responses_response, "metadata")
+    metadata = _get(respapi_response, "metadata")
     if metadata is not None:
         model_response["metadata"] = deepcopy(metadata)
 
-    usage = _get(responses_response, "usage")
+    usage = _get(respapi_response, "usage")
     if isinstance(usage, dict):
         prompt_tokens = usage.get("prompt_tokens")
         completion_tokens = usage.get("completion_tokens")
@@ -698,7 +698,7 @@ def convert_responses_to_model_response(responses_response: Any) -> ModelRespons
     tool_calls: list[dict[str, Any]] = []
     function_call: Optional[dict[str, Any]] = None
 
-    output = _get(responses_response, "output")
+    output = _get(respapi_response, "output")
     if isinstance(output, list):
         for item in output:
             if not isinstance(item, dict):
@@ -730,7 +730,7 @@ def convert_responses_to_model_response(responses_response: Any) -> ModelRespons
         choice_message["function_call"] = function_call
 
     finish_reason: Optional[str] = None
-    status = _get(responses_response, "status")
+    status = _get(respapi_response, "status")
     if isinstance(status, str):
         if status == "completed":
             finish_reason = "stop"
@@ -749,7 +749,7 @@ def convert_responses_to_model_response(responses_response: Any) -> ModelRespons
 
     provider_fields: dict[str, Any] = {}
     for key in ("response", "meta", "trace_id", "previous_response_id"):
-        value = _get(responses_response, key)
+        value = _get(respapi_response, key)
         if value is not None:
             provider_fields[key] = deepcopy(value)
     if provider_fields:

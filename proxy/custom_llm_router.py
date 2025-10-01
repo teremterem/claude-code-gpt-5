@@ -12,7 +12,7 @@ from proxy.utils import (
     ProxyError,
     convert_chat_messages_to_responses_items,
     convert_chat_params_to_responses,
-    convert_responses_to_model_response,
+    convert_respapi_to_model_response,
     to_generic_streaming_chunk,
 )
 
@@ -144,7 +144,7 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **params_respapi,
             )
-            response_complapi = convert_responses_to_model_response(response)
+            response_complapi = convert_respapi_to_model_response(response)
 
             if RESPAPI_TRACING_ENABLED:
                 write_response_trace(timestamp, calling_method, response, response_complapi)
@@ -213,7 +213,7 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **params_respapi,
             )
-            response_complapi = convert_responses_to_model_response(response)
+            response_complapi = convert_respapi_to_model_response(response)
 
             if RESPAPI_TRACING_ENABLED:
                 write_response_trace(timestamp, calling_method, response, response_complapi)
