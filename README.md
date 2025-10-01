@@ -40,7 +40,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
    # Recommended: remap Claude models to GPT‑5 variants to ensure all
    # built-in agents in Claude Code also use GPT‑5
-   REMAP_CLAUDE_HAIKU_TO=gpt-5-nano-reason-minimal
+   REMAP_CLAUDE_HAIKU_TO=gpt-5-mini-reason-minimal
    REMAP_CLAUDE_SONNET_TO=gpt-5-reason-medium
    REMAP_CLAUDE_OPUS_TO=gpt-5-reason-high
 
