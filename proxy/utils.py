@@ -277,6 +277,8 @@ _TOOL_TYPE_ALIASES = {
 
 _CONTENT_KEYS_TO_DROP = {"cache_control"}
 
+_MESSAGE_KEYS_TO_DROP = {"tool_calls", "function_call", "tool_call_id"}
+
 _FUNCTION_METADATA_KEYS = ("description", "parameters", "strict")
 
 _UNSUPPORTED_RESPONSES_PARAMS = {"stream_options"}
@@ -337,9 +339,20 @@ def convert_chat_messages_to_responses_items(messages: list[Any]) -> list[dict[s
         if not isinstance(role, str) or not role:
             raise ValueError(f"Chat message at index {idx} is missing a valid role")
 
-        new_message: dict[str, Any] = {k: deepcopy(v) for k, v in message.items() if k != "content"}
+        # Drop tool_calls and function_call - Responses API doesn't support these in message content
+        # Tool results are preserved in tool role messages with tool_result type
+        keys_to_exclude = {"content"} | _MESSAGE_KEYS_TO_DROP
+        new_message: dict[str, Any] = {k: deepcopy(v) for k, v in message.items() if k not in keys_to_exclude}
+
+        # Convert role: "tool" to "user" for Responses API
+        # Responses API only supports: assistant, system, developer, user
+        normalized_role = role
+        if role == "tool":
+            normalized_role = "user"
+            new_message["role"] = "user"
+
         content = message.get("content")
-        new_message["content"] = _normalize_message_content(role, content)
+        new_message["content"] = _normalize_message_content(normalized_role, content)
         converted.append(new_message)
 
     return converted
@@ -626,6 +639,41 @@ def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
             }
             break
 
+    # For completed responses, check response.output for tool calls
+    if tool_use is None and chunk_type in {
+        "response.completed",
+        "response.failed",
+        "response.canceled",
+        "response.cancelled",
+    }:
+        response_obj = _get(chunk, "response")
+        if response_obj is not None:
+            output = _get(response_obj, "output")
+            if isinstance(output, list):
+                for item in output:
+                    item_type = _get(item, "type")
+                    if item_type in {"function_call", "tool_call"}:
+                        name = _get(item, "name") or _get(item, "function_name")
+                        arguments = _get(item, "arguments") or _get(item, "input") or _get(item, "input_json")
+                        if arguments is not None and not isinstance(arguments, str):
+                            try:
+                                arguments = str(arguments)
+                            except Exception as exc:
+                                raise ProxyError(
+                                    "Failed to convert Responses output tool_call arguments to string"
+                                ) from exc
+                        call_id = _get(item, "id") or _get(item, "call_id") or _get(item, "tool_call_id")
+                        tool_use = {
+                            "index": index,
+                            "id": call_id if isinstance(call_id, str) else None,
+                            "type": "function",
+                            "function": {
+                                "name": name if isinstance(name, str) else None,
+                                "arguments": arguments if isinstance(arguments, str) else None,
+                            },
+                        }
+                        break
+
     terminal_suffixes = (".completed", ".failed", ".cancelled", ".canceled")
     is_finished = any(chunk_type.endswith(suffix) for suffix in terminal_suffixes)
     if chunk_type in {"response.completed", "response.error", "response.canceled", "response.cancelled"}:
@@ -683,10 +731,11 @@ def convert_respapi_to_model_response(respapi_response: ResponsesAPIResponse) ->
 
     usage = _get(respapi_response, "usage")
     if isinstance(usage, dict):
-        prompt_tokens = usage.get("prompt_tokens")
-        completion_tokens = usage.get("completion_tokens")
+        # Responses API uses input_tokens/output_tokens, Chat Completions uses prompt_tokens/completion_tokens
+        prompt_tokens = usage.get("prompt_tokens") or usage.get("input_tokens")
+        completion_tokens = usage.get("completion_tokens") or usage.get("output_tokens")
         total_tokens = usage.get("total_tokens")
-        if prompt_tokens is not None and completion_tokens is not None:
+        if prompt_tokens is not None and completion_tokens is not None and total_tokens is None:
             total_tokens = prompt_tokens + completion_tokens
         model_response["usage"] = {
             "prompt_tokens": prompt_tokens,
@@ -701,22 +750,28 @@ def convert_respapi_to_model_response(respapi_response: ResponsesAPIResponse) ->
     output = _get(respapi_response, "output")
     if isinstance(output, list):
         for item in output:
-            if not isinstance(item, dict):
-                continue
-            item_type = item.get("type") or item.get("event")
+            item_type = _get(item, "type") or _get(item, "event")
             if item_type == "message":
-                content = item.get("content")
+                content = _get(item, "content")
                 flattened = _flatten_responses_text(content)
                 if flattened:
                     text_segments.append(flattened)
             elif item_type == "tool_call":
-                maybe_tool = _convert_responses_tool_call(item)
+                # Convert to dict for _convert_responses_tool_call if needed
+                item_dict = (
+                    item if isinstance(item, dict) else {k: _get(item, k) for k in dir(item) if not k.startswith("_")}
+                )
+                maybe_tool = _convert_responses_tool_call(item_dict)
                 if maybe_tool is not None:
                     tool_calls.append(maybe_tool)
             elif item_type == "function_call" and function_call is None:
-                maybe_fn = _convert_responses_tool_call(item)
+                # Convert to dict for _convert_responses_tool_call if needed
+                item_dict = (
+                    item if isinstance(item, dict) else {k: _get(item, k) for k in dir(item) if not k.startswith("_")}
+                )
+                maybe_fn = _convert_responses_tool_call(item_dict)
                 if maybe_fn is not None:
-                    function_call = maybe_fn.get("function")
+                    function_call = _get(maybe_fn, "function")
 
     message_content = "".join(text_segments) if text_segments else ""
 
