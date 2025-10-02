@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
@@ -7,12 +6,13 @@ from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse
 
 from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, RESPAPI_TRACING_ENABLED
 from proxy.responses_api_tracing import write_request_trace, write_response_trace, write_streaming_response_trace
-from proxy.route_model import route_model
+from proxy.route_model import ModelRoute
 from proxy.utils import (
     ProxyError,
     convert_chat_messages_to_respapi,
     convert_chat_params_to_respapi,
     convert_respapi_to_model_response,
+    generate_timestamp,
     to_generic_streaming_chunk,
 )
 
@@ -69,15 +69,6 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
     messages.append(tool_instruction)
 
 
-def _generate_timestamp() -> str:
-    """
-    Generate timestamp in format YYYYmmdd_HHMMSS_ffff.
-    """
-    now = datetime.now(timezone.utc)
-    # Remove last 2 digits to only leave milliseconds and a single highest digit of microseconds
-    return now.strftime("%Y%m%d_%H%M%S_%f")[:-2]
-
-
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
@@ -105,11 +96,11 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "COMPLETION"
 
-            final_model, extra_params = route_model(model)
-            optional_params.update(extra_params)
+            model_route = ModelRoute(model)
+            optional_params.update(model_route.extra_params)
             optional_params["stream"] = False
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
@@ -117,7 +108,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-completion"
 
             _adapt_for_non_anthropic_models(
-                model=final_model,
+                model=model_route.target_model,
                 messages=messages,
                 optional_params=optional_params,
             )
@@ -136,7 +127,7 @@ class CustomLLMRouter(CustomLLM):
                 )
 
             response = litellm.responses(  # TODO Check all params are supported
-                model=final_model,
+                model=model_route.target_model,
                 input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
@@ -174,11 +165,11 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "ACOMPLETION"
 
-            final_model, extra_params = route_model(model)
-            optional_params.update(extra_params)
+            model_route = ModelRoute(model)
+            optional_params.update(model_route.extra_params)
             optional_params["stream"] = False
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
@@ -186,7 +177,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-acompletion"
 
             _adapt_for_non_anthropic_models(
-                model=final_model,
+                model=model_route.target_model,
                 messages=messages,
                 optional_params=optional_params,
             )
@@ -205,7 +196,7 @@ class CustomLLMRouter(CustomLLM):
                 )
 
             response = await litellm.aresponses(  # TODO Check all params are supported
-                model=final_model,
+                model=model_route.target_model,
                 input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
@@ -243,11 +234,11 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "STREAMING"
 
-            final_model, extra_params = route_model(model)
-            optional_params.update(extra_params)
+            model_route = ModelRoute(model)
+            optional_params.update(model_route.extra_params)
             optional_params["stream"] = True
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
@@ -255,7 +246,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-streaming"
 
             _adapt_for_non_anthropic_models(
-                model=final_model,
+                model=model_route.target_model,
                 messages=messages,
                 optional_params=optional_params,
             )
@@ -274,7 +265,7 @@ class CustomLLMRouter(CustomLLM):
                 )
 
             response = litellm.responses(  # TODO Check all params are supported
-                model=final_model,
+                model=model_route.target_model,
                 input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
@@ -320,11 +311,11 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "ASTREAMING"
 
-            final_model, extra_params = route_model(model)
-            optional_params.update(extra_params)
+            model_route = ModelRoute(model)
+            optional_params.update(model_route.extra_params)
             optional_params["stream"] = True
             optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
 
@@ -332,7 +323,7 @@ class CustomLLMRouter(CustomLLM):
             optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-astreaming"
 
             _adapt_for_non_anthropic_models(
-                model=final_model,
+                model=model_route.target_model,
                 messages=messages,
                 optional_params=optional_params,
             )
@@ -351,7 +342,7 @@ class CustomLLMRouter(CustomLLM):
                 )
 
             response = await litellm.aresponses(  # TODO Check all params are supported
-                model=final_model,
+                model=model_route.target_model,
                 input=messages_respapi,
                 logger_fn=logger_fn,
                 headers=headers or {},
