@@ -3,8 +3,9 @@
 """
 NOTE: The utilities in this module were mostly vibe-coded without review.
 """
-from copy import deepcopy
 import json
+from copy import deepcopy
+from datetime import datetime, timezone
 from typing import Any, Optional, Union
 
 from litellm import GenericStreamingChunk, ModelResponse, ResponsesAPIResponse
@@ -32,6 +33,15 @@ def env_var_to_bool(value: Optional[str], default: str = "false") -> bool:
         True if the value (or default) is a truthy string, False otherwise
     """
     return (value or default).lower() in ("true", "1", "on", "yes", "y")
+
+
+def generate_timestamp() -> str:
+    """
+    Generate timestamp in format YYYYmmdd_HHMMSS_ffff.
+    """
+    now = datetime.now(timezone.utc)
+    # Remove last 2 digits to only leave milliseconds and a single highest digit of microseconds
+    return now.strftime("%Y%m%d_%H%M%S_%f")[:-2]
 
 
 def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:

@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
@@ -13,6 +12,7 @@ from proxy.utils import (
     convert_chat_messages_to_respapi,
     convert_chat_params_to_respapi,
     convert_respapi_to_model_response,
+    generate_timestamp,
     to_generic_streaming_chunk,
 )
 
@@ -69,15 +69,6 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
     messages.append(tool_instruction)
 
 
-def _generate_timestamp() -> str:
-    """
-    Generate timestamp in format YYYYmmdd_HHMMSS_ffff.
-    """
-    now = datetime.now(timezone.utc)
-    # Remove last 2 digits to only leave milliseconds and a single highest digit of microseconds
-    return now.strftime("%Y%m%d_%H%M%S_%f")[:-2]
-
-
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
@@ -105,7 +96,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "COMPLETION"
 
             final_model, extra_params = route_model(model)
@@ -174,7 +165,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "ACOMPLETION"
 
             final_model, extra_params = route_model(model)
@@ -243,7 +234,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "STREAMING"
 
             final_model, extra_params = route_model(model)
@@ -320,7 +311,7 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
-            timestamp = _generate_timestamp()
+            timestamp = generate_timestamp()
             calling_method = "ASTREAMING"
 
             final_model, extra_params = route_model(model)
