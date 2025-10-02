@@ -14,9 +14,9 @@ from proxy.config import (
 
 
 class ModelRoute:
-    requested_model: str
-    remapped_to: str
-    target_model: str
+    requested_model: str  # May or may not have a provider prefix
+    remapped_to: str  # May or may not have a provider prefix
+    target_model: str  # ALWAYS has a provider prefix ("provider/model_name")
     extra_params: dict[str, Any]
     use_responses_api: bool = ALWAYS_USE_RESPONSES_API
 
