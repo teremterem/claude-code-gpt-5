@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Deploy claude-code-gpt-5 Docker container
-# This script pulls and runs the Docker image from GHCR
+# This script pulls the Docker image from GHCR and runs it in the background
 
 set -e
 
@@ -36,7 +36,16 @@ echo "🔗 Proxy URL: http://localhost:${PROXY_PORT}"
 echo "📊 Health check: curl http://localhost:${PROXY_PORT}/health"
 echo ""
 echo "📝 Usage with Claude Code:"
+echo ""
 echo "   ANTHROPIC_BASE_URL=http://localhost:${PROXY_PORT} claude"
 echo ""
-echo "🛑 To stop: docker stop ${PROXY_CONTAINER_NAME}"
+echo "      OR"
+echo ""
+echo "   ANTHROPIC_API_KEY=\"<LITELLM_MASTER_KEY>\" \\"
+echo "   ANTHROPIC_BASE_URL=http://localhost:${PROXY_PORT} \\"
+echo "   claude"
+echo ""
+echo "❌ To stop and remove container: ./stop-docker.sh"
+echo "🛑 To stop container: docker stop ${PROXY_CONTAINER_NAME}"
+echo "🗑️  To remove container: docker rm ${PROXY_CONTAINER_NAME}"
 echo "🔍 To view logs: docker logs -f ${PROXY_CONTAINER_NAME}"
