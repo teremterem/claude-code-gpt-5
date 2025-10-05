@@ -21,6 +21,7 @@ def write_request_trace(
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     file = TRACES_DIR / f"{timestamp}_REQUEST.md"
     if file.exists():
+        # TODO Replace with a warning instead ?
         raise FileExistsError(f"File {file} already exists")
 
     with file.open("w", encoding="utf-8") as f:
@@ -62,6 +63,7 @@ def write_response_trace(
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     file = TRACES_DIR / f"{timestamp}_RESPONSE.md"
     if file.exists():
+        # TODO Replace with a warning instead ?
         raise FileExistsError(f"File {file} already exists")
 
     with file.open("w", encoding="utf-8") as f:
@@ -90,6 +92,7 @@ def write_streaming_response_trace(
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     file = TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md"
     if file.exists():
+        # TODO Replace with a warning instead ?
         raise FileExistsError(f"File {file} already exists")
 
     with file.open("w", encoding="utf-8") as f:
