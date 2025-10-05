@@ -37,19 +37,15 @@ def env_var_to_bool(value: Optional[str], default: str = "false") -> bool:
 
 def generate_timestamp() -> str:
     """
-    Generate timestamp in format YYYYmmdd_HHMMSS_fffff.
+    Generate timestamp in format YYYYmmdd_HHMMSS_fff.
 
-    NOTE: Keeping only five highest digits of microseconds, instead of all six
-    or only four, makes it easier not to visually confuse them with HHMM or
-    HHMMSS.
+    An example of how these timestamps are used later:
 
-    One example of how these timestamps are used:
-
-    `.outbound_traces/20251005_140642_18050_RESPONSE_STREAM.md`
+    `.traces/20251005_140642_180_RESPONSE_STREAM.md`
     """
     now = datetime.now(timezone.utc)
-    # Remove the last digit to only leave five highest digits of microseconds
-    return now.strftime("%Y%m%d_%H%M%S_%f")[:-1]
+    # Keep only milliseconds (first 3 digits of microseconds)
+    return now.strftime("%Y%m%d_%H%M%S_%f")[:-3]
 
 
 def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:

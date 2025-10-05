@@ -19,7 +19,11 @@ def write_request_trace(
     params_respapi: Optional[dict],
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
+    file = TRACES_DIR / f"{timestamp}_REQUEST.md"
+    if file.exists():
+        raise FileExistsError(f"File {file} already exists")
+
+    with file.open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method.upper()}\n\n")
 
         f.write("## Request Messages\n\n")
@@ -56,7 +60,11 @@ def write_response_trace(
     response_complapi: ModelResponse,
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
+    file = TRACES_DIR / f"{timestamp}_RESPONSE.md"
+    if file.exists():
+        raise FileExistsError(f"File {file} already exists")
+
+    with file.open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method.upper()}\n\n")
 
         f.write("## Response\n\n")
@@ -80,7 +88,11 @@ def write_streaming_response_trace(
     complapi_chunks = complapi_chunks or []
 
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
+    file = TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md"
+    if file.exists():
+        raise FileExistsError(f"File {file} already exists")
+
+    with file.open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method.upper()}\n\n")
 
         zipped = zip_longest(respapi_chunks, complapi_chunks, generic_chunks)
