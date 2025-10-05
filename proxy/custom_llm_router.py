@@ -26,7 +26,7 @@ from proxy.utils import (
 )
 
 
-def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params: dict) -> None:
+def _adapt_for_non_anthropic_models(model: str, messages_complapi: list, params_complapi: dict) -> None:
     """
     Perform necessary prompt injections to adjust certain requests to work with non-Anthropic models.
 
@@ -43,16 +43,16 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
         return
 
     if (
-        optional_params.get("max_tokens") == 1
-        and len(messages) == 1
-        and messages[0].get("role") == "user"
-        and messages[0].get("content") == "test"
+        params_complapi.get("max_tokens") == 1
+        and len(messages_complapi) == 1
+        and messages_complapi[0].get("role") == "user"
+        and messages_complapi[0].get("content") == "test"
     ):
         # This is a "connectivity test" request by Claude Code => we need to make sure non-Anthropic models don't fail
         # because of exceeding max_tokens
-        optional_params["max_tokens"] = 100
-        messages[0]["role"] = "system"
-        messages[0][
+        params_complapi["max_tokens"] = 100
+        messages_complapi[0]["role"] = "system"
+        messages_complapi[0][
             "content"
         ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
         return
@@ -61,7 +61,7 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
         return
 
     # Only add the instruction if at least two tools and/or functions are present in the request (in total)
-    num_tools = len(optional_params.get("tools") or []) + len(optional_params.get("functions") or [])
+    num_tools = len(params_complapi.get("tools") or []) + len(params_complapi.get("functions") or [])
     if num_tools < 2:
         return
 
@@ -75,7 +75,7 @@ def _adapt_for_non_anthropic_models(model: str, messages: list, optional_params:
             "turn."
         ),
     }
-    messages.append(tool_instruction)
+    messages_complapi.append(tool_instruction)
 
 
 class CustomLLMRouter(CustomLLM):
@@ -107,31 +107,34 @@ class CustomLLMRouter(CustomLLM):
         try:
             timestamp = generate_timestamp()
             calling_method = "COMPLETION"
-
             model_route = ModelRoute(model)
-            optional_params.update(model_route.extra_params)
-            optional_params["stream"] = False
-            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            params_complapi = optional_params.copy()
+            messages_complapi = messages.copy()
+
+            params_complapi.update(model_route.extra_params)
+            params_complapi["stream"] = False
+            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-completion"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-completion"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,
-                messages=messages,
-                optional_params=optional_params,
+                messages_complapi=messages_complapi,
+                params_complapi=params_complapi,
             )
 
             if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages)
-                params_respapi = convert_chat_params_to_respapi(optional_params)
+                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
+                params_respapi = convert_chat_params_to_respapi(params_complapi)
 
                 if RESPAPI_TRACING_ENABLED:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
-                        messages_complapi=messages,
-                        params_complapi=optional_params,
+                        messages_complapi=messages_complapi,
+                        params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
                         params_respapi=params_respapi,
                     )
@@ -154,13 +157,13 @@ class CustomLLMRouter(CustomLLM):
             else:
                 response_complapi: ModelResponse = litellm.completion(
                     model=model_route.target_model,
-                    messages=messages,
+                    messages=messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     drop_params=True,  # Drop any params that are not supported by the provider
-                    **optional_params,
+                    **params_complapi,
                 )
 
             return response_complapi
@@ -190,31 +193,34 @@ class CustomLLMRouter(CustomLLM):
         try:
             timestamp = generate_timestamp()
             calling_method = "ACOMPLETION"
-
             model_route = ModelRoute(model)
-            optional_params.update(model_route.extra_params)
-            optional_params["stream"] = False
-            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            params_complapi = optional_params.copy()
+            messages_complapi = messages.copy()
+
+            params_complapi.update(model_route.extra_params)
+            params_complapi["stream"] = False
+            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-acompletion"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-acompletion"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,
-                messages=messages,
-                optional_params=optional_params,
+                messages_complapi=messages_complapi,
+                params_complapi=params_complapi,
             )
 
             if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages)
-                params_respapi = convert_chat_params_to_respapi(optional_params)
+                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
+                params_respapi = convert_chat_params_to_respapi(params_complapi)
 
                 if RESPAPI_TRACING_ENABLED:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
-                        messages_complapi=messages,
-                        params_complapi=optional_params,
+                        messages_complapi=messages_complapi,
+                        params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
                         params_respapi=params_respapi,
                     )
@@ -237,13 +243,13 @@ class CustomLLMRouter(CustomLLM):
             else:
                 response_complapi: ModelResponse = await litellm.acompletion(
                     model=model_route.target_model,
-                    messages=messages,
+                    messages=messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     drop_params=True,  # Drop any params that are not supported by the provider
-                    **optional_params,
+                    **params_complapi,
                 )
 
             return response_complapi
@@ -273,31 +279,34 @@ class CustomLLMRouter(CustomLLM):
         try:
             timestamp = generate_timestamp()
             calling_method = "STREAMING"
-
             model_route = ModelRoute(model)
-            optional_params.update(model_route.extra_params)
-            optional_params["stream"] = True
-            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            params_complapi = optional_params.copy()
+            messages_complapi = messages.copy()
+
+            params_complapi.update(model_route.extra_params)
+            params_complapi["stream"] = True
+            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-streaming"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-streaming"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,
-                messages=messages,
-                optional_params=optional_params,
+                messages_complapi=messages_complapi,
+                params_complapi=params_complapi,
             )
 
             if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages)
-                params_respapi = convert_chat_params_to_respapi(optional_params)
+                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
+                params_respapi = convert_chat_params_to_respapi(params_complapi)
 
                 if RESPAPI_TRACING_ENABLED:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
-                        messages_complapi=messages,
-                        params_complapi=optional_params,
+                        messages_complapi=messages_complapi,
+                        params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
                         params_respapi=params_respapi,
                     )
@@ -330,13 +339,13 @@ class CustomLLMRouter(CustomLLM):
             else:
                 resp_stream_complapi: CustomStreamWrapper = litellm.completion(
                     model=model_route.target_model,
-                    messages=messages,
+                    messages=messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     drop_params=True,  # Drop any params that are not supported by the provider
-                    **optional_params,
+                    **params_complapi,
                 )
                 for complapi_chunk in resp_stream_complapi:
                     generic_chunk = to_generic_streaming_chunk(complapi_chunk)
@@ -367,31 +376,34 @@ class CustomLLMRouter(CustomLLM):
         try:
             timestamp = generate_timestamp()
             calling_method = "ASTREAMING"
-
             model_route = ModelRoute(model)
-            optional_params.update(model_route.extra_params)
-            optional_params["stream"] = True
-            optional_params.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            params_complapi = optional_params.copy()
+            messages_complapi = messages.copy()
+
+            params_complapi.update(model_route.extra_params)
+            params_complapi["stream"] = True
+            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
 
             # For Langfuse
-            optional_params.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-astreaming"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-astreaming"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,
-                messages=messages,
-                optional_params=optional_params,
+                messages_complapi=messages_complapi,
+                params_complapi=params_complapi,
             )
 
             if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages)
-                params_respapi = convert_chat_params_to_respapi(optional_params)
+                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
+                params_respapi = convert_chat_params_to_respapi(params_complapi)
 
                 if RESPAPI_TRACING_ENABLED:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
-                        messages_complapi=messages,
-                        params_complapi=optional_params,
+                        messages_complapi=messages_complapi,
+                        params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
                         params_respapi=params_respapi,
                     )
@@ -424,13 +436,13 @@ class CustomLLMRouter(CustomLLM):
             else:
                 resp_stream_complapi: CustomStreamWrapper = await litellm.acompletion(
                     model=model_route.target_model,
-                    messages=messages,
+                    messages=messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     drop_params=True,  # Drop any params that are not supported by the provider
-                    **optional_params,
+                    **params_complapi,
                 )
                 async for complapi_chunk in resp_stream_complapi:
                     generic_chunk = to_generic_streaming_chunk(complapi_chunk)
