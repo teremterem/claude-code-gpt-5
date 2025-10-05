@@ -15,8 +15,8 @@ from litellm import (
 )
 
 from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, WRITE_TRACES_TO_FILES
-from proxy.responses_api_tracing import write_request_trace, write_response_trace, write_streaming_response_trace
 from proxy.route_model import ModelRoute
+from proxy.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_response_trace
 from proxy.utils import (
     ProxyError,
     convert_chat_messages_to_respapi,
