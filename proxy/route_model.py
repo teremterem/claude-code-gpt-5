@@ -5,11 +5,9 @@ from proxy.config import (
     ALWAYS_USE_RESPONSES_API,
     ANTHROPIC,
     OPENAI,
-    RECOMMEND_SETTING_REMAPS,
     REMAP_CLAUDE_HAIKU_TO,
     REMAP_CLAUDE_OPUS_TO,
     REMAP_CLAUDE_SONNET_TO,
-    recommend_setting_remaps,
 )
 
 
@@ -28,9 +26,6 @@ class ModelRoute:
 
         self._log_model_route()
 
-        if RECOMMEND_SETTING_REMAPS:
-            recommend_setting_remaps()
-
     def _remap_model(self) -> str:
         self.remapped_to = self.requested_model
 
@@ -47,7 +42,7 @@ class ModelRoute:
                 # Here we assume the requested model is a Sonnet model (but
                 # also fallback to this remap in case it is some new, unknown
                 # model by Anthropic)
-                # TODO Add a warning if the requested model is completely unknown ?
+                # TODO Add a warning if the requested model is unknown ?
                 self.remapped_to = REMAP_CLAUDE_SONNET_TO
 
         self.remapped_to = self.remapped_to.strip()
@@ -89,7 +84,7 @@ class ModelRoute:
         self.extra_params = extra_params
 
         if "gpt-5-codex" in model_name_only:
-            # GPT-5-Codex does not support ChatCompletions API => use Responses API
+            # GPT-5-Codex does not support ChatCompletions API
             self.use_responses_api = True
 
     def _log_model_route(self) -> None:

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import litellm
 
-from proxy.utils import ProxyError, env_var_to_bool
+from proxy.utils import env_var_to_bool
 
 
 # We don't need to do `dotenv.load_dotenv()` - litellm does this for us upon
@@ -12,22 +12,14 @@ from proxy.utils import ProxyError, env_var_to_bool
 #  DEV (although, when it is not set, it is DEV by default). What would be the
 #  best way to adapt to the approach taken by litellm ?
 
+# NOTE: If any of the three env vars below are set to an empty string, the
+# defaults will NOT be used. The defaults are used only when these env vars are
+# not set at all. This is intentional - setting them to empty strings should
+# result in no remapping.
+REMAP_CLAUDE_HAIKU_TO = os.getenv("REMAP_CLAUDE_HAIKU_TO", "gpt-5-mini-reason-minimal")
+REMAP_CLAUDE_SONNET_TO = os.getenv("REMAP_CLAUDE_SONNET_TO", "gpt-5-codex-reason-medium")
+REMAP_CLAUDE_OPUS_TO = os.getenv("REMAP_CLAUDE_OPUS_TO", "gpt-5-codex-reason-high")
 
-REMAP_CLAUDE_HAIKU_TO = os.getenv("REMAP_CLAUDE_HAIKU_TO")
-REMAP_CLAUDE_SONNET_TO = os.getenv("REMAP_CLAUDE_SONNET_TO")
-REMAP_CLAUDE_OPUS_TO = os.getenv("REMAP_CLAUDE_OPUS_TO")
-
-RECOMMEND_SETTING_REMAPS = (
-    "REMAP_CLAUDE_HAIKU_TO" not in os.environ
-    or "REMAP_CLAUDE_SONNET_TO" not in os.environ
-    or "REMAP_CLAUDE_OPUS_TO" not in os.environ
-)
-
-if "OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE" in os.environ:
-    raise ProxyError(
-        "The OPENAI_ENFORCE_ONE_TOOL_CALL_PER_RESPONSE environment variable is no longer supported. "
-        "Please use the ENFORCE_ONE_TOOL_CALL_PER_RESPONSE environment variable instead."
-    )
 ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = env_var_to_bool(os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPONSE"), "true")
 
 ALWAYS_USE_RESPONSES_API = env_var_to_bool(os.getenv("ALWAYS_USE_RESPONSES_API"), "false")
@@ -50,16 +42,3 @@ if os.getenv("LANGFUSE_SECRET_KEY") or os.getenv("LANGFUSE_PUBLIC_KEY") or os.ge
         print("\033[1;34mEnabling Langfuse logging...\033[0m")
         litellm.success_callback = ["langfuse"]
         litellm.failure_callback = ["langfuse"]
-
-
-def recommend_setting_remaps():
-    # TODO Turn this print into a log record ? Or, maybe, into a Python warning ?
-    print(
-        "\033[1;31mWARNING: It is recommended to set the REMAP_CLAUDE_HAIKU_TO, REMAP_CLAUDE_SONNET_TO, and "
-        "REMAP_CLAUDE_OPUS_TO environment variables.\n"
-        "Please refer to .env.template for recommended values (and an explanation).\033[0m"
-    )
-
-
-if RECOMMEND_SETTING_REMAPS:
-    recommend_setting_remaps()

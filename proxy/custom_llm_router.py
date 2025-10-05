@@ -29,15 +29,18 @@ from proxy.utils import (
 
 def _adapt_for_non_anthropic_models(model: str, messages_complapi: list, params_complapi: dict) -> None:
     """
-    Perform necessary prompt injections to adjust certain requests to work with non-Anthropic models.
+    Perform necessary prompt injections to adjust certain requests to work with
+    non-Anthropic models.
 
     Args:
         model: The model string (e.g., "openai/gpt-5") to adapt for
         messages: Messages list to modify "in place"
-        optional_params: Request params which may include tools/functions (may also be modified "in place")
+        optional_params: Request params which may include tools/functions (may
+            also be modified "in place")
 
     Returns:
-        Modified messages list with additional instruction for non-Anthropic models
+        Modified messages list with additional instruction for non-Anthropic
+        models
     """
     if model.startswith(f"{ANTHROPIC}/"):
         # Do not alter requests for Anthropic models
@@ -115,7 +118,11 @@ class CustomLLMRouter(CustomLLM):
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = False
-            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            if model_route.use_responses_api:
+                # TODO What's a more reasonable way to decide when to unset
+                #  temperature ?
+                params_complapi.pop("temperature", None)
 
             # For Langfuse
             params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-completion"
@@ -163,7 +170,8 @@ class CustomLLMRouter(CustomLLM):
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    drop_params=True,  # Drop any params that are not supported by the provider
+                    # Drop any params that are not supported by the provider
+                    drop_params=True,
                     **params_complapi,
                 )
 
@@ -201,7 +209,11 @@ class CustomLLMRouter(CustomLLM):
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = False
-            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            if model_route.use_responses_api:
+                # TODO What's a more reasonable way to decide when to unset
+                #  temperature ?
+                params_complapi.pop("temperature", None)
 
             # For Langfuse
             params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-acompletion"
@@ -249,7 +261,8 @@ class CustomLLMRouter(CustomLLM):
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    drop_params=True,  # Drop any params that are not supported by the provider
+                    # Drop any params that are not supported by the provider
+                    drop_params=True,
                     **params_complapi,
                 )
 
@@ -287,7 +300,11 @@ class CustomLLMRouter(CustomLLM):
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = True
-            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            if model_route.use_responses_api:
+                # TODO What's a more reasonable way to decide when to unset
+                #  temperature ?
+                params_complapi.pop("temperature", None)
 
             # For Langfuse
             params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-streaming"
@@ -345,7 +362,8 @@ class CustomLLMRouter(CustomLLM):
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    drop_params=True,  # Drop any params that are not supported by the provider
+                    # Drop any params that are not supported by the provider
+                    drop_params=True,
                     **params_complapi,
                 )
                 for complapi_chunk in resp_stream_complapi:
@@ -384,7 +402,11 @@ class CustomLLMRouter(CustomLLM):
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = True
-            params_complapi.pop("temperature", None)  # TODO How to do it only when needed ?
+
+            if model_route.use_responses_api:
+                # TODO What's a more reasonable way to decide when to unset
+                #  temperature ?
+                params_complapi.pop("temperature", None)
 
             # For Langfuse
             params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-astreaming"
@@ -442,7 +464,8 @@ class CustomLLMRouter(CustomLLM):
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    drop_params=True,  # Drop any params that are not supported by the provider
+                    # Drop any params that are not supported by the provider
+                    drop_params=True,
                     **params_complapi,
                 )
                 async for complapi_chunk in resp_stream_complapi:

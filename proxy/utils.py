@@ -54,13 +54,15 @@ def generate_timestamp() -> str:
 
 def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
     """
-    Best-effort convert a LiteLLM ModelResponseStream chunk into GenericStreamingChunk.
+    Best-effort convert a LiteLLM ModelResponseStream chunk into
+    GenericStreamingChunk.
 
     GenericStreamingChunk TypedDict keys:
       - text: str (required)
       - is_finished: bool (required)
       - finish_reason: str (required)
-      - usage: Optional[ChatCompletionUsageBlock] (we pass None for incremental chunks)
+      - usage: Optional[ChatCompletionUsageBlock] (we pass None for incremental
+        chunks)
       - index: int (default 0)
       - tool_use: Optional[ChatCompletionToolCallChunk] (default None)
       - provider_specific_fields: Optional[dict]
