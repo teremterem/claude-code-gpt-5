@@ -141,6 +141,8 @@ class CustomLLMRouter(CustomLLM):
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
+                        messages_original=messages,
+                        params_original=optional_params,
                         messages_complapi=messages_complapi,
                         params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
@@ -160,7 +162,12 @@ class CustomLLMRouter(CustomLLM):
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
                 if WRITE_TRACES_TO_FILES:
-                    write_response_trace(timestamp, calling_method, response_respapi, response_complapi)
+                    write_response_trace(
+                        timestamp=timestamp,
+                        calling_method=calling_method,
+                        response_respapi=response_respapi,
+                        response_complapi=response_complapi,
+                    )
 
             else:
                 response_complapi: ModelResponse = litellm.completion(
@@ -232,6 +239,8 @@ class CustomLLMRouter(CustomLLM):
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
+                        messages_original=messages,
+                        params_original=optional_params,
                         messages_complapi=messages_complapi,
                         params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
@@ -251,7 +260,12 @@ class CustomLLMRouter(CustomLLM):
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
                 if WRITE_TRACES_TO_FILES:
-                    write_response_trace(timestamp, calling_method, response_respapi, response_complapi)
+                    write_response_trace(
+                        timestamp=timestamp,
+                        calling_method=calling_method,
+                        response_respapi=response_respapi,
+                        response_complapi=response_complapi,
+                    )
 
             else:
                 response_complapi: ModelResponse = await litellm.acompletion(
@@ -323,6 +337,8 @@ class CustomLLMRouter(CustomLLM):
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
+                        messages_original=messages,
+                        params_original=optional_params,
                         messages_complapi=messages_complapi,
                         params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
@@ -341,6 +357,7 @@ class CustomLLMRouter(CustomLLM):
                 )
 
                 respapi_chunks = []
+                complapi_chunks = []
                 generic_chunks = []
                 for respapi_chunk in resp_stream_respapi:
                     generic_chunk = to_generic_streaming_chunk(respapi_chunk)
@@ -352,7 +369,13 @@ class CustomLLMRouter(CustomLLM):
                     yield generic_chunk
 
                 if WRITE_TRACES_TO_FILES:
-                    write_streaming_response_trace(timestamp, calling_method, respapi_chunks, generic_chunks)
+                    write_streaming_response_trace(
+                        timestamp=timestamp,
+                        calling_method=calling_method,
+                        respapi_chunks=respapi_chunks,
+                        complapi_chunks=complapi_chunks,
+                        generic_chunks=generic_chunks,
+                    )
 
             else:
                 resp_stream_complapi: CustomStreamWrapper = litellm.completion(
@@ -425,6 +448,8 @@ class CustomLLMRouter(CustomLLM):
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
+                        messages_original=messages,
+                        params_original=optional_params,
                         messages_complapi=messages_complapi,
                         params_complapi=params_complapi,
                         messages_respapi=messages_respapi,
@@ -443,6 +468,7 @@ class CustomLLMRouter(CustomLLM):
                 )
 
                 respapi_chunks = []
+                complapi_chunks = []
                 generic_chunks = []
                 async for respapi_chunk in resp_stream_respapi:
                     generic_chunk = to_generic_streaming_chunk(respapi_chunk)
@@ -454,7 +480,13 @@ class CustomLLMRouter(CustomLLM):
                     yield generic_chunk
 
                 if WRITE_TRACES_TO_FILES:
-                    write_streaming_response_trace(timestamp, calling_method, respapi_chunks, generic_chunks)
+                    write_streaming_response_trace(
+                        timestamp=timestamp,
+                        calling_method=calling_method,
+                        respapi_chunks=respapi_chunks,
+                        complapi_chunks=complapi_chunks,
+                        generic_chunks=generic_chunks,
+                    )
 
             else:
                 resp_stream_complapi: CustomStreamWrapper = await litellm.acompletion(
