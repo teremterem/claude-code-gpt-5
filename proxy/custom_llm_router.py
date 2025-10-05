@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
@@ -109,8 +110,8 @@ class CustomLLMRouter(CustomLLM):
             calling_method = "COMPLETION"
             model_route = ModelRoute(model)
 
-            params_complapi = optional_params.copy()
-            messages_complapi = messages.copy()
+            params_complapi = deepcopy(optional_params)
+            messages_complapi = deepcopy(messages)
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = False
@@ -195,8 +196,8 @@ class CustomLLMRouter(CustomLLM):
             calling_method = "ACOMPLETION"
             model_route = ModelRoute(model)
 
-            params_complapi = optional_params.copy()
-            messages_complapi = messages.copy()
+            params_complapi = deepcopy(optional_params)
+            messages_complapi = deepcopy(messages)
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = False
@@ -281,8 +282,8 @@ class CustomLLMRouter(CustomLLM):
             calling_method = "STREAMING"
             model_route = ModelRoute(model)
 
-            params_complapi = optional_params.copy()
-            messages_complapi = messages.copy()
+            params_complapi = deepcopy(optional_params)
+            messages_complapi = deepcopy(messages)
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = True
@@ -378,8 +379,8 @@ class CustomLLMRouter(CustomLLM):
             calling_method = "ASTREAMING"
             model_route = ModelRoute(model)
 
-            params_complapi = optional_params.copy()
-            messages_complapi = messages.copy()
+            params_complapi = deepcopy(optional_params)
+            messages_complapi = deepcopy(messages)
 
             params_complapi.update(model_route.extra_params)
             params_complapi["stream"] = True
