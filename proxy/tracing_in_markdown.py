@@ -1,5 +1,6 @@
-from itertools import zip_longest
 import json
+from itertools import zip_longest
+from typing import Optional
 
 from litellm import ModelResponse, ResponsesAPIResponse
 
@@ -14,8 +15,8 @@ def write_request_trace(
     params_original: dict,
     messages_complapi: list,
     params_complapi: dict,
-    messages_respapi: list,
-    params_respapi: dict,
+    messages_respapi: Optional[list],
+    params_respapi: Optional[dict],
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
@@ -30,8 +31,9 @@ def write_request_trace(
         f.write("### ChatCompletions API:\n")
         f.write(f"```json\n{json.dumps(messages_complapi, indent=2)}\n```\n\n")
 
-        f.write("### Responses API:\n")
-        f.write(f"```json\n{json.dumps(messages_respapi, indent=2)}\n```\n\n")
+        if messages_respapi is not None:
+            f.write("### Responses API:\n")
+            f.write(f"```json\n{json.dumps(messages_respapi, indent=2)}\n```\n\n")
 
         f.write("## Request Params\n\n")
 
@@ -42,14 +44,15 @@ def write_request_trace(
         f.write("### ChatCompletions API:\n")
         f.write(f"```json\n{json.dumps(params_complapi, indent=2)}\n```\n\n")
 
-        f.write("### Responses API:\n")
-        f.write(f"```json\n{json.dumps(params_respapi, indent=2)}\n```\n")
+        if params_respapi is not None:
+            f.write("### Responses API:\n")
+            f.write(f"```json\n{json.dumps(params_respapi, indent=2)}\n```\n")
 
 
 def write_response_trace(
     timestamp: str,
     calling_method: str,
-    response_respapi: ResponsesAPIResponse,
+    response_respapi: Optional[ResponsesAPIResponse],
     response_complapi: ModelResponse,
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
@@ -58,8 +61,9 @@ def write_response_trace(
 
         f.write("## Response\n\n")
 
-        f.write("### Responses API:\n")
-        f.write(f"```json\n{response_respapi.model_dump_json(indent=2)}\n```\n\n")
+        if response_respapi is not None:
+            f.write("### Responses API:\n")
+            f.write(f"```json\n{response_respapi.model_dump_json(indent=2)}\n```\n\n")
 
         f.write("### ChatCompletions API:\n")
         f.write(f"```json\n{response_complapi.model_dump_json(indent=2)}\n```\n")
@@ -68,13 +72,12 @@ def write_response_trace(
 def write_streaming_response_trace(
     timestamp: str,
     calling_method: str,
-    respapi_chunks: list,
-    complapi_chunks: list,
+    respapi_chunks: Optional[list],
+    complapi_chunks: Optional[list],
     generic_chunks: list,
 ) -> None:
     respapi_chunks = respapi_chunks or []
     complapi_chunks = complapi_chunks or []
-    generic_chunks = generic_chunks or []
 
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
@@ -88,7 +91,6 @@ def write_streaming_response_trace(
                 f.write(f"### Responses API:\n```json\n{respapi_chunk.model_dump_json(indent=2)}\n```\n\n")
             if complapi_chunk is not None:
                 f.write(f"### ChatCompletions API:\n```json\n{complapi_chunk.model_dump_json(indent=2)}\n```\n\n")
-            if generic_chunk is not None:
-                # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not
-                #  just a dict
-                f.write(f"### GenericStreamingChunk:\n```json\n{json.dumps(generic_chunk, indent=2)}\n```\n\n")
+            # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not
+            #  just a dict
+            f.write(f"### GenericStreamingChunk:\n```json\n{json.dumps(generic_chunk, indent=2)}\n```\n\n")
