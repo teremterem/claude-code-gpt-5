@@ -136,19 +136,23 @@ class CustomLLMRouter(CustomLLM):
             if model_route.use_responses_api:
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
+            else:
+                messages_respapi = None
+                params_respapi = None
 
-                if WRITE_TRACES_TO_FILES:
-                    write_request_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        messages_original=messages,
-                        params_original=optional_params,
-                        messages_complapi=messages_complapi,
-                        params_complapi=params_complapi,
-                        messages_respapi=messages_respapi,
-                        params_respapi=params_respapi,
-                    )
+            if WRITE_TRACES_TO_FILES:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_original=messages,
+                    params_original=optional_params,
+                    messages_complapi=messages_complapi,
+                    params_complapi=params_complapi,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
+            if model_route.use_responses_api:
                 response_respapi: ResponsesAPIResponse = litellm.responses(
                     # TODO Make sure all params are supported
                     model=model_route.target_model,
@@ -161,15 +165,8 @@ class CustomLLMRouter(CustomLLM):
                 )
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
-                if WRITE_TRACES_TO_FILES:
-                    write_response_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        response_respapi=response_respapi,
-                        response_complapi=response_complapi,
-                    )
-
             else:
+                response_respapi = None
                 response_complapi: ModelResponse = litellm.completion(
                     model=model_route.target_model,
                     messages=messages_complapi,
@@ -180,6 +177,14 @@ class CustomLLMRouter(CustomLLM):
                     # Drop any params that are not supported by the provider
                     drop_params=True,
                     **params_complapi,
+                )
+
+            if WRITE_TRACES_TO_FILES:
+                write_response_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    response_respapi=response_respapi,
+                    response_complapi=response_complapi,
                 )
 
             return response_complapi
@@ -234,19 +239,23 @@ class CustomLLMRouter(CustomLLM):
             if model_route.use_responses_api:
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
+            else:
+                messages_respapi = None
+                params_respapi = None
 
-                if WRITE_TRACES_TO_FILES:
-                    write_request_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        messages_original=messages,
-                        params_original=optional_params,
-                        messages_complapi=messages_complapi,
-                        params_complapi=params_complapi,
-                        messages_respapi=messages_respapi,
-                        params_respapi=params_respapi,
-                    )
+            if WRITE_TRACES_TO_FILES:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_original=messages,
+                    params_original=optional_params,
+                    messages_complapi=messages_complapi,
+                    params_complapi=params_complapi,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
+            if model_route.use_responses_api:
                 response_respapi: ResponsesAPIResponse = await litellm.aresponses(
                     # TODO Make sure all params are supported
                     model=model_route.target_model,
@@ -259,15 +268,8 @@ class CustomLLMRouter(CustomLLM):
                 )
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
-                if WRITE_TRACES_TO_FILES:
-                    write_response_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        response_respapi=response_respapi,
-                        response_complapi=response_complapi,
-                    )
-
             else:
+                response_respapi = None
                 response_complapi: ModelResponse = await litellm.acompletion(
                     model=model_route.target_model,
                     messages=messages_complapi,
@@ -278,6 +280,14 @@ class CustomLLMRouter(CustomLLM):
                     # Drop any params that are not supported by the provider
                     drop_params=True,
                     **params_complapi,
+                )
+
+            if WRITE_TRACES_TO_FILES:
+                write_response_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    response_respapi=response_respapi,
+                    response_complapi=response_complapi,
                 )
 
             return response_complapi
@@ -332,20 +342,24 @@ class CustomLLMRouter(CustomLLM):
             if model_route.use_responses_api:
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
+            else:
+                messages_respapi = None
+                params_respapi = None
 
-                if WRITE_TRACES_TO_FILES:
-                    write_request_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        messages_original=messages,
-                        params_original=optional_params,
-                        messages_complapi=messages_complapi,
-                        params_complapi=params_complapi,
-                        messages_respapi=messages_respapi,
-                        params_respapi=params_respapi,
-                    )
+            if WRITE_TRACES_TO_FILES:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_original=messages,
+                    params_original=optional_params,
+                    messages_complapi=messages_complapi,
+                    params_complapi=params_complapi,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
-                resp_stream_respapi: BaseResponsesAPIStreamingIterator = litellm.responses(
+            if model_route.use_responses_api:
+                resp_stream: BaseResponsesAPIStreamingIterator = litellm.responses(
                     # TODO Make sure all params are supported
                     model=model_route.target_model,
                     input=messages_respapi,
@@ -356,29 +370,8 @@ class CustomLLMRouter(CustomLLM):
                     **params_respapi,
                 )
 
-                respapi_chunks = []
-                complapi_chunks = []
-                generic_chunks = []
-                for respapi_chunk in resp_stream_respapi:
-                    generic_chunk = to_generic_streaming_chunk(respapi_chunk)
-
-                    if WRITE_TRACES_TO_FILES:
-                        respapi_chunks.append(respapi_chunk)
-                        generic_chunks.append(generic_chunk)
-
-                    yield generic_chunk
-
-                if WRITE_TRACES_TO_FILES:
-                    write_streaming_response_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        respapi_chunks=respapi_chunks,
-                        complapi_chunks=complapi_chunks,
-                        generic_chunks=generic_chunks,
-                    )
-
             else:
-                resp_stream_complapi: CustomStreamWrapper = litellm.completion(
+                resp_stream: CustomStreamWrapper = litellm.completion(
                     model=model_route.target_model,
                     messages=messages_complapi,
                     logger_fn=logger_fn,
@@ -389,9 +382,31 @@ class CustomLLMRouter(CustomLLM):
                     drop_params=True,
                     **params_complapi,
                 )
-                for complapi_chunk in resp_stream_complapi:
-                    generic_chunk = to_generic_streaming_chunk(complapi_chunk)
-                    yield generic_chunk
+
+            respapi_chunks = []
+            complapi_chunks = []
+            generic_chunks = []
+
+            for resp_chunk in resp_stream:
+                generic_chunk = to_generic_streaming_chunk(resp_chunk)
+
+                if WRITE_TRACES_TO_FILES:
+                    if model_route.use_responses_api:
+                        respapi_chunks.append(resp_chunk)
+                    else:
+                        complapi_chunks.append(resp_chunk)
+                    generic_chunks.append(generic_chunk)
+
+                yield generic_chunk
+
+            if WRITE_TRACES_TO_FILES:
+                write_streaming_response_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    respapi_chunks=respapi_chunks,
+                    complapi_chunks=complapi_chunks,
+                    generic_chunks=generic_chunks,
+                )
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -443,20 +458,24 @@ class CustomLLMRouter(CustomLLM):
             if model_route.use_responses_api:
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
+            else:
+                messages_respapi = None
+                params_respapi = None
 
-                if WRITE_TRACES_TO_FILES:
-                    write_request_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        messages_original=messages,
-                        params_original=optional_params,
-                        messages_complapi=messages_complapi,
-                        params_complapi=params_complapi,
-                        messages_respapi=messages_respapi,
-                        params_respapi=params_respapi,
-                    )
+            if WRITE_TRACES_TO_FILES:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_original=messages,
+                    params_original=optional_params,
+                    messages_complapi=messages_complapi,
+                    params_complapi=params_complapi,
+                    messages_respapi=messages_respapi,
+                    params_respapi=params_respapi,
+                )
 
-                resp_stream_respapi: BaseResponsesAPIStreamingIterator = await litellm.aresponses(
+            if model_route.use_responses_api:
+                resp_stream: BaseResponsesAPIStreamingIterator = await litellm.aresponses(
                     # TODO Make sure all params are supported
                     model=model_route.target_model,
                     input=messages_respapi,
@@ -467,29 +486,8 @@ class CustomLLMRouter(CustomLLM):
                     **params_respapi,
                 )
 
-                respapi_chunks = []
-                complapi_chunks = []
-                generic_chunks = []
-                async for respapi_chunk in resp_stream_respapi:
-                    generic_chunk = to_generic_streaming_chunk(respapi_chunk)
-
-                    if WRITE_TRACES_TO_FILES:
-                        respapi_chunks.append(respapi_chunk)
-                        generic_chunks.append(generic_chunk)
-
-                    yield generic_chunk
-
-                if WRITE_TRACES_TO_FILES:
-                    write_streaming_response_trace(
-                        timestamp=timestamp,
-                        calling_method=calling_method,
-                        respapi_chunks=respapi_chunks,
-                        complapi_chunks=complapi_chunks,
-                        generic_chunks=generic_chunks,
-                    )
-
             else:
-                resp_stream_complapi: CustomStreamWrapper = await litellm.acompletion(
+                resp_stream: CustomStreamWrapper = await litellm.acompletion(
                     model=model_route.target_model,
                     messages=messages_complapi,
                     logger_fn=logger_fn,
@@ -500,9 +498,31 @@ class CustomLLMRouter(CustomLLM):
                     drop_params=True,
                     **params_complapi,
                 )
-                async for complapi_chunk in resp_stream_complapi:
-                    generic_chunk = to_generic_streaming_chunk(complapi_chunk)
-                    yield generic_chunk
+
+            respapi_chunks = []
+            complapi_chunks = []
+            generic_chunks = []
+
+            async for resp_chunk in resp_stream:
+                generic_chunk = to_generic_streaming_chunk(resp_chunk)
+
+                if WRITE_TRACES_TO_FILES:
+                    if model_route.use_responses_api:
+                        respapi_chunks.append(resp_chunk)
+                    else:
+                        complapi_chunks.append(resp_chunk)
+                    generic_chunks.append(generic_chunk)
+
+                yield generic_chunk
+
+            if WRITE_TRACES_TO_FILES:
+                write_streaming_response_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    respapi_chunks=respapi_chunks,
+                    complapi_chunks=complapi_chunks,
+                    generic_chunks=generic_chunks,
+                )
 
         except Exception as e:
             raise ProxyError(e) from e
