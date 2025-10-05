@@ -2,7 +2,15 @@ from typing import AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
-from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
+from litellm import (
+    BaseResponsesAPIStreamingIterator,
+    CustomLLM,
+    GenericStreamingChunk,
+    HTTPHandler,
+    ModelResponse,
+    AsyncHTTPHandler,
+    ResponsesAPIResponse,
+)
 
 from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, RESPAPI_TRACING_ENABLED
 from proxy.responses_api_tracing import write_request_trace, write_response_trace, write_streaming_response_trace
@@ -113,32 +121,46 @@ class CustomLLMRouter(CustomLLM):
                 optional_params=optional_params,
             )
 
-            messages_respapi = convert_chat_messages_to_respapi(messages)
-            params_respapi = convert_chat_params_to_respapi(optional_params)
+            if model_route.use_responses_api:
+                messages_respapi = convert_chat_messages_to_respapi(messages)
+                params_respapi = convert_chat_params_to_respapi(optional_params)
 
-            if RESPAPI_TRACING_ENABLED:
-                write_request_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
-                    messages_complapi=messages,
-                    params_complapi=optional_params,
-                    messages_respapi=messages_respapi,
-                    params_respapi=params_respapi,
+                if RESPAPI_TRACING_ENABLED:
+                    write_request_trace(
+                        timestamp=timestamp,
+                        calling_method=calling_method,
+                        messages_complapi=messages,
+                        params_complapi=optional_params,
+                        messages_respapi=messages_respapi,
+                        params_respapi=params_respapi,
+                    )
+
+                response_respapi: ResponsesAPIResponse = litellm.responses(
+                    # TODO Make sure all params are supported
+                    model=model_route.target_model,
+                    input=messages_respapi,
+                    logger_fn=logger_fn,
+                    headers=headers or {},
+                    timeout=timeout,
+                    client=client,
+                    **params_respapi,
                 )
+                response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
-            response = litellm.responses(  # TODO Check all params are supported
-                model=model_route.target_model,
-                input=messages_respapi,
-                logger_fn=logger_fn,
-                headers=headers or {},
-                timeout=timeout,
-                client=client,
-                **params_respapi,
-            )
-            response_complapi = convert_respapi_to_model_response(response)
+                if RESPAPI_TRACING_ENABLED:
+                    write_response_trace(timestamp, calling_method, response_respapi, response_complapi)
 
-            if RESPAPI_TRACING_ENABLED:
-                write_response_trace(timestamp, calling_method, response, response_complapi)
+            else:
+                response_complapi: ModelResponse = litellm.completion(
+                    model=model_route.target_model,
+                    messages=messages,
+                    logger_fn=logger_fn,
+                    headers=headers or {},
+                    timeout=timeout,
+                    client=client,
+                    drop_params=True,  # Drop any params that are not supported by the provider
+                    **optional_params,
+                )
 
             return response_complapi
 
@@ -195,7 +217,8 @@ class CustomLLMRouter(CustomLLM):
                     params_respapi=params_respapi,
                 )
 
-            response = await litellm.aresponses(  # TODO Check all params are supported
+            resopnse_respapi: ResponsesAPIResponse = await litellm.aresponses(
+                # TODO Make sure all params are supported
                 model=model_route.target_model,
                 input=messages_respapi,
                 logger_fn=logger_fn,
@@ -204,10 +227,10 @@ class CustomLLMRouter(CustomLLM):
                 client=client,
                 **params_respapi,
             )
-            response_complapi = convert_respapi_to_model_response(response)
+            response_complapi: ModelResponse = convert_respapi_to_model_response(resopnse_respapi)
 
             if RESPAPI_TRACING_ENABLED:
-                write_response_trace(timestamp, calling_method, response, response_complapi)
+                write_response_trace(timestamp, calling_method, resopnse_respapi, response_complapi)
 
             return response_complapi
 
@@ -264,7 +287,8 @@ class CustomLLMRouter(CustomLLM):
                     params_respapi=params_respapi,
                 )
 
-            response = litellm.responses(  # TODO Check all params are supported
+            resopnse_respapi: BaseResponsesAPIStreamingIterator = litellm.responses(
+                # TODO Make sure all params are supported
                 model=model_route.target_model,
                 input=messages_respapi,
                 logger_fn=logger_fn,
@@ -276,7 +300,7 @@ class CustomLLMRouter(CustomLLM):
 
             responses_chunks = []
             generic_chunks = []
-            for chunk in response:
+            for chunk in resopnse_respapi:
                 generic_chunk = to_generic_streaming_chunk(chunk)
 
                 if RESPAPI_TRACING_ENABLED:
@@ -341,7 +365,8 @@ class CustomLLMRouter(CustomLLM):
                     params_respapi=params_respapi,
                 )
 
-            response = await litellm.aresponses(  # TODO Check all params are supported
+            resopnse_respapi: BaseResponsesAPIStreamingIterator = await litellm.aresponses(
+                # TODO Make sure all params are supported
                 model=model_route.target_model,
                 input=messages_respapi,
                 logger_fn=logger_fn,
@@ -353,7 +378,7 @@ class CustomLLMRouter(CustomLLM):
 
             responses_chunks = []
             generic_chunks = []
-            async for chunk in response:
+            async for chunk in resopnse_respapi:
                 generic_chunk = to_generic_streaming_chunk(chunk)
 
                 if RESPAPI_TRACING_ENABLED:
