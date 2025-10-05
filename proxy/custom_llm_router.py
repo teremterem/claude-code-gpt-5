@@ -110,7 +110,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> ModelResponse:
         try:
             timestamp = generate_timestamp()
-            calling_method = "COMPLETION"
+            calling_method = "completion"
             model_route = ModelRoute(model)
 
             params_complapi = deepcopy(optional_params)
@@ -125,7 +125,7 @@ class CustomLLMRouter(CustomLLM):
                 params_complapi.pop("temperature", None)
 
             # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-completion"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,
@@ -201,7 +201,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> ModelResponse:
         try:
             timestamp = generate_timestamp()
-            calling_method = "ACOMPLETION"
+            calling_method = "acompletion"
             model_route = ModelRoute(model)
 
             params_complapi = deepcopy(optional_params)
@@ -216,7 +216,7 @@ class CustomLLMRouter(CustomLLM):
                 params_complapi.pop("temperature", None)
 
             # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-acompletion"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,
@@ -292,7 +292,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
             timestamp = generate_timestamp()
-            calling_method = "STREAMING"
+            calling_method = "streaming"
             model_route = ModelRoute(model)
 
             params_complapi = deepcopy(optional_params)
@@ -307,7 +307,7 @@ class CustomLLMRouter(CustomLLM):
                 params_complapi.pop("temperature", None)
 
             # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-streaming"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,
@@ -394,7 +394,7 @@ class CustomLLMRouter(CustomLLM):
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
             timestamp = generate_timestamp()
-            calling_method = "ASTREAMING"
+            calling_method = "astreaming"
             model_route = ModelRoute(model)
 
             params_complapi = deepcopy(optional_params)
@@ -409,7 +409,7 @@ class CustomLLMRouter(CustomLLM):
                 params_complapi.pop("temperature", None)
 
             # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-astreaming"
+            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
 
             _adapt_for_non_anthropic_models(
                 model=model_route.target_model,

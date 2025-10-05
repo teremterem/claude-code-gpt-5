@@ -16,7 +16,7 @@ def write_request_trace(
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
-        f.write(f"# {calling_method}\n\n")
+        f.write(f"# {calling_method.upper()}\n\n")
 
         f.write("## Request Messages\n\n")
 
@@ -43,7 +43,7 @@ def write_response_trace(
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
-        f.write(f"# {calling_method}\n\n")
+        f.write(f"# {calling_method.upper()}\n\n")
 
         f.write("## Response\n\n")
 
@@ -62,7 +62,7 @@ def write_streaming_response_trace(
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     with (TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
-        f.write(f"# {calling_method}\n\n")
+        f.write(f"# {calling_method.upper()}\n\n")
 
         for idx, (resp_chunk, gen_chunk) in enumerate(zip(responses_chunks, generic_chunks)):
             f.write(f"## Response Chunk #{idx}\n\n")
