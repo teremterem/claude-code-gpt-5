@@ -2,7 +2,7 @@ import json
 
 from litellm import ModelResponse, ResponsesAPIResponse
 
-from proxy.config import RESPAPI_TRACES_DIR
+from proxy.config import TRACES_DIR
 
 
 def write_request_trace(
@@ -14,8 +14,8 @@ def write_request_trace(
     messages_respapi: list,
     params_respapi: dict,
 ) -> None:
-    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (RESPAPI_TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
+    TRACES_DIR.mkdir(parents=True, exist_ok=True)
+    with (TRACES_DIR / f"{timestamp}_REQUEST.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Request Messages\n\n")
@@ -41,8 +41,8 @@ def write_response_trace(
     response: ResponsesAPIResponse,
     response_complapi: ModelResponse,
 ) -> None:
-    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (RESPAPI_TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
+    TRACES_DIR.mkdir(parents=True, exist_ok=True)
+    with (TRACES_DIR / f"{timestamp}_RESPONSE.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         f.write("## Response\n\n")
@@ -60,8 +60,8 @@ def write_streaming_response_trace(
     responses_chunks: list,
     generic_chunks: list,
 ) -> None:
-    RESPAPI_TRACES_DIR.mkdir(parents=True, exist_ok=True)
-    with (RESPAPI_TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
+    TRACES_DIR.mkdir(parents=True, exist_ok=True)
+    with (TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md").open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method}\n\n")
 
         for idx, (resp_chunk, gen_chunk) in enumerate(zip(responses_chunks, generic_chunks)):

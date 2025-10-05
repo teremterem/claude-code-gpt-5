@@ -32,8 +32,8 @@ ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = env_var_to_bool(os.getenv("ENFORCE_ONE_TOOL
 
 ALWAYS_USE_RESPONSES_API = env_var_to_bool(os.getenv("ALWAYS_USE_RESPONSES_API"), "false")
 
-RESPAPI_TRACING_ENABLED = env_var_to_bool(os.getenv("RESPAPI_TRACING_ENABLED"), "false")
-RESPAPI_TRACES_DIR = Path(".respapi_traces/")
+WRITE_TRACES_TO_FILES = env_var_to_bool(os.getenv("WRITE_TRACES_TO_FILES"), "false")
+TRACES_DIR = Path(".traces/")
 
 ANTHROPIC = "anthropic"
 OPENAI = "openai"

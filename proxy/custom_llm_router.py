@@ -14,7 +14,7 @@ from litellm import (
     ResponsesAPIResponse,
 )
 
-from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, RESPAPI_TRACING_ENABLED
+from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, WRITE_TRACES_TO_FILES
 from proxy.responses_api_tracing import write_request_trace, write_response_trace, write_streaming_response_trace
 from proxy.route_model import ModelRoute
 from proxy.utils import (
@@ -130,7 +130,7 @@ class CustomLLMRouter(CustomLLM):
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
@@ -152,7 +152,7 @@ class CustomLLMRouter(CustomLLM):
                 )
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_response_trace(timestamp, calling_method, response_respapi, response_complapi)
 
             else:
@@ -216,7 +216,7 @@ class CustomLLMRouter(CustomLLM):
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
@@ -238,7 +238,7 @@ class CustomLLMRouter(CustomLLM):
                 )
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_response_trace(timestamp, calling_method, response_respapi, response_complapi)
 
             else:
@@ -302,7 +302,7 @@ class CustomLLMRouter(CustomLLM):
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
@@ -328,13 +328,13 @@ class CustomLLMRouter(CustomLLM):
                 for respapi_chunk in resp_stream_respapi:
                     generic_chunk = to_generic_streaming_chunk(respapi_chunk)
 
-                    if RESPAPI_TRACING_ENABLED:
+                    if WRITE_TRACES_TO_FILES:
                         respapi_chunks.append(respapi_chunk)
                         generic_chunks.append(generic_chunk)
 
                     yield generic_chunk
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_streaming_response_trace(timestamp, calling_method, respapi_chunks, generic_chunks)
 
             else:
@@ -399,7 +399,7 @@ class CustomLLMRouter(CustomLLM):
                 messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
                 params_respapi = convert_chat_params_to_respapi(params_complapi)
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_request_trace(
                         timestamp=timestamp,
                         calling_method=calling_method,
@@ -425,13 +425,13 @@ class CustomLLMRouter(CustomLLM):
                 async for respapi_chunk in resp_stream_respapi:
                     generic_chunk = to_generic_streaming_chunk(respapi_chunk)
 
-                    if RESPAPI_TRACING_ENABLED:
+                    if WRITE_TRACES_TO_FILES:
                         respapi_chunks.append(respapi_chunk)
                         generic_chunks.append(generic_chunk)
 
                     yield generic_chunk
 
-                if RESPAPI_TRACING_ENABLED:
+                if WRITE_TRACES_TO_FILES:
                     write_streaming_response_trace(timestamp, calling_method, respapi_chunks, generic_chunks)
 
             else:
