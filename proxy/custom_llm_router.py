@@ -22,7 +22,7 @@ from proxy.utils import (
     convert_chat_messages_to_respapi,
     convert_chat_params_to_respapi,
     convert_respapi_to_model_response,
-    generate_timestamp,
+    generate_timestamp_local_tz,
     to_generic_streaming_chunk,
 )
 
@@ -92,7 +92,7 @@ class RoutedRequest:
         params_original: dict,
         stream: bool,
     ) -> None:
-        self.timestamp = generate_timestamp()
+        self.timestamp = generate_timestamp_local_tz()
         self.calling_method = calling_method
         self.model_route = ModelRoute(model)
 
