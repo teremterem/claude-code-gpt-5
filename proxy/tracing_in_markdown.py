@@ -7,7 +7,7 @@ from litellm import ModelResponse, ResponsesAPIResponse
 from proxy.config import TRACES_DIR
 
 
-def write_request_trace(
+def write_request_trace(  # pylint: disable=unused-argument
     *,
     timestamp: str,
     calling_method: str,
@@ -29,9 +29,9 @@ def write_request_trace(
 
         f.write("## Request Messages\n\n")
 
-        if messages_original != messages_complapi:
-            f.write("### Original:\n")
-            f.write(f"```json\n{json.dumps(messages_original, indent=2)}\n```\n\n")
+        # if messages_original != messages_complapi:
+        #     f.write("### Original:\n")
+        #     f.write(f"```json\n{json.dumps(messages_original, indent=2)}\n```\n\n")
 
         f.write("### ChatCompletions API:\n")
         f.write(f"```json\n{json.dumps(messages_complapi, indent=2)}\n```\n\n")
@@ -42,9 +42,9 @@ def write_request_trace(
 
         f.write("## Request Params\n\n")
 
-        if params_original != params_complapi:
-            f.write("### Original:\n")
-            f.write(f"```json\n{json.dumps(params_original, indent=2)}\n```\n\n")
+        # if params_original != params_complapi:
+        #     f.write("### Original:\n")
+        #     f.write(f"```json\n{json.dumps(params_original, indent=2)}\n```\n\n")
 
         f.write("### ChatCompletions API:\n")
         f.write(f"```json\n{json.dumps(params_complapi, indent=2)}\n```\n\n")
