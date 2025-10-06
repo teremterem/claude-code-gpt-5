@@ -82,6 +82,64 @@ def _adapt_for_non_anthropic_models(model: str, messages_complapi: list, params_
     messages_complapi.append(tool_instruction)
 
 
+class RoutedRequest:
+    def __init__(
+        self,
+        *,
+        calling_method: str,
+        model: str,
+        messages_original: list,
+        params_original: dict,
+        stream: bool,
+    ) -> None:
+        self.timestamp = generate_timestamp()
+        self.calling_method = calling_method
+        self.model_route = ModelRoute(model)
+
+        self.messages_original = messages_original
+        self.params_original = params_original
+
+        self.messages_complapi = deepcopy(self.messages_original)
+        self.params_complapi = deepcopy(self.params_original)
+
+        self.params_complapi.update(self.model_route.extra_params)
+        self.params_complapi["stream"] = stream
+
+        if self.model_route.use_responses_api:
+            # TODO What's a more reasonable way to decide when to unset
+            #  temperature ?
+            self.params_complapi.pop("temperature", None)
+
+        # For Langfuse
+        trace_name = f"{self.timestamp}-OUTBOUND-{self.calling_method}"
+        self.params_complapi.setdefault("metadata", {})["trace_name"] = trace_name
+
+        _adapt_for_non_anthropic_models(
+            model=self.model_route.target_model,
+            messages_complapi=self.messages_complapi,
+            params_complapi=self.params_complapi,
+        )
+
+        if self.model_route.use_responses_api:
+            self.messages_respapi = convert_chat_messages_to_respapi(self.messages_complapi)
+            self.params_respapi = convert_chat_params_to_respapi(self.params_complapi)
+        else:
+            self.messages_respapi = None
+            self.params_respapi = None
+
+        if WRITE_TRACES_TO_FILES:
+            write_request_trace(
+                timestamp=self.timestamp,
+                calling_method=self.calling_method,
+                messages_original=self.messages_original,
+                params_original=self.params_original,
+                messages_complapi=self.messages_complapi,
+                params_complapi=self.params_complapi,
+                messages_respapi=self.messages_respapi,
+                params_respapi=self.params_respapi,
+            )
+
+
 class CustomLLMRouter(CustomLLM):
     """
     Routes model requests to the correct provider and parameters.
@@ -109,80 +167,45 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            timestamp = generate_timestamp()
-            calling_method = "completion"
-            model_route = ModelRoute(model)
-
-            params_complapi = deepcopy(optional_params)
-            messages_complapi = deepcopy(messages)
-
-            params_complapi.update(model_route.extra_params)
-            params_complapi["stream"] = False
-
-            if model_route.use_responses_api:
-                # TODO What's a more reasonable way to decide when to unset
-                #  temperature ?
-                params_complapi.pop("temperature", None)
-
-            # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
-
-            _adapt_for_non_anthropic_models(
-                model=model_route.target_model,
-                messages_complapi=messages_complapi,
-                params_complapi=params_complapi,
+            routed_request = RoutedRequest(
+                calling_method="completion",
+                model=model,
+                messages_original=messages,
+                params_original=optional_params,
+                stream=False,
             )
 
-            if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
-                params_respapi = convert_chat_params_to_respapi(params_complapi)
-            else:
-                messages_respapi = None
-                params_respapi = None
-
-            if WRITE_TRACES_TO_FILES:
-                write_request_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
-                    messages_original=messages,
-                    params_original=optional_params,
-                    messages_complapi=messages_complapi,
-                    params_complapi=params_complapi,
-                    messages_respapi=messages_respapi,
-                    params_respapi=params_respapi,
-                )
-
-            if model_route.use_responses_api:
+            if routed_request.model_route.use_responses_api:
                 response_respapi: ResponsesAPIResponse = litellm.responses(
                     # TODO Make sure all params are supported
-                    model=model_route.target_model,
-                    input=messages_respapi,
+                    model=routed_request.model_route.target_model,
+                    input=routed_request.messages_respapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    **params_respapi,
+                    **routed_request.params_respapi,
                 )
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
             else:
                 response_respapi = None
                 response_complapi: ModelResponse = litellm.completion(
-                    model=model_route.target_model,
-                    messages=messages_complapi,
+                    model=routed_request.model_route.target_model,
+                    messages=routed_request.messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     # Drop any params that are not supported by the provider
                     drop_params=True,
-                    **params_complapi,
+                    **routed_request.params_complapi,
                 )
 
             if WRITE_TRACES_TO_FILES:
                 write_response_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
+                    timestamp=routed_request.timestamp,
+                    calling_method=routed_request.calling_method,
                     response_respapi=response_respapi,
                     response_complapi=response_complapi,
                 )
@@ -212,80 +235,45 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
         try:
-            timestamp = generate_timestamp()
-            calling_method = "acompletion"
-            model_route = ModelRoute(model)
-
-            params_complapi = deepcopy(optional_params)
-            messages_complapi = deepcopy(messages)
-
-            params_complapi.update(model_route.extra_params)
-            params_complapi["stream"] = False
-
-            if model_route.use_responses_api:
-                # TODO What's a more reasonable way to decide when to unset
-                #  temperature ?
-                params_complapi.pop("temperature", None)
-
-            # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
-
-            _adapt_for_non_anthropic_models(
-                model=model_route.target_model,
-                messages_complapi=messages_complapi,
-                params_complapi=params_complapi,
+            routed_request = RoutedRequest(
+                calling_method="acompletion",
+                model=model,
+                messages_original=messages,
+                params_original=optional_params,
+                stream=False,
             )
 
-            if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
-                params_respapi = convert_chat_params_to_respapi(params_complapi)
-            else:
-                messages_respapi = None
-                params_respapi = None
-
-            if WRITE_TRACES_TO_FILES:
-                write_request_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
-                    messages_original=messages,
-                    params_original=optional_params,
-                    messages_complapi=messages_complapi,
-                    params_complapi=params_complapi,
-                    messages_respapi=messages_respapi,
-                    params_respapi=params_respapi,
-                )
-
-            if model_route.use_responses_api:
+            if routed_request.model_route.use_responses_api:
                 response_respapi: ResponsesAPIResponse = await litellm.aresponses(
                     # TODO Make sure all params are supported
-                    model=model_route.target_model,
-                    input=messages_respapi,
+                    model=routed_request.model_route.target_model,
+                    input=routed_request.messages_respapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    **params_respapi,
+                    **routed_request.params_respapi,
                 )
                 response_complapi: ModelResponse = convert_respapi_to_model_response(response_respapi)
 
             else:
                 response_respapi = None
                 response_complapi: ModelResponse = await litellm.acompletion(
-                    model=model_route.target_model,
-                    messages=messages_complapi,
+                    model=routed_request.model_route.target_model,
+                    messages=routed_request.messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     # Drop any params that are not supported by the provider
                     drop_params=True,
-                    **params_complapi,
+                    **routed_request.params_complapi,
                 )
 
             if WRITE_TRACES_TO_FILES:
                 write_response_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
+                    timestamp=routed_request.timestamp,
+                    calling_method=routed_request.calling_method,
                     response_respapi=response_respapi,
                     response_complapi=response_complapi,
                 )
@@ -315,72 +303,37 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
         try:
-            timestamp = generate_timestamp()
-            calling_method = "streaming"
-            model_route = ModelRoute(model)
-
-            params_complapi = deepcopy(optional_params)
-            messages_complapi = deepcopy(messages)
-
-            params_complapi.update(model_route.extra_params)
-            params_complapi["stream"] = True
-
-            if model_route.use_responses_api:
-                # TODO What's a more reasonable way to decide when to unset
-                #  temperature ?
-                params_complapi.pop("temperature", None)
-
-            # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
-
-            _adapt_for_non_anthropic_models(
-                model=model_route.target_model,
-                messages_complapi=messages_complapi,
-                params_complapi=params_complapi,
+            routed_request = RoutedRequest(
+                calling_method="streaming",
+                model=model,
+                messages_original=messages,
+                params_original=optional_params,
+                stream=True,
             )
 
-            if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
-                params_respapi = convert_chat_params_to_respapi(params_complapi)
-            else:
-                messages_respapi = None
-                params_respapi = None
-
-            if WRITE_TRACES_TO_FILES:
-                write_request_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
-                    messages_original=messages,
-                    params_original=optional_params,
-                    messages_complapi=messages_complapi,
-                    params_complapi=params_complapi,
-                    messages_respapi=messages_respapi,
-                    params_respapi=params_respapi,
-                )
-
-            if model_route.use_responses_api:
+            if routed_request.model_route.use_responses_api:
                 resp_stream: BaseResponsesAPIStreamingIterator = litellm.responses(
                     # TODO Make sure all params are supported
-                    model=model_route.target_model,
-                    input=messages_respapi,
+                    model=routed_request.model_route.target_model,
+                    input=routed_request.messages_respapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    **params_respapi,
+                    **routed_request.params_respapi,
                 )
 
             else:
                 resp_stream: CustomStreamWrapper = litellm.completion(
-                    model=model_route.target_model,
-                    messages=messages_complapi,
+                    model=routed_request.model_route.target_model,
+                    messages=routed_request.messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     # Drop any params that are not supported by the provider
                     drop_params=True,
-                    **params_complapi,
+                    **routed_request.params_complapi,
                 )
 
             respapi_chunks = []
@@ -391,7 +344,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunk = to_generic_streaming_chunk(resp_chunk)
 
                 if WRITE_TRACES_TO_FILES:
-                    if model_route.use_responses_api:
+                    if routed_request.model_route.use_responses_api:
                         respapi_chunks.append(resp_chunk)
                     else:
                         complapi_chunks.append(resp_chunk)
@@ -401,8 +354,8 @@ class CustomLLMRouter(CustomLLM):
 
             if WRITE_TRACES_TO_FILES:
                 write_streaming_response_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
+                    timestamp=routed_request.timestamp,
+                    calling_method=routed_request.calling_method,
                     respapi_chunks=respapi_chunks,
                     complapi_chunks=complapi_chunks,
                     generic_chunks=generic_chunks,
@@ -431,72 +384,37 @@ class CustomLLMRouter(CustomLLM):
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
         try:
-            timestamp = generate_timestamp()
-            calling_method = "astreaming"
-            model_route = ModelRoute(model)
-
-            params_complapi = deepcopy(optional_params)
-            messages_complapi = deepcopy(messages)
-
-            params_complapi.update(model_route.extra_params)
-            params_complapi["stream"] = True
-
-            if model_route.use_responses_api:
-                # TODO What's a more reasonable way to decide when to unset
-                #  temperature ?
-                params_complapi.pop("temperature", None)
-
-            # For Langfuse
-            params_complapi.setdefault("metadata", {})["trace_name"] = f"{timestamp}-OUTBOUND-{calling_method}"
-
-            _adapt_for_non_anthropic_models(
-                model=model_route.target_model,
-                messages_complapi=messages_complapi,
-                params_complapi=params_complapi,
+            routed_request = RoutedRequest(
+                calling_method="astreaming",
+                model=model,
+                messages_original=messages,
+                params_original=optional_params,
+                stream=True,
             )
 
-            if model_route.use_responses_api:
-                messages_respapi = convert_chat_messages_to_respapi(messages_complapi)
-                params_respapi = convert_chat_params_to_respapi(params_complapi)
-            else:
-                messages_respapi = None
-                params_respapi = None
-
-            if WRITE_TRACES_TO_FILES:
-                write_request_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
-                    messages_original=messages,
-                    params_original=optional_params,
-                    messages_complapi=messages_complapi,
-                    params_complapi=params_complapi,
-                    messages_respapi=messages_respapi,
-                    params_respapi=params_respapi,
-                )
-
-            if model_route.use_responses_api:
+            if routed_request.model_route.use_responses_api:
                 resp_stream: BaseResponsesAPIStreamingIterator = await litellm.aresponses(
                     # TODO Make sure all params are supported
-                    model=model_route.target_model,
-                    input=messages_respapi,
+                    model=routed_request.model_route.target_model,
+                    input=routed_request.messages_respapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
-                    **params_respapi,
+                    **routed_request.params_respapi,
                 )
 
             else:
                 resp_stream: CustomStreamWrapper = await litellm.acompletion(
-                    model=model_route.target_model,
-                    messages=messages_complapi,
+                    model=routed_request.model_route.target_model,
+                    messages=routed_request.messages_complapi,
                     logger_fn=logger_fn,
                     headers=headers or {},
                     timeout=timeout,
                     client=client,
                     # Drop any params that are not supported by the provider
                     drop_params=True,
-                    **params_complapi,
+                    **routed_request.params_complapi,
                 )
 
             respapi_chunks = []
@@ -507,7 +425,7 @@ class CustomLLMRouter(CustomLLM):
                 generic_chunk = to_generic_streaming_chunk(resp_chunk)
 
                 if WRITE_TRACES_TO_FILES:
-                    if model_route.use_responses_api:
+                    if routed_request.model_route.use_responses_api:
                         respapi_chunks.append(resp_chunk)
                     else:
                         complapi_chunks.append(resp_chunk)
@@ -517,8 +435,8 @@ class CustomLLMRouter(CustomLLM):
 
             if WRITE_TRACES_TO_FILES:
                 write_streaming_response_trace(
-                    timestamp=timestamp,
-                    calling_method=calling_method,
+                    timestamp=routed_request.timestamp,
+                    calling_method=routed_request.calling_method,
                     respapi_chunks=respapi_chunks,
                     complapi_chunks=complapi_chunks,
                     generic_chunks=generic_chunks,
