@@ -2,78 +2,98 @@ import re
 from typing import Any
 
 from proxy.config import (
+    ALWAYS_USE_RESPONSES_API,
     ANTHROPIC,
     OPENAI,
-    RECOMMEND_SETTING_REMAPS,
     REMAP_CLAUDE_HAIKU_TO,
     REMAP_CLAUDE_OPUS_TO,
     REMAP_CLAUDE_SONNET_TO,
-    recommend_setting_remaps,
 )
 
 
-def route_model(requested_model: str) -> tuple[str, dict[str, Any]]:
-    final_model = requested_model.strip()
+class ModelRoute:
+    requested_model: str  # May or may not have a provider prefix
+    remapped_to: str  # May or may not have a provider prefix
+    target_model: str  # ALWAYS has a provider prefix ("provider/model_name")
+    extra_params: dict[str, Any]
+    use_responses_api: bool = ALWAYS_USE_RESPONSES_API
 
-    if final_model.startswith("claude-"):
-        # If the model name contains "haiku", "opus", or "sonnet", remap it to the appropriate model (provided the
-        # remap is configured)
-        if "haiku" in final_model:
-            if REMAP_CLAUDE_HAIKU_TO:
-                final_model = REMAP_CLAUDE_HAIKU_TO
-        elif "opus" in final_model:
-            if REMAP_CLAUDE_OPUS_TO:
-                final_model = REMAP_CLAUDE_OPUS_TO
-        elif REMAP_CLAUDE_SONNET_TO:
-            # Here we assume the requested model is a Sonnet model (but also fallback to this remap in case it is some
-            # new, unknown model by Anthropic)
-            final_model = REMAP_CLAUDE_SONNET_TO
+    def __init__(self, requested_model: str) -> None:
+        self.requested_model = requested_model.strip()
 
-    # Prepend the provider name (and resolve to a real GPT-5 model name and configuration if it is one of our GPT-5
-    # aliases with a reasoning effort specified in the alias)
-    final_model, extra_params = resolve_model_for_provider(final_model)
+        self._remap_model()
+        self._finalize_model_route_object()
 
-    log_message = f"\033[1m\033[32m{requested_model}\033[0m -> \033[1m\033[36m{final_model}\033[0m"
-    if extra_params:
-        log_message += f" [\033[1m\033[33m{repr_extra_params(extra_params)}\033[0m]"
-    # TODO Make it possible to disable this print ? (Turn it into a log record ?)
-    print(log_message)
+        self._log_model_route()
 
-    if RECOMMEND_SETTING_REMAPS:
-        recommend_setting_remaps()
+    def _remap_model(self) -> str:
+        self.remapped_to = self.requested_model
 
-    return final_model, extra_params
+        if self.requested_model.startswith("claude-"):
+            # If the model name contains "haiku", "opus", or "sonnet", remap it
+            # to the appropriate model (provided the remap is configured)
+            if "haiku" in self.requested_model:
+                if REMAP_CLAUDE_HAIKU_TO:
+                    self.remapped_to = REMAP_CLAUDE_HAIKU_TO
+            elif "opus" in self.requested_model:
+                if REMAP_CLAUDE_OPUS_TO:
+                    self.remapped_to = REMAP_CLAUDE_OPUS_TO
+            elif REMAP_CLAUDE_SONNET_TO:
+                # Here we assume the requested model is a Sonnet model (but
+                # also fallback to this remap in case it is some new, unknown
+                # model by Anthropic)
+                # TODO Add a warning if the requested model is unknown ?
+                self.remapped_to = REMAP_CLAUDE_SONNET_TO
 
+        self.remapped_to = self.remapped_to.strip()
 
-def resolve_model_for_provider(requested_model: str) -> tuple[str, dict[str, Any]]:
-    model_name_only = requested_model.strip()
-    if "/" in model_name_only:
-        explicit_provider, model_name_only = model_name_only.split("/", 1)
-    else:
-        explicit_provider = None
+    def _finalize_model_route_object(self) -> None:
+        """
+        Resolve and prepend provider to the model name if not already present,
+        set other attributes to finish initializing this ModelRoute object.
+        """
+        if "/" in self.remapped_to:
+            explicit_provider, model_name_only = self.remapped_to.split("/", 1)
+        else:
+            # Provider is not mentioned in the model name explicitly
+            explicit_provider, model_name_only = None, self.remapped_to
 
-    extra_params = {}
-    # Check if it is one of our GPT-5 model aliases with a reasoning effort specified in the model name
-    reasoning_effort_alias_match = re.fullmatch(
-        r"(?P<name>.+)-reason(ing)?(-effort)?-(?P<effort>\w+)", model_name_only
-    )
-    if reasoning_effort_alias_match:
-        model_name_only = reasoning_effort_alias_match.group("name")
-        extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
+        extra_params = {}
+        # Check if it is one of our GPT-5 model aliases with a reasoning effort
+        # specified in the model name
+        reasoning_effort_alias_match = re.fullmatch(
+            r"(?P<name>.+)-reason(ing)?(-effort)?-(?P<effort>\w+)", model_name_only
+        )
+        if reasoning_effort_alias_match:
+            model_name_only = reasoning_effort_alias_match.group("name")
+            extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
 
-    # Autocorrect `gpt5` to `gpt-5` for convenience
-    model_name_only = re.sub(r"\bgpt5\b", "gpt-5", model_name_only)
+        # Autocorrect `gpt5` to `gpt-5` for convenience
+        model_name_only = re.sub(r"\bgpt5\b", "gpt-5", model_name_only)
 
-    if explicit_provider:
-        final_model = f"{explicit_provider}/{model_name_only}"
-    elif model_name_only.startswith("claude-"):
-        final_model = f"{ANTHROPIC}/{model_name_only}"
-    else:
-        # Default to OpenAI if it is not a Claude model (and the provider was not specified explicitly)
-        final_model = f"{OPENAI}/{model_name_only}"
+        if explicit_provider:
+            target_model = f"{explicit_provider}/{model_name_only}"
+        elif model_name_only.startswith("claude-"):
+            target_model = f"{ANTHROPIC}/{model_name_only}"
+        else:
+            # Default to OpenAI if it is not a Claude model (and the provider
+            # was not specified explicitly)
+            target_model = f"{OPENAI}/{model_name_only}"
 
-    return final_model, extra_params
+        self.target_model = target_model
+        self.extra_params = extra_params
 
+        if "gpt-5-codex" in model_name_only:
+            # GPT-5-Codex does not support ChatCompletions API
+            self.use_responses_api = True
 
-def repr_extra_params(extra_params: dict[str, Any]) -> str:
-    return ", ".join([f"{k}: {v}" for k, v in extra_params.items()])
+    def _log_model_route(self) -> None:
+        log_message = f"\033[1m\033[32m{self.requested_model}\033[0m -> " f"\033[1m\033[36m{self.target_model}\033[0m"
+        if self.extra_params:
+            log_message += f" [\033[1m\033[33m{self._repr_extra_params()}\033[0m]"
+        # TODO Make it possible to disable this print ? (Turn it into a log
+        #  record ?)
+        print(log_message)
+
+    def _repr_extra_params(self) -> str:
+        return ", ".join([f"{k}: {v}" for k, v in self.extra_params.items()])

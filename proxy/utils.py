@@ -3,8 +3,9 @@
 """
 NOTE: The utilities in this module were mostly vibe-coded without review.
 """
-from copy import deepcopy
 import json
+from copy import deepcopy
+from datetime import datetime
 from typing import Any, Optional, Union
 
 from litellm import GenericStreamingChunk, ModelResponse, ResponsesAPIResponse
@@ -34,15 +35,30 @@ def env_var_to_bool(value: Optional[str], default: str = "false") -> bool:
     return (value or default).lower() in ("true", "1", "on", "yes", "y")
 
 
+def generate_timestamp_local_tz() -> str:
+    """
+    Generate timestamp in format YYYYmmdd_HHMMSS_fff in local timezone.
+
+    An example of how these timestamps are used later:
+
+    `.traces/20251005_140642_180_RESPONSE_STREAM.md`
+    """
+    now = datetime.now()
+    # Keep only milliseconds (first 3 digits of microseconds)
+    return now.strftime("%Y%m%d_%H%M%S_%f")[:-3]
+
+
 def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
     """
-    Best-effort convert a LiteLLM ModelResponseStream chunk into GenericStreamingChunk.
+    Best-effort convert a LiteLLM ModelResponseStream chunk into
+    GenericStreamingChunk.
 
     GenericStreamingChunk TypedDict keys:
       - text: str (required)
       - is_finished: bool (required)
       - finish_reason: str (required)
-      - usage: Optional[ChatCompletionUsageBlock] (we pass None for incremental chunks)
+      - usage: Optional[ChatCompletionUsageBlock] (we pass None for incremental
+        chunks)
       - index: int (default 0)
       - tool_use: Optional[ChatCompletionToolCallChunk] (default None)
       - provider_specific_fields: Optional[dict]
