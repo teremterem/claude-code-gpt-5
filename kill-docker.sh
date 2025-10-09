@@ -6,7 +6,7 @@ set -e
 
 PROXY_CONTAINER_NAME="${PROXY_CONTAINER_NAME:-claude-code-gpt-5}"
 
-echo "❌ Stopping Claude Code GPT-5 Proxy..."
+echo "❌ Killing Claude Code GPT-5 Proxy..."
 
 if docker ps -a --format 'table {{.Names}}' | grep -q "^${PROXY_CONTAINER_NAME}$"; then
     echo "📦 Stopping container..."

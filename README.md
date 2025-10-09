@@ -93,7 +93,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
       To stop and remove the container, run:
       ```bash
-      ./stop-docker.sh
+      ./kill-docker.sh
       ```
 
       > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
