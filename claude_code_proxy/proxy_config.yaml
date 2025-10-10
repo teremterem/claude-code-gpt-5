@@ -1,0 +1,10 @@
+model_list:
+  - model_name: "*"
+    litellm_params:
+      model: "claude_code_router/*"
+      drop_params: true  # Automatically drop unsupported parameters
+
+litellm_settings:
+  custom_provider_map:
+  - provider: claude_code_router
+    custom_handler: claude_code_proxy.claude_code_router.claude_code_router

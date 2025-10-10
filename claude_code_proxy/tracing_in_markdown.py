@@ -4,7 +4,7 @@ from typing import Optional
 
 from litellm import ModelResponse, ResponsesAPIResponse
 
-from proxy.config import TRACES_DIR
+from claude_code_proxy.proxy_config import TRACES_DIR
 
 
 def write_request_trace(  # pylint: disable=unused-argument

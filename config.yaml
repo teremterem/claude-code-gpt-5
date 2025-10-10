@@ -1,10 +1,2 @@
-model_list:
-  - model_name: "*"
-    litellm_params:
-      model: "custom_llm_router/*"
-      drop_params: true  # Automatically drop unsupported parameters
-
-litellm_settings:
-  custom_provider_map:
-  - provider: custom_llm_router
-    custom_handler: proxy.custom_llm_router.custom_llm_router
+include:
+  - claude_code_proxy/proxy_config.yaml
