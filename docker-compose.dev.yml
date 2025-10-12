@@ -7,8 +7,6 @@ services:
       - .:/app
       - app-venv:/app/.venv
       - uv-cache:/root/.cache/uv  # To boost performance of `uv sync` operation
-    env_file:
-      - .env
 
 volumes:
   app-venv:

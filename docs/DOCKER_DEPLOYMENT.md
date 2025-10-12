@@ -12,6 +12,8 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ## 🚀 Quick Start
 
+TODO All three methods now use .env file for configuration, so these steps need to be moved here, before the methods themselves.
+
 ### Method 1: Using the deployment script
 
 1. **Copy `.env.template` to `.env`:**
@@ -190,16 +192,16 @@ If you need to build the image yourself.
 
 ### Docker Compose build
 
-Build and run, but overlay with the dev version of Compose setup:
+TODO Any more updates to this section ?
+
+Build and run by overlaying with the dev version of Compose setup:
 ```bash
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
-This will also map the current directory to the container.
+This will map the current directory to the container.
 
 > **NOTE:** To run in the foreground, remove the `-d` flag.
-
-> **NOTE:** The dev version of the Compose setup DOES use the `.env` file, so you will need to set up your environment variables in `.env`
 
 ## 🔧 Troubleshooting
 

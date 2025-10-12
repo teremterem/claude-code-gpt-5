@@ -5,16 +5,5 @@ services:
     ports:
       - "4000:4000"
     restart: unless-stopped
-    environment:
-      - OPENAI_API_KEY
-      - ANTHROPIC_API_KEY
-      - LITELLM_MASTER_KEY
-      - REMAP_CLAUDE_HAIKU_TO
-      - REMAP_CLAUDE_SONNET_TO
-      - REMAP_CLAUDE_OPUS_TO
-      - OPENAI_BASE_URL
-      - ANTHROPIC_BASE_URL
-      - ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
-      - LANGFUSE_SECRET_KEY
-      - LANGFUSE_PUBLIC_KEY
-      - LANGFUSE_HOST
+    env_file:
+      - .env
