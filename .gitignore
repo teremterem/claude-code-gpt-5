@@ -1,5 +1,6 @@
-/.traces/
 .DS_Store
+.traces/
+librechat/app/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -9,8 +9,8 @@ model_list:
   - model_name: "*"
     litellm_params:
       model: "claude_code_router/*"
-      drop_params: true  # Automatically drop unsupported parameters
+      # drop_params: true  # Automatically drop unsupported parameters
   - model_name: "yoda"
     litellm_params:
       model: "yoda_speak/yoda"
-      drop_params: true  # Automatically drop unsupported parameters
+      # drop_params: true  # Automatically drop unsupported parameters
