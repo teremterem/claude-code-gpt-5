@@ -23,8 +23,12 @@ if ! docker compose version >/dev/null 2>&1; then
   fi
 fi
 
+COMPOSE_UID="${LIBRECHAT_UID:-0}"
+COMPOSE_GID="${LIBRECHAT_GID:-0}"
+COMPOSE_ENV_PREFIX=(env "UID=${COMPOSE_UID}" "GID=${COMPOSE_GID}")
+
 print_command() {
-  printf '%s ' "${DOCKER_COMPOSE[@]}"
+  printf '%q ' "${COMPOSE_ENV_PREFIX[@]}" "${DOCKER_COMPOSE[@]}"
   for arg in "$@"; do
     printf '%q ' "$arg"
   done
@@ -34,7 +38,7 @@ print_command() {
 run_compose() {
   print_command "$@"
   echo ""
-  "${DOCKER_COMPOSE[@]}" "$@"
+  "${COMPOSE_ENV_PREFIX[@]}" "${DOCKER_COMPOSE[@]}" "$@"
 }
 
 echo ""
