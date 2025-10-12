@@ -9,7 +9,6 @@ librechat/data-node/
 librechat/images/
 librechat/logs/
 librechat/meili_data_*/
-librechat/pgdata2/
 librechat/uploads/
 
 # Byte-compiled / optimized / DLL files
