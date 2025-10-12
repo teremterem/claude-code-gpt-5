@@ -4,11 +4,9 @@ set -e
 
 COMPOSE_PROJECT_NAME="litellm-librechat"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 # Change to the `librechat/` directory, where the docker-compose.yml for
 # LibreChat file is located
-cd "${SCRIPT_DIR}/librechat/"
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "❌ Docker is not installed or not available in PATH."
