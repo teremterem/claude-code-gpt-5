@@ -62,5 +62,8 @@ echo "   http://localhost:3080"
 echo ""
 echo "▶️  Starting LibreChat stack in the foreground (Ctrl+C to stop)..."
 echo ""
+# Append `--build` at the end of the command below to force rebuild of the
+# LiteLLM-Server image. Append `-d` - to run in the background.
+# TODO Read these flags from the command line arguments ?
 run_compose -p "${COMPOSE_PROJECT_NAME}" up
 echo ""
