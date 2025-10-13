@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from proxy.config import (
+from claude_code_proxy.proxy_config import (
     ALWAYS_USE_RESPONSES_API,
     ANTHROPIC,
     OPENAI,

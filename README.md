@@ -63,7 +63,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       uv run litellm --config config.yaml
       ```
 
-   2) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/ first):
+   2) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
 
       **OPTION 3:** Run `Docker` in the foreground:
       ```bash
@@ -96,7 +96,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       ./kill-docker.sh
       ```
 
-      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)
+      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [docs/DOCKER_DEPLOYMENT.md](docs/DOCKER_DEPLOYMENT.md)
 
 ### Using with Claude Code 🎮
 

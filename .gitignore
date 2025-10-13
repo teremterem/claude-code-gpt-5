@@ -1,5 +1,15 @@
-/.traces/
+# OS
 .DS_Store
+
+# LiteLLM request/response traces (if enabled)
+.traces/
+
+# LibreChat data directories from librechat/docker-compose.yml
+librechat/data-node/
+librechat/images/
+librechat/logs/
+librechat/meili_data_*/
+librechat/uploads/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,44 @@
+services:
+  api:
+    depends_on:
+      - litellm
+      - mongodb
+      - rag_api
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml
+    env_file:
+      # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
+      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
+      - .env.non-secure-litellm-master-key
+      # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
+      # value from the file above
+      - ../.env
+      # Load .env from LibreChat (will override everything else in case of
+      # variable name conflicts)
+      - .env
+    environment:
+      - LITELLM_BASE_URL=http://litellm:4000/v1
+
+  litellm:
+    # Build from Claude Code GPT-5 Proxy
+    build: ..
+    container_name: LiteLLM-Server
+    # ports:
+    #   - "4000:4000"
+    restart: unless-stopped
+    volumes:
+      - ..:/app
+      - litellm-app-venv:/app/.venv
+      # To boost performance of `uv sync` operation
+      - litellm-uv-cache:/root/.cache/uv
+    env_file:
+      # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
+      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
+      - .env.non-secure-litellm-master-key
+      # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
+      # value from the file above
+      - ../.env
+
+volumes:
+  litellm-app-venv:
+  litellm-uv-cache:

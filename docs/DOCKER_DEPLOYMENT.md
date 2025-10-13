@@ -12,8 +12,6 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ## 🚀 Quick Start
 
-### Method 1: Using the deployment script
-
 1. **Copy `.env.template` to `.env`:**
    ```bash
    cp .env.template .env
@@ -29,6 +27,8 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    # More settings (see .env.template for details)
    ...
    ```
+
+### Method 1: Using the deployment script
 
 3. **Run the deployment script:**
 
@@ -49,42 +49,18 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 ### Method 2: Using Docker Compose
 
-1. **Export your OpenAI API key as an env var**, as well as any other vars from `.env.template` if you would like to modify the defaults (our default Compose setup DOES NOT load env vars from `.env`):
-   ```bash
-   export OPENAI_API_KEY=your-openai-api-key-here
-
-   # Optional (see .env.template for details):
-   # export LITELLM_MASTER_KEY=your-master-key-here
-   ```
-
-2. **Start the service:**
+3. **Start the service:**
    ```bash
    docker-compose up -d
    ```
    > **NOTE:** To run in the foreground, remove the `-d` flag.
 
-3. **Check the logs:**
+4. **Check the logs:**
    ```bash
    docker-compose logs -f
    ```
 
 ### Method 3: Direct Docker run
-
-1. **Copy `.env.template` to `.env`:**
-   ```bash
-   cp .env.template .env
-   ```
-
-2. **Edit `.env` and add your OpenAI API key:**
-   ```dotenv
-   OPENAI_API_KEY=your-openai-api-key-here
-
-   # Optional (see .env.template for details):
-   # LITELLM_MASTER_KEY=your-master-key-here
-
-   # More settings (see .env.template for details)
-   ...
-   ```
 
 3. **Run the container:**
    ```bash
@@ -168,7 +144,9 @@ curl http://localhost:4000/health
 
 ## 🏗️ Building from Source
 
-If you need to build the image yourself.
+If you need to build the image yourself, follow the instructions below.
+
+> **NOTE:** You still need to set up the `.env` file as described in the beginning of the [Quick Start](#-quick-start) section.
 
 ### Direct Docker build
 
@@ -190,16 +168,14 @@ If you need to build the image yourself.
 
 ### Docker Compose build
 
-Build and run, but overlay with the dev version of Compose setup:
+Build and run by overlaying with the dev version of Compose setup:
 ```bash
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
-This will also map the current directory to the container.
+This will map the current directory to the container.
 
 > **NOTE:** To run in the foreground, remove the `-d` flag.
-
-> **NOTE:** The dev version of the Compose setup DOES use the `.env` file, so you will need to set up your environment variables in `.env`
 
 ## 🔧 Troubleshooting
 

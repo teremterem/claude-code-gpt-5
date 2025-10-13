@@ -14,10 +14,14 @@ from litellm import (
     ResponsesAPIResponse,
 )
 
-from proxy.config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, WRITE_TRACES_TO_FILES
-from proxy.route_model import ModelRoute
-from proxy.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_response_trace
-from proxy.utils import (
+from claude_code_proxy.proxy_config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE, WRITE_TRACES_TO_FILES
+from claude_code_proxy.route_model import ModelRoute
+from claude_code_proxy.tracing_in_markdown import (
+    write_request_trace,
+    write_response_trace,
+    write_streaming_response_trace,
+)
+from common.utils import (
     ProxyError,
     convert_chat_messages_to_respapi,
     convert_chat_params_to_respapi,
@@ -140,11 +144,7 @@ class RoutedRequest:
             )
 
 
-class CustomLLMRouter(CustomLLM):
-    """
-    Routes model requests to the correct provider and parameters.
-    """
-
+class ClaudeCodeRouter(CustomLLM):
     # pylint: disable=too-many-positional-arguments,too-many-locals
 
     def completion(
@@ -446,4 +446,4 @@ class CustomLLMRouter(CustomLLM):
             raise ProxyError(e) from e
 
 
-custom_llm_router = CustomLLMRouter()
+claude_code_router = ClaudeCodeRouter()
