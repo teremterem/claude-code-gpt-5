@@ -53,6 +53,7 @@ run_compose -p "${COMPOSE_PROJECT_NAME}" pull
 echo ""
 
 echo "🚀 Running LibreChat stack via Docker Compose..."
+echo ""
 echo "🧾 Compose project name: ${COMPOSE_PROJECT_NAME}"
 echo ""
 echo "🌐 HINT: Default Web UI URL (IF NOT CHANGED IN 'librechat/.env'):"
