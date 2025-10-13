@@ -1,4 +1,10 @@
 services:
+  api:
+    volumes:
+    - type: bind
+      source: ./librechat.yaml
+      target: /app/librechat.yaml
+
   claude-code-gpt-5:
     build: ..
     container_name: litellm
