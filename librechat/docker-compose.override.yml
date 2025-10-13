@@ -2,8 +2,8 @@ services:
   claude-code-gpt-5:
     build: ..
     container_name: litellm
-    ports:
-      - "4000:4000"
+    # ports:
+    #   - "4000:4000"
     restart: unless-stopped
     env_file:
       - ../.env
