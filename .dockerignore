@@ -44,7 +44,8 @@ Thumbs.db
 # Logs
 *.log
 
-# Environment files (env vars are meant to be supplied by the user upon deployment)
+# Environment files (env vars are meant to be supplied by the user upon
+# deployment)
 .env
 
 # Development files
@@ -53,3 +54,6 @@ Thumbs.db
 
 # Documentation
 claude-code-gpt-5.jpeg
+
+# LibreChat is not part of the LiteLLM image, it has an image of its own
+/librechat/
