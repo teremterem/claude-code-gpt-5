@@ -2,6 +2,7 @@ litellm_settings:
   custom_provider_map:
   - provider: claude_code_router
     custom_handler: claude_code_proxy.claude_code_router.claude_code_router
+
   - provider: yoda_speak
     custom_handler: yoda_example.yoda_speak.yoda_speak_llm
 
@@ -10,7 +11,8 @@ model_list:
     litellm_params:
       model: "claude_code_router/*"
       drop_params: true  # Automatically drop unsupported parameters
-  - model_name: "yoda"
+
+  - model_name: "Yoda"
     litellm_params:
       model: "yoda_speak/yoda"
       drop_params: true  # Automatically drop unsupported parameters

@@ -1,0 +1,16 @@
+version: 1.2.1
+
+endpoints:
+  custom:
+    - name: "LiteLLM"
+      apiKey: "${LITELLM_MASTER_KEY}"
+      baseURL: "${LITELLM_BASE_URL}"
+      models:
+        default: ["Yoda"]
+        fetch: false
+      titleConvo: true
+      titleModel: "openai/gpt-4o-mini"
+      summarize: false
+      summaryModel: "openai/gpt-4o-mini"
+      forcePrompt: false
+      modelDisplayLabel: "Yoda"
