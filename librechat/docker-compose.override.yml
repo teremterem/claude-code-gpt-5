@@ -1,5 +1,7 @@
 services:
   api:
+    # Let's pin the version
+    image: ghcr.io/danny-avila/librechat-dev:v0.8.0
     depends_on:
       - litellm
       - mongodb
@@ -18,6 +20,15 @@ services:
       - .env
     environment:
       - LITELLM_BASE_URL=http://litellm:4000/v1
+
+  rag_api:
+    # Let's pin the version
+    # TODO The "latest" version (which is used in the original
+    #  docker-compose.yml file) was built almost one month later than the most
+    #  recent numbered version "v0.6.0", but it does not have its own number.
+    #  Is it something to worry about ? Should we keep using the "latest" tag
+    #  instead of the numbered version ?
+    image: ghcr.io/danny-avila/librechat-rag-api-dev-lite:v0.6.0
 
   litellm:
     # Build from Claude Code GPT-5 Proxy
