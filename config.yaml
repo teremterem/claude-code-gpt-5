@@ -12,7 +12,7 @@ model_list:
       model: "claude_code_router/*"
       drop_params: true  # Automatically drop unsupported parameters
 
-  - model_name: "Yoda"
+  - model_name: yoda
     litellm_params:
-      model: "yoda_speak/yoda"
+      model: yoda_speak/yoda
       drop_params: true  # Automatically drop unsupported parameters

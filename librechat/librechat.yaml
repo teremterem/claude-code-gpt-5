@@ -6,7 +6,7 @@ endpoints:
       apiKey: "${LITELLM_MASTER_KEY}"
       baseURL: "${LITELLM_BASE_URL}"
       models:
-        default: ["Yoda"]
+        default: ["yoda"]
         fetch: false
       titleConvo: true
       titleModel: "openai/gpt-4o-mini"
@@ -14,3 +14,19 @@ endpoints:
       summaryModel: "openai/gpt-4o-mini"
       forcePrompt: false
       modelDisplayLabel: "Yoda"
+
+# NOTE: The `modelSpecs` section below gives the yoda model a more
+# human-friendly, capitalized name, but it also restricts the list of available
+# models to just the yoda model.
+#
+# If you comment out this section, the user will see multiple model providers
+# with their respective models on the list and will also be able to supply
+# provider-specific API keys directly through the LibreChat UI.
+modelSpecs:
+  list:
+    - name: "yoda"
+      label: "Yoda"
+      default: true
+      preset:
+        endpoint: "LiteLLM"
+        model: "yoda"

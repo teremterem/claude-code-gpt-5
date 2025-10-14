@@ -47,10 +47,10 @@ echo ""
 run_compose -p "${COMPOSE_PROJECT_NAME}" down --remove-orphans || true
 echo ""
 
-echo "⬇️  Pulling latest images..."
-echo ""
-run_compose -p "${COMPOSE_PROJECT_NAME}" pull
-echo ""
+# echo "⬇️  Pulling latest images..."
+# echo ""
+# run_compose -p "${COMPOSE_PROJECT_NAME}" pull
+# echo ""
 
 echo "🚀 Running LibreChat stack via Docker Compose..."
 echo ""
@@ -62,8 +62,7 @@ echo "   http://localhost:3080"
 echo ""
 echo "▶️  Starting LibreChat stack in the foreground (Ctrl+C to stop)..."
 echo ""
-# Append `--build` at the end of the command below to force rebuild of the
-# LiteLLM-Server image. Append `-d` - to run in the background.
-# TODO Read these flags from the command line arguments ?
-run_compose -p "${COMPOSE_PROJECT_NAME}" up
+# Pass through any flags supplied to this script (e.g., --build, -d) to
+# `docker compose up`.
+run_compose -p "${COMPOSE_PROJECT_NAME}" up "$@"
 echo ""
