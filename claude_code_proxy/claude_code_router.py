@@ -54,7 +54,7 @@ def _adapt_for_non_anthropic_models(model: str, messages_complapi: list, params_
         params_complapi.get("max_tokens") == 1
         and len(messages_complapi) == 1
         and messages_complapi[0].get("role") == "user"
-        and messages_complapi[0].get("content") == "test"
+        and messages_complapi[0].get("content") in ["quota", "test"]
     ):
         # This is a "connectivity test" request by Claude Code => we need to make sure non-Anthropic models don't fail
         # because of exceeding max_tokens
