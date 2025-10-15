@@ -81,28 +81,6 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    docker logs -f claude-code-gpt-5
    ```
 
-## 🔧 Usage with Claude Code
-
-Once the proxy is running, use it with Claude Code:
-
-1. **Install Claude Code** (if not already installed):
-   ```bash
-   npm install -g @anthropic-ai/claude-code
-   ```
-
-2. **Use with GPT-5 via the proxy:**
-   ```bash
-   ANTHROPIC_BASE_URL=http://localhost:4000 claude
-   ```
-
-   **If you set a master key, pass it as the Anthropic API key for the CLI:**
-   ```bash
-   ANTHROPIC_API_KEY="<LITELLM_MASTER_KEY>" \
-   ANTHROPIC_BASE_URL=http://localhost:4000 \
-   claude
-   ```
-   > **NOTE:** In the latter case, if you've previously authenticated, run `claude /logout` first.
-
 ## 📊 Monitoring
 
 ### Check container status:
