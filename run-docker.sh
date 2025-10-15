@@ -26,16 +26,6 @@ docker pull ${PROXY_DOCKER_IMAGE}
 echo ""
 echo "▶️  Starting container..."
 echo ""
-echo "📝 Usage with Claude Code:"
-echo ""
-echo "   ANTHROPIC_BASE_URL=http://localhost:${PROXY_PORT} claude"
-echo ""
-echo "      OR"
-echo ""
-echo "   ANTHROPIC_API_KEY=\"<LITELLM_MASTER_KEY>\" \\"
-echo "   ANTHROPIC_BASE_URL=http://localhost:${PROXY_PORT} \\"
-echo "   claude"
-echo ""
 docker run \
     --name ${PROXY_CONTAINER_NAME} \
     -p ${PROXY_PORT}:4000 \
