@@ -4,7 +4,9 @@ import httpx
 import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
-from common.utils import to_generic_streaming_chunk
+from common.config import WRITE_TRACES_TO_FILES
+from common.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_response_trace
+from common.utils import generate_timestamp_local_tz, to_generic_streaming_chunk
 
 
 _YODA_SYSTEM_PROMPT = {
@@ -45,11 +47,23 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
-        optional_params.pop("max_tokens", None)
+        timestamp = generate_timestamp_local_tz()
+        calling_method = "completion"
+
+        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
+
+        if WRITE_TRACES_TO_FILES:
+            write_request_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                messages_original=messages,
+                messages_complapi=messages_modified,
+                params_original=optional_params,
+            )
 
         response = litellm.completion(
             model=self.target_model,
-            messages=messages + [_YODA_SYSTEM_PROMPT],
+            messages=messages_modified,
             logger_fn=logger_fn,
             headers=headers or {},
             timeout=timeout,
@@ -58,6 +72,14 @@ class YodaSpeakLLM(CustomLLM):
             drop_params=True,
             **optional_params,
         )
+
+        if WRITE_TRACES_TO_FILES:
+            write_response_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                response_complapi=response,
+            )
+
         return response
 
     async def acompletion(
@@ -79,18 +101,39 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
-        optional_params.pop("max_tokens", None)
+        timestamp = generate_timestamp_local_tz()
+        calling_method = "acompletion"
+
+        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
+
+        if WRITE_TRACES_TO_FILES:
+            write_request_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                messages_original=messages,
+                messages_complapi=messages_modified,
+                params_original=optional_params,
+            )
 
         response = await litellm.acompletion(
             model=self.target_model,
-            messages=messages + [_YODA_SYSTEM_PROMPT],
+            messages=messages_modified,
             logger_fn=logger_fn,
             headers=headers or {},
             timeout=timeout,
             client=client,
-            drop_params=True,  # Drop any params that are not supported by the provider
+            # Drop any params that are not supported by the provider
+            drop_params=True,
             **optional_params,
         )
+
+        if WRITE_TRACES_TO_FILES:
+            write_response_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                response_complapi=response,
+            )
+
         return response
 
     def streaming(
@@ -112,12 +155,23 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
-        optional_params["stream"] = True
-        optional_params.pop("max_tokens", None)
+        timestamp = generate_timestamp_local_tz()
+        calling_method = "streaming"
 
-        response = litellm.completion(
+        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
+
+        if WRITE_TRACES_TO_FILES:
+            write_request_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                messages_original=messages,
+                messages_complapi=messages_modified,
+                params_original=optional_params,
+            )
+
+        resp_stream = litellm.completion(
             model=self.target_model,
-            messages=messages + [_YODA_SYSTEM_PROMPT],
+            messages=messages_modified,
             logger_fn=logger_fn,
             headers=headers or {},
             timeout=timeout,
@@ -126,9 +180,24 @@ class YodaSpeakLLM(CustomLLM):
             drop_params=True,
             **optional_params,
         )
-        for chunk in response:
-            generic_chunk = to_generic_streaming_chunk(chunk)
+
+        complapi_chunks = []
+        generic_chunks = []
+
+        for resp_chunk in resp_stream:
+            generic_chunk = to_generic_streaming_chunk(resp_chunk)
+            if WRITE_TRACES_TO_FILES:
+                complapi_chunks.append(resp_chunk)
+                generic_chunks.append(generic_chunk)
             yield generic_chunk
+
+        if WRITE_TRACES_TO_FILES:
+            write_streaming_response_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                complapi_chunks=complapi_chunks,
+                generic_chunks=generic_chunks,
+            )
 
     async def astreaming(
         self,
@@ -149,12 +218,23 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
-        optional_params["stream"] = True
-        optional_params.pop("max_tokens", None)
+        timestamp = generate_timestamp_local_tz()
+        calling_method = "astreaming"
 
-        response = await litellm.acompletion(
+        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
+
+        if WRITE_TRACES_TO_FILES:
+            write_request_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                messages_original=messages,
+                messages_complapi=messages_modified,
+                params_original=optional_params,
+            )
+
+        resp_stream = await litellm.acompletion(
             model=self.target_model,
-            messages=messages + [_YODA_SYSTEM_PROMPT],
+            messages=messages_modified,
             logger_fn=logger_fn,
             headers=headers or {},
             timeout=timeout,
@@ -163,9 +243,24 @@ class YodaSpeakLLM(CustomLLM):
             drop_params=True,
             **optional_params,
         )
-        async for chunk in response:
-            generic_chunk = to_generic_streaming_chunk(chunk)
+
+        complapi_chunks = []
+        generic_chunks = []
+
+        async for resp_chunk in resp_stream:
+            generic_chunk = to_generic_streaming_chunk(resp_chunk)
+            if WRITE_TRACES_TO_FILES:
+                complapi_chunks.append(resp_chunk)
+                generic_chunks.append(generic_chunk)
             yield generic_chunk
+
+        if WRITE_TRACES_TO_FILES:
+            write_streaming_response_trace(
+                timestamp=timestamp,
+                calling_method=calling_method,
+                complapi_chunks=complapi_chunks,
+                generic_chunks=generic_chunks,
+            )
 
 
 yoda_speak_llm = YodaSpeakLLM()
