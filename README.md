@@ -23,13 +23,18 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 ### Setup 🛠️
 
-TODO Update git clone command
-
-1. **Clone this repository:**
+1. **Clone this repository's `main-boilerplate` branch into a local `main` branch:**
    ```bash
-   git clone https://github.com/teremterem/claude-code-gpt-5.git
-   cd claude-code-gpt-5
+   git clone --branch main-boilerplate --origin boilerplate https://github.com/teremterem/claude-code-gpt-5.git my-litellm-server
+   cd my-litellm-server
+   git switch -c main
    ```
+
+   TODO Explain the commands above
+
+   TODO Show how to create `origin` remote and push it to your own repository
+
+   TODO Show how to pull the latest changes from the `boilerplate/main-boilerplate` branch and merge them into your local `main` branch which is linked to your own repository (in separate README section)
 
 2. **Configure Environment Variables:**
 
