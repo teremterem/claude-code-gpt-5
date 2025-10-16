@@ -5,7 +5,7 @@ import litellm
 from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
 
 from common.config import WRITE_TRACES_TO_FILES
-from common.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_response_trace
+from common.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_chunk_trace
 from common.utils import generate_timestamp_local_tz, to_generic_streaming_chunk
 
 
@@ -181,23 +181,19 @@ class YodaSpeakLLM(CustomLLM):
             **optional_params,
         )
 
-        complapi_chunks = []
-        generic_chunks = []
+        for chunk_idx, chunk in enumerate(resp_stream):
+            generic_chunk = to_generic_streaming_chunk(chunk)
 
-        for resp_chunk in resp_stream:
-            generic_chunk = to_generic_streaming_chunk(resp_chunk)
             if WRITE_TRACES_TO_FILES:
-                complapi_chunks.append(resp_chunk)
-                generic_chunks.append(generic_chunk)
-            yield generic_chunk
+                write_streaming_chunk_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    chunk_idx=chunk_idx,
+                    complapi_chunk=chunk,
+                    generic_chunk=generic_chunk,
+                )
 
-        if WRITE_TRACES_TO_FILES:
-            write_streaming_response_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                complapi_chunks=complapi_chunks,
-                generic_chunks=generic_chunks,
-            )
+            yield generic_chunk
 
     async def astreaming(
         self,
@@ -244,23 +240,21 @@ class YodaSpeakLLM(CustomLLM):
             **optional_params,
         )
 
-        complapi_chunks = []
-        generic_chunks = []
+        chunk_idx = 0
+        async for chunk in resp_stream:
+            generic_chunk = to_generic_streaming_chunk(chunk)
 
-        async for resp_chunk in resp_stream:
-            generic_chunk = to_generic_streaming_chunk(resp_chunk)
             if WRITE_TRACES_TO_FILES:
-                complapi_chunks.append(resp_chunk)
-                generic_chunks.append(generic_chunk)
-            yield generic_chunk
+                write_streaming_chunk_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    chunk_idx=chunk_idx,
+                    complapi_chunk=chunk,
+                    generic_chunk=generic_chunk,
+                )
 
-        if WRITE_TRACES_TO_FILES:
-            write_streaming_response_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                complapi_chunks=complapi_chunks,
-                generic_chunks=generic_chunks,
-            )
+            yield generic_chunk
+            chunk_idx += 1
 
 
 yoda_speak_llm = YodaSpeakLLM()

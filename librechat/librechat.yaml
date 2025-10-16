@@ -9,9 +9,9 @@ endpoints:
         default: ["yoda"]
         fetch: false
       titleConvo: true
-      titleModel: "openai/gpt-4o-mini"
+      titleModel: "yoda"
       summarize: false
-      summaryModel: "openai/gpt-4o-mini"
+      summaryModel: "yoda"
       forcePrompt: false
       modelDisplayLabel: "Yoda"
 
