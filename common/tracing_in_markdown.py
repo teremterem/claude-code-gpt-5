@@ -5,6 +5,7 @@ from typing import Optional
 from litellm import ModelResponse, ResponsesAPIResponse
 
 from common.config import TRACES_DIR
+from common.utils import NOTHING
 
 
 def write_request_trace(  # pylint: disable=unused-argument
@@ -103,17 +104,17 @@ def write_streaming_response_trace(
     with file.open("w", encoding="utf-8") as f:
         f.write(f"# {calling_method.upper()}\n\n")
 
-        zipped = zip_longest(respapi_chunks, complapi_chunks, generic_chunks)
+        zipped = zip_longest(respapi_chunks, complapi_chunks, generic_chunks, fillvalue=NOTHING)
         for idx, (respapi_chunk, complapi_chunk, generic_chunk) in enumerate(zipped):
             f.write(f"## Response Chunk #{idx}\n\n")
 
-            if respapi_chunk is not None:
+            if respapi_chunk is not NOTHING:
                 f.write(f"### Responses API:\n```json\n{respapi_chunk.model_dump_json(indent=2)}\n```\n\n")
 
-            if complapi_chunk is not None:
+            if complapi_chunk is not NOTHING:
                 f.write(f"### ChatCompletions API:\n```json\n{complapi_chunk.model_dump_json(indent=2)}\n```\n\n")
 
-            if generic_chunk is not None:
+            if generic_chunk is not NOTHING:
                 # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not
                 #  just a dict
                 f.write(f"### GenericStreamingChunk:\n```json\n{json.dumps(generic_chunk, indent=2)}\n```\n\n")

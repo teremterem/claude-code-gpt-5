@@ -30,9 +30,13 @@ COPY . .
 # Expose port 4000 (default LiteLLM proxy port)
 EXPOSE 4000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" http://localhost:4000/health || exit 1
+# # !!! WARNING !!!
+# # LiteLLM's /health endpoint also checks the responsiveness of the deployed
+# # Language Models, which incurs extra costs !!! Uncomment the lines below
+# # only if you're comfortable with these extra costs !!!
+
+# HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
+#    CMD curl -f -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" http://localhost:4000/health || exit 1
 
 # Default command to run the LiteLLM proxy
 # TODO Do we need to set PYTHONUNBUFFERED=1 ?

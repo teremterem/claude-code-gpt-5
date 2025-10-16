@@ -120,6 +120,8 @@ The container includes a health check endpoint:
 curl http://localhost:4000/health
 ```
 
+> **WARNING:** LiteLLM's `/health` endpoint also checks the responsiveness of the deployed Language Models, which **incurs extra costs !!!** Keep this in mind if you decide to set up an automatic health check for your deployment.
+
 ## 🏗️ Building from Source
 
 If you need to build the image yourself, follow the instructions below.
