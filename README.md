@@ -1,6 +1,6 @@
 # LiteLLM Server Boilerplate
 
-![LibreChat with LiteLLM Server Boilerplate](librechat-litellm.jpeg)
+![LibreChat with LiteLLM Server Boilerplate](librechat-master-yoda.jpg)
 
 TODO Add short description of this boilerplate
 

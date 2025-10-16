@@ -13,7 +13,7 @@ endpoints:
       summarize: false
       summaryModel: "yoda"
       forcePrompt: false
-      modelDisplayLabel: "Yoda"
+      modelDisplayLabel: "Master Yoda"
 
 # NOTE: The `modelSpecs` section below gives the yoda model a more
 # human-friendly, capitalized name, but it also restricts the list of available
