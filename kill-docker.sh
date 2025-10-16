@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Stop claude-code-gpt-5 Docker container
+# Stop my-litellm-server Docker container
 
 set -e
 
-PROXY_CONTAINER_NAME="${PROXY_CONTAINER_NAME:-claude-code-gpt-5}"
+PROXY_CONTAINER_NAME="${PROXY_CONTAINER_NAME:-my-litellm-server}"
 
 echo "❌ Killing Claude Code GPT-5 Proxy..."
 

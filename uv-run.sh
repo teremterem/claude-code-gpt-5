@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Run claude-code-gpt-5 via uv
+# Run my-litellm-server via uv
 
 set -e
 LITELLM_CONFIG="${LITELLM_CONFIG:-config.yaml}"

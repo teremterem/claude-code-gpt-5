@@ -1,7 +1,7 @@
 services:
-  claude-code-gpt-5:
-    image: ghcr.io/teremterem/claude-code-gpt-5:latest
-    container_name: claude-code-gpt-5
+  my-litellm-server:
+    image: ghcr.io/teremterem/my-litellm-server:latest
+    container_name: my-litellm-server
     ports:
       - "4000:4000"
     restart: unless-stopped

@@ -83,7 +83,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       **OPTION 5:** Run `Docker` via a direct command:
       ```bash
       docker run -d \
-         --name claude-code-gpt-5 \
+         --name my-litellm-server \
          -p 4000:4000 \
          --env-file .env \
          --restart unless-stopped \
@@ -93,7 +93,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
       To see the logs, run:
       ```bash
-      docker logs -f claude-code-gpt-5
+      docker logs -f my-litellm-server
       ```
 
       To stop and remove the container, run:

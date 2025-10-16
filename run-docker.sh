@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Run claude-code-gpt-5 Docker container in the foreground
+# Run my-litellm-server Docker container in the foreground
 # This script pulls and runs the Docker image from GHCR
 
 set -e
 
-PROXY_DOCKER_IMAGE="${PROXY_DOCKER_IMAGE:-ghcr.io/teremterem/claude-code-gpt-5:latest}"
-PROXY_CONTAINER_NAME="${PROXY_CONTAINER_NAME:-claude-code-gpt-5}"
+PROXY_DOCKER_IMAGE="${PROXY_DOCKER_IMAGE:-ghcr.io/teremterem/my-litellm-server:latest}"
+PROXY_CONTAINER_NAME="${PROXY_CONTAINER_NAME:-my-litellm-server}"
 PROXY_PORT="${PROXY_PORT:-4000}"
 
 echo "🚀 Running Claude Code GPT-5 Proxy..."

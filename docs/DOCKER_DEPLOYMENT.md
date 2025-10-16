@@ -7,7 +7,7 @@ This guide explains how to deploy the Claude Code GPT-5 proxy using Docker and G
 The Docker image is available in GitHub Container Registry:
 
 ```
-ghcr.io/teremterem/claude-code-gpt-5:latest
+ghcr.io/teremterem/my-litellm-server:latest
 ```
 
 ## 🚀 Quick Start
@@ -44,7 +44,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 4. **Check the logs** (if you ran in the background):
    ```bash
-   docker logs -f claude-code-gpt-5
+   docker logs -f my-litellm-server
    ```
 
 ### Method 2: Using Docker Compose
@@ -65,11 +65,11 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 3. **Run the container:**
    ```bash
    docker run -d \
-     --name claude-code-gpt-5 \
+     --name my-litellm-server \
      -p 4000:4000 \
      --env-file .env \
      --restart unless-stopped \
-     ghcr.io/teremterem/claude-code-gpt-5:latest
+     ghcr.io/teremterem/my-litellm-server:latest
    ```
 
    > **NOTE:** To run in the foreground, remove the `-d` flag.
@@ -78,31 +78,31 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
 
 4. **Check the logs:**
    ```bash
-   docker logs -f claude-code-gpt-5
+   docker logs -f my-litellm-server
    ```
 
 ## 📊 Monitoring
 
 ### Check container status:
 ```bash
-docker ps | grep claude-code-gpt-5
+docker ps | grep my-litellm-server
 ```
 
 ### Monitor resource usage:
 ```bash
-docker stats claude-code-gpt-5
+docker stats my-litellm-server
 ```
 
 ## 🛑 Stopping and Cleanup
 
 ### Stop the container:
 ```bash
-docker stop claude-code-gpt-5
+docker stop my-litellm-server
 ```
 
 ### Remove the container:
 ```bash
-docker rm claude-code-gpt-5
+docker rm my-litellm-server
 ```
 
 > **NOTE:** `./kill-docker.sh` can be used to both stop and remove the container in one go.
@@ -132,17 +132,17 @@ If you need to build the image yourself, follow the instructions below.
 
 1. First build the image:
    ```bash
-   docker build -t claude-code-gpt-5 .
+   docker build -t my-litellm-server .
    ```
 
 2. Then run the container:
    ```bash
    docker run -d \
-     --name claude-code-gpt-5 \
+     --name my-litellm-server \
      -p 4000:4000 \
      --env-file .env \
      --restart unless-stopped \
-     claude-code-gpt-5
+     my-litellm-server
    ```
    > **NOTE:** To run in the foreground, remove the `-d` flag.
 
@@ -162,7 +162,7 @@ This will map the current directory to the container.
 ### Container won't start
 1. Check if port 4000 is available: `lsof -i :4000`
 2. Verify environment variables are set correctly
-3. Check container logs: `docker logs -f claude-code-gpt-5`
+3. Check container logs: `docker logs -f my-litellm-server`
 
 ### Authentication issues
 1. Verify your API keys are valid and have sufficient credits

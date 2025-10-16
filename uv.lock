@@ -1054,38 +1054,6 @@ wheels = [
 ]
 
 [[package]]
-name = "claude-code-gpt-5"
-version = "1.0.0b3"
-source = { virtual = "." }
-dependencies = [
-    { name = "litellm", extra = ["proxy"] },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "black", version = "24.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "black", version = "25.9.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-    { name = "pre-commit", version = "3.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "pre-commit", version = "4.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-    { name = "pylint", version = "3.2.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "pylint", version = "3.3.9", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-]
-langfuse = [
-    { name = "langfuse", version = "2.54.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "langfuse", version = "2.60.10", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "black", marker = "extra == 'dev'" },
-    { name = "langfuse", marker = "extra == 'langfuse'", specifier = ">=2.0.0,<3.0.0" },
-    { name = "litellm", extras = ["proxy"], specifier = "!=1.77.3,!=1.77.4" },
-    { name = "pre-commit", marker = "extra == 'dev'" },
-    { name = "pylint", marker = "extra == 'dev'", specifier = "<4.0.0" },
-]
-provides-extras = ["langfuse", "dev"]
-
-[[package]]
 name = "click"
 version = "8.1.8"
 source = { registry = "https://pypi.org/simple" }
@@ -2924,6 +2892,38 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/27/77/cfa5461d1d2651d6fc24216c92b4a21d4e385a41c46e0d9f3b070675167b/multidict-6.7.0-cp39-cp39-win_arm64.whl", hash = "sha256:6bdce131e14b04fd34a809b6380dbfd826065c3e2fe8a50dbae659fa0c390546", size = 43118, upload-time = "2025-10-06T14:52:27.876Z" },
     { url = "https://files.pythonhosted.org/packages/b7/da/7d22601b625e241d4f23ef1ebff8acfc60da633c9e7e7922e24d10f592b3/multidict-6.7.0-py3-none-any.whl", hash = "sha256:394fc5c42a333c9ffc3e421a4c85e08580d990e08b99f6bf35b4132114c5dcb3", size = 12317, upload-time = "2025-10-06T14:52:29.272Z" },
 ]
+
+[[package]]
+name = "my-litellm-server"
+version = "1.0.0b3"
+source = { virtual = "." }
+dependencies = [
+    { name = "litellm", extra = ["proxy"] },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "black", version = "24.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "black", version = "25.9.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "pre-commit", version = "3.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "pre-commit", version = "4.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "pylint", version = "3.2.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "pylint", version = "3.3.9", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+]
+langfuse = [
+    { name = "langfuse", version = "2.54.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "langfuse", version = "2.60.10", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "black", marker = "extra == 'dev'" },
+    { name = "langfuse", marker = "extra == 'langfuse'", specifier = ">=2.0.0,<3.0.0" },
+    { name = "litellm", extras = ["proxy"], specifier = "!=1.77.3,!=1.77.4" },
+    { name = "pre-commit", marker = "extra == 'dev'" },
+    { name = "pylint", marker = "extra == 'dev'", specifier = "<4.0.0" },
+]
+provides-extras = ["langfuse", "dev"]
 
 [[package]]
 name = "mypy-extensions"

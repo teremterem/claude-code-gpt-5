@@ -21,9 +21,9 @@ echo <YOUR_GITHUB_PAT> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --passwo
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t ghcr.io/teremterem/claude-code-gpt-5:<VERSION> \
-  -t ghcr.io/teremterem/claude-code-gpt-5:latest \
+  -t ghcr.io/teremterem/my-litellm-server:<VERSION> \
+  -t ghcr.io/teremterem/my-litellm-server:latest \
   --push .
 ```
 
-> **NOTE:** If publishing for the first time, then, after you published it with the command above, make sure to make the package public in [GHCR package settings](https://github.com/users/teremterem/packages/container/claude-code-gpt-5/settings) and also [connect it to the project repository](https://github.com/users/teremterem/packages/container/package/claude-code-gpt-5).
+> **NOTE:** If publishing for the first time, then, after you published it with the command above, make sure to make the package public in [GHCR package settings](https://github.com/users/teremterem/packages/container/my-litellm-server/settings) and also [connect it to the project repository](https://github.com/users/teremterem/packages/container/package/my-litellm-server).
