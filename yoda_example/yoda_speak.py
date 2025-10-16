@@ -58,7 +58,7 @@ class YodaSpeakLLM(CustomLLM):
                 calling_method=calling_method,
                 messages_original=messages,
                 messages_complapi=messages_modified,
-                params_original=optional_params,
+                params_complapi=optional_params,
             )
 
         response = litellm.completion(
@@ -112,7 +112,7 @@ class YodaSpeakLLM(CustomLLM):
                 calling_method=calling_method,
                 messages_original=messages,
                 messages_complapi=messages_modified,
-                params_original=optional_params,
+                params_complapi=optional_params,
             )
 
         response = await litellm.acompletion(
@@ -166,7 +166,7 @@ class YodaSpeakLLM(CustomLLM):
                 calling_method=calling_method,
                 messages_original=messages,
                 messages_complapi=messages_modified,
-                params_original=optional_params,
+                params_complapi=optional_params,
             )
 
         resp_stream = litellm.completion(
@@ -229,7 +229,7 @@ class YodaSpeakLLM(CustomLLM):
                 calling_method=calling_method,
                 messages_original=messages,
                 messages_complapi=messages_modified,
-                params_original=optional_params,
+                params_complapi=optional_params,
             )
 
         resp_stream = await litellm.acompletion(
