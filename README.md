@@ -1,5 +1,7 @@
 # LiteLLM Server Boilerplate
 
+![LibreChat with LiteLLM Server Boilerplate](librechat-litellm.jpeg)
+
 TODO Add short description of this boilerplate
 
 ## Quick Start ⚡

@@ -54,6 +54,7 @@ Thumbs.db
 
 # Documentation
 claude-code-gpt-5.jpeg
+librechat-litellm.jpeg
 
 # LibreChat is not part of the LiteLLM image, it has an image of its own
 /librechat/
