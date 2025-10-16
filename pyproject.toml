@@ -3,7 +3,7 @@ line-length = 119
 
 [project]
 name = "claude-code-gpt-5"
-version = "1.0.0b2"
+version = "1.0.0b3"
 description = "Connect Claude Code CLI to GPT-5"
 readme = "README.md"
 

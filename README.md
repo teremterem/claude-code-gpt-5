@@ -1,6 +1,14 @@
-![Claude Code with GPT-5](images/claude-code-gpt-5.jpeg)
+<p align="center">
+    <img alt="Claude Code with GPT-5"
+        src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5/main/images/claude-code-gpt-5.jpeg">
+</p>
+
 
 This repository lets you use **Anthropic's Claude Code CLI** with **OpenAI's GPT-5** via a local LiteLLM proxy.
+
+> ⚠️ **ATTENTION** ⚠️
+>
+> If you're here to set up `your own LiteLLM Server` (potentially with `LibreChat` or similar UI), head over to the [main-boilerplate](https://github.com/teremterem/claude-code-gpt-5/tree/main-boilerplate) branch and check the [README](https://github.com/teremterem/claude-code-gpt-5/blob/main-boilerplate/README.md) there - the "boilerplate" version of this repo with all the Claude Code CLI stuff stripped away (which is still kept up to date with all the relevant improvements from the regular `main`, however).
 
 ## Quick Start ⚡
 
@@ -51,7 +59,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 3. **Run the proxy:**
 
-   1) **EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
+   1) **EITHER via `uv`** (make sure to install [or upgrade to] the **LATEST** version of [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
       **OPTION 1:** Use a script for `uv`:
       ```bash
@@ -155,3 +163,13 @@ This is planned to be fixed soon.
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
 
 ## And if you like the project, please give it a Star 💫
+
+<p align="center">
+<a href="https://www.star-history.com/#teremterem/claude-code-gpt-5&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
+ </picture>
+</a>
+</p>
