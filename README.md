@@ -46,7 +46,7 @@ TODO Update git clone command
 
 3. **Run the proxy:**
 
-   1) **EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
+   1) **EITHER via `uv`** (make sure to install [or upgrade to] the **LATEST** version of [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
       **OPTION 1:** Use a script for `uv`:
       ```bash
@@ -96,3 +96,13 @@ TODO Update git clone command
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
 
 ## And if you like the project, please give it a Star 💫
+
+<p align="center">
+<a href="https://www.star-history.com/#teremterem/claude-code-gpt-5&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
+ </picture>
+</a>
+</p>
