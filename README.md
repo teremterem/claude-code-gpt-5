@@ -1,6 +1,9 @@
 # LiteLLM Server Boilerplate
 
-![LibreChat with LiteLLM Server Boilerplate](librechat-master-yoda.jpg)
+<p align="center">
+    <img alt="LibreChat with LiteLLM Server Boilerplate"
+        src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5/main/images/librechat-master-yoda.jpg">
+</p>
 
 TODO Add short description of this boilerplate
 
