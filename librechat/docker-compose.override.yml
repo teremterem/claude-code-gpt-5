@@ -10,7 +10,7 @@ services:
       - ./librechat.yaml:/app/librechat.yaml
     env_file:
       # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
-      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
+      # ../.env (the .env of the LiteLLM Server itself)
       - .env.non-secure-litellm-master-key
       # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
       # value from the file above
@@ -32,7 +32,7 @@ services:
     #  Is there any difference between the two ?
 
   litellm:
-    # Build from Claude Code GPT-5 Proxy
+    # Build from the your LiteLLM Server source code
     build: ..
     container_name: LiteLLM-Server
     # ports:
@@ -45,7 +45,7 @@ services:
       - litellm-uv-cache:/root/.cache/uv
     env_file:
       # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
-      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
+      # ../.env (the .env of the LiteLLM Server itself)
       - .env.non-secure-litellm-master-key
       # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
       # value from the file above

@@ -63,12 +63,6 @@ Package manager: uv (Python). If you prefer containers, see the Docker section.
     ```bash
     docker compose down
     ```
-  - Helper scripts:
-    ```bash
-    ./run-docker.sh        # run pre-built image in foreground
-    ./deploy-docker.sh     # deploy background container
-    ./kill-docker.sh       # stop and remove container
-    ```
 
 ## High-level architecture
 

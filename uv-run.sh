@@ -6,7 +6,7 @@ set -e
 LITELLM_CONFIG="${LITELLM_CONFIG:-config.yaml}"
 PROXY_PORT="${PROXY_PORT:-4000}"
 echo ""
-echo "🚀 Running Claude Code GPT-5 Proxy (via uv)..."
+echo "🚀 Running My LiteLLM Server (via uv)..."
 echo "📦 Config: ${LITELLM_CONFIG}"
 echo ""
 echo "Starting..."

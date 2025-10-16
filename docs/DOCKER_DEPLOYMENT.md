@@ -1,6 +1,6 @@
-# Docker Deployment Guide for Claude Code GPT-5 Proxy
+# Docker Deployment Guide for the LiteLLM Server
 
-This guide explains how to deploy the Claude Code GPT-5 proxy using Docker and GitHub Container Registry (GHCR).
+This guide explains how to deploy the LiteLLM Server using Docker.
 
 ## 🐳 Docker Image
 
@@ -178,11 +178,3 @@ This will map the current directory to the container.
 - Use environment variables or Docker secrets for sensitive data
 - Consider running the container in a restricted network environment
 - Regularly update the image to get security patches
-
-## 📝 Architecture
-
-```
-Claude Code CLI → LiteLLM Proxy (Port 4000) → OpenAI GPT-5 API
-```
-
-The proxy handles model routing and ensures compatibility between Claude Code's expectations and OpenAI's GPT-5 responses.

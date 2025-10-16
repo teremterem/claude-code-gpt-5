@@ -1,5 +1,7 @@
 services:
   my-litellm-server:
+    # TODO What would be the purpose of the image below ? The whole point is to
+    #  build a custom one...
     image: ghcr.io/teremterem/my-litellm-server:latest
     container_name: my-litellm-server
     ports:
