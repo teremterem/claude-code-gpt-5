@@ -1,4 +1,4 @@
-<h1 align="center">LiteLLM Server Boilerplate</h1>
+<h1 align="center">My LiteLLM Server</h1>
 
 <p align="center">
     <img alt="LibreChat with LiteLLM Server Boilerplate"
