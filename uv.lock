@@ -1055,7 +1055,7 @@ wheels = [
 
 [[package]]
 name = "claude-code-gpt-5"
-version = "1.0.0b2"
+version = "1.0.0b3"
 source = { virtual = "." }
 dependencies = [
     { name = "litellm", extra = ["proxy"] },
