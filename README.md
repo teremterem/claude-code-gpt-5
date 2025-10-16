@@ -70,6 +70,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
    2) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
 
+      TODO There isn't really a point in downloading the image from a registry - it's going to be custom anyway
+
       **OPTION 3:** Run `Docker` in the foreground:
       ```bash
       ./run-docker.sh
@@ -87,7 +89,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
          -p 4000:4000 \
          --env-file .env \
          --restart unless-stopped \
-         ghcr.io/teremterem/claude-code-gpt-5:latest
+         ghcr.io/teremterem/my-litellm-server:latest
       ```
       > **NOTE:** To run with this command in the foreground instead of the background, remove the `-d` flag.
 
