@@ -6,7 +6,7 @@ from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse
 
 from common.config import WRITE_TRACES_TO_FILES
 from common.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_chunk_trace
-from common.utils import generate_timestamp_local_tz, to_generic_streaming_chunk
+from common.utils import generate_timestamp_utc, to_generic_streaming_chunk
 
 
 _YODA_SYSTEM_PROMPT = {
@@ -47,7 +47,7 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
-        timestamp = generate_timestamp_local_tz()
+        timestamp = generate_timestamp_utc()
         calling_method = "completion"
 
         messages_modified = messages + [_YODA_SYSTEM_PROMPT]
@@ -101,7 +101,7 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
-        timestamp = generate_timestamp_local_tz()
+        timestamp = generate_timestamp_utc()
         calling_method = "acompletion"
 
         messages_modified = messages + [_YODA_SYSTEM_PROMPT]
@@ -155,7 +155,7 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
-        timestamp = generate_timestamp_local_tz()
+        timestamp = generate_timestamp_utc()
         calling_method = "streaming"
 
         messages_modified = messages + [_YODA_SYSTEM_PROMPT]
@@ -214,7 +214,7 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
-        timestamp = generate_timestamp_local_tz()
+        timestamp = generate_timestamp_utc()
         calling_method = "astreaming"
 
         messages_modified = messages + [_YODA_SYSTEM_PROMPT]
