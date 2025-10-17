@@ -7,7 +7,7 @@
 
 TODO Add short description of this boilerplate
 
-> **NOTE:** Click [here](https://github.com/teremterem/claude-code-gpt-5) to go back to the `Claude Code CLI Proxy` version of the repo.
+> **NOTE:** Click [here](https://github.com/teremterem/claude-code-gpt-5) if you need to go back to the `Claude Code CLI Proxy` version of this repository.
 
 ## Quick Start ⚡
 
