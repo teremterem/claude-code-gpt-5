@@ -5,7 +5,7 @@
         src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5/main/images/librechat-master-yoda.jpg">
 </p>
 
-TODO Add short description of this boilerplate
+A lightweight LiteLLM server boilerplate with prewired `uv` and Docker workflows for hosting your own OpenAI-compatible endpoint (perfect for LibreChat and other UI clients).
 
 > **NOTE:** Click [here](https://github.com/teremterem/claude-code-gpt-5) if you need to go back to the `Claude Code CLI Proxy` version of this repository.
 
