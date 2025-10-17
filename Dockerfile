@@ -23,7 +23,7 @@ RUN uv sync --frozen
 # Copy all the project files
 COPY . .
 
-# Expose port 4000 (default LiteLLM proxy port)
+# Expose port 4000 (default LiteLLM server port)
 EXPOSE 4000
 
 # # !!! WARNING !!!
@@ -34,6 +34,6 @@ EXPOSE 4000
 # HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
 #    CMD curl -f -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" http://localhost:4000/health || exit 1
 
-# Default command to run the LiteLLM proxy
+# Default command to run the LiteLLM server
 # TODO Do we need to set PYTHONUNBUFFERED=1 ?
 CMD ["uv", "run", "litellm", "--config", "config.yaml", "--port", "4000", "--host", "0.0.0.0"]
