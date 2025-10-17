@@ -128,4 +128,5 @@ This repository provides a customizable LiteLLM server that exposes OpenAI-compa
   1) Create a module similar to `yoda_example/` (implement the provider class and required methods)
   2) Register it in `config.yaml` under your chosen provider key
   3) Add any env/config toggles in `common/config.py` as needed
-  4) Run locally with `uv run litellm --config config.yaml` and verify normal/streaming behavior
+  4) Update librechat/librechat.yaml to add the new provider, new model, etc.
+  5) Run locally with `./librechat/run-docker-compose.sh` and verify the new provider, new model, etc. is working in LibreChat as expected.
