@@ -130,7 +130,7 @@ If you don't want to use LibreChat, you can run your LiteLLM Server directly.
       up
    ```
 
-### Staying Up to Date with the Boilerplate
+### Staying up to date with the Boilerplate
 
 Once you start customizing your copy, you will occasionally want to bring in the newest boilerplate improvements. The steps below assume you cloned the boilerplate with the `boilerplate` remote (see the setup section above) and that your own repository is attached as `origin`.
 
