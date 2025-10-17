@@ -152,16 +152,16 @@ Once you start customizing your copy, you will occasionally want to bring in the
 
 4. **Merge the upstream updates into your branch.**
    ```bash
-   git merge --ff-only boilerplate/main-boilerplate
+   git merge boilerplate/main-boilerplate
    ```
-   If Git reports conflicts (or if you prefer a merge commit), rerun the command without `--ff-only` or resolve the reported conflicts before continuing.
+   If Git reports conflicts, resolve the files Git marks, `git add` them, and run `git commit` to complete the merge before continuing.
 
 5. **Push the refreshed branch to your own repository.**
    ```bash
    git push origin main
    ```
 
-That’s it—your `main` branch now contains the latest boilerplate changes while keeping your customizations intact.
+That’s it - your `main` branch now contains the latest boilerplate changes while keeping your customizations in place.
 
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
 
