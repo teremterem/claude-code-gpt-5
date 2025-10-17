@@ -46,7 +46,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    git switch -c main
    ```
 
-3. **Set up `origin` remote and push your `main` branch to your remote repository:**
+3. **(Optional) Set up `origin` remote and push your `main` branch to your remote repository:**
 
    ```bash
    git remote add origin <your-remote-repository-url>
@@ -56,7 +56,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    git push -u origin main
    ```
 
-   (Even though this step is optional, it is generally a good idea to have your own remote repository to push your changes to.)
+   Even though this step is optional, it is generally a good idea to have your own remote repository to push your changes to.
 
 4. **Configure Environment Variables:**
 
@@ -76,64 +76,42 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ...
    ```
 
-5. **Run your LiteLLM Server with LibreChat and the Yoda example:**
+5. **Run your LiteLLM Server with LibreChat and the Yoda example** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
 
    ```bash
    ./librechat/run-docker-compose.sh
    ```
+   **OR**
+   ```bash
+   cd librechat
+   ```
+
+   ```bash
+   docker compose -p litellm-librechat up
+   ```
 
    **That's it.** You should be able to access the LibreChat UI at **http://localhost:3080**, and after registering an account in your local LibreChat instance, you should be able to see something similar to what you see on the screenshot at the beginning of this README.
 
-### Running your LiteLLM Server without LibreChat
+### Running your LiteLLM Server WITHOUT LibreChat
 
-   1) **EITHER via `uv`** (make sure to install [or upgrade to] the **LATEST** version of [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
+> **NOTE:** The commands below should be run in the `root directory` of the repository, **not** in the `librechat/` subdirectory.
 
-      **OPTION 1:** Use a script for `uv`:
-      ```bash
-      ./uv-run.sh
-      ```
+- **OPTION 1:** Use a script for `uv` (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
+   ```bash
+   ./uv-run.sh
+   ```
 
-      **OPTION 2:** Run via a direct `uv` command:
-      ```bash
-      uv run litellm --config config.yaml
-      ```
+- **OPTION 2:** Run via a direct `uv` command:
+   ```bash
+   uv run litellm --config config.yaml
+   ```
 
-   2) **OR via `Docker`** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
+- **OPTION 3:** Run via `Docker Compose` (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+   ```
 
-      TODO There isn't really a point in downloading the image from a registry - it's going to be custom anyway
-
-      **OPTION 3:** Run `Docker` in the foreground:
-      ```bash
-      ./run-docker.sh
-      ```
-
-      **OPTION 4:** Run `Docker` in the background:
-      ```bash
-      ./deploy-docker.sh
-      ```
-
-      **OPTION 5:** Run `Docker` via a direct command:
-      ```bash
-      docker run -d \
-         --name my-litellm-server \
-         -p 4000:4000 \
-         --env-file .env \
-         --restart unless-stopped \
-         ghcr.io/teremterem/my-litellm-server:latest
-      ```
-      > **NOTE:** To run with this command in the foreground instead of the background, remove the `-d` flag.
-
-      To see the logs, run:
-      ```bash
-      docker logs -f my-litellm-server
-      ```
-
-      To stop and remove the container, run:
-      ```bash
-      ./kill-docker.sh
-      ```
-
-      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [docs/DOCKER_DEPLOYMENT.md](docs/DOCKER_DEPLOYMENT.md)
+---
 
 TODO Show how to pull the latest changes from the `boilerplate/main-boilerplate` branch and merge them into your local `main` branch which is linked to your own repository (in separate README section)
 
