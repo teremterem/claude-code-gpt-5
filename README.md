@@ -23,20 +23,42 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 ### Setup 🛠️
 
-1. **Clone this repository's `main-boilerplate` branch into a local `main` branch:**
+1. **Clone this repository's `main-boilerplate` branch into a local directory:**
    ```bash
-   git clone --branch main-boilerplate --origin boilerplate https://github.com/teremterem/claude-code-gpt-5.git my-litellm-server
+   git clone \
+       --branch main-boilerplate \
+       --origin boilerplate \
+       https://github.com/teremterem/claude-code-gpt-5.git \
+       my-litellm-server
+   ```
+
+   ```bash
    cd my-litellm-server
+   ```
+
+   > **NOTE:** If you want to, you can replace `my-litellm-server` with a different project name in both commands above.
+
+   Notice, that the `git clone` command above uses `boilerplate` as the remote name to link back to the boilerplate repository. **This is because in the next steps you will set up `origin` to link to your own remote repository.**
+
+2. **Create `main` branch from the `main-boilerplate` in your local repository:**
+
+   ```bash
    git switch -c main
    ```
 
-   TODO Explain the commands above
+3. **Set up `origin` remote and push your `main` branch to your remote repository:**
 
-   TODO Show how to create `origin` remote and push it to your own repository
+   ```bash
+   git remote add origin <your-remote-repository-url>
+   ```
 
-   TODO Show how to pull the latest changes from the `boilerplate/main-boilerplate` branch and merge them into your local `main` branch which is linked to your own repository (in separate README section)
+   ```bash
+   git push -u origin main
+   ```
 
-2. **Configure Environment Variables:**
+   (Even though this step is optional, it is generally a good idea to have your own remote repository to push your changes to.)
+
+4. **Configure Environment Variables:**
 
    Copy the template file to create your `.env`:
    ```bash
@@ -54,7 +76,15 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ...
    ```
 
-3. **Run your LiteLLM Server:**
+5. **Run your LiteLLM Server with LibreChat and the Yoda example:**
+
+   ```bash
+   ./librechat/run-docker-compose.sh
+   ```
+
+   **That's it.** You should be able to access the LibreChat UI at **http://localhost:3080**, and after registering an account in your local LibreChat instance, you should be able to see something similar to what you see on the screenshot at the beginning of this README.
+
+### Running your LiteLLM Server without LibreChat
 
    1) **EITHER via `uv`** (make sure to install [or upgrade to] the **LATEST** version of [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
@@ -104,6 +134,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       ```
 
       > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [docs/DOCKER_DEPLOYMENT.md](docs/DOCKER_DEPLOYMENT.md)
+
+TODO Show how to pull the latest changes from the `boilerplate/main-boilerplate` branch and merge them into your local `main` branch which is linked to your own repository (in separate README section)
 
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
 
