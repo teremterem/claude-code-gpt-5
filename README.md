@@ -16,7 +16,7 @@
 - [OpenAI API key 🔑](https://platform.openai.com/settings/organization/api-keys)
 - Either [uv](https://docs.astral.sh/uv/getting-started/installation/) or [Docker Desktop](https://docs.docker.com/desktop/), depending on your preferred setup method
 
-### First time using GPT-5 via API?
+### GPT-5 caveat
 
 If you are going to use GPT-5 via API for the first time, **OpenAI may require you to verify your identity via Persona.** You may encounter an OpenAI error asking you to “verify your organization.” To resolve this, you can go through the verification process here:
 - [OpenAI developer platform - Organization settings](https://platform.openai.com/settings/organization/general)
