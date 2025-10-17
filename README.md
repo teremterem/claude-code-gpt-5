@@ -7,7 +7,7 @@
 
 **A lightweight LiteLLM server boilerplate** with prewired `uv` and Docker workflows for hosting your own OpenAI-compatible endpoint. Perfect for **LibreChat** (a quick setup of which is already included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
 
-> **NOTE:** Click [here](https://github.com/teremterem/claude-code-gpt-5) if you need to go back to the `Claude Code CLI Proxy` version of this repository.
+> **NOTE:** If you need to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
 
 ## Quick Start ⚡
 
@@ -81,20 +81,36 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```bash
    ./librechat/run-docker-compose.sh
    ```
+
    **OR**
+
    ```bash
    cd librechat
    ```
+
+   Then
 
    ```bash
    docker compose -p litellm-librechat up
    ```
 
+   Which is equivalent to running:
+   ```bash
+   docker compose \
+      -p litellm-librechat \
+      -f docker-compose.yml \
+      -f docker-compose.override.yml \
+      up
+   ```
+   > **NOTE:** The last two variants of the direct `docker compose` command require you to be in the `librechat/` subdirectory, hence the `cd` command.
+
    **That's it.** You should be able to access the LibreChat UI at **http://localhost:3080**, and after registering an account in your local LibreChat instance, you should be able to see something similar to what you see on the screenshot at the beginning of this README.
 
 ### Running your LiteLLM Server WITHOUT LibreChat
 
-> **NOTE:** The commands below should be run in the `root directory` of the repository, **not** in the `librechat/` subdirectory.
+If you don't want to use LibreChat, you can run your LiteLLM Server directly.
+
+> **NOTE:** This time you are expected to be in the `root directory` of the repository, **not** in the `librechat/` subdirectory.
 
 - **OPTION 1:** Use a script for `uv` (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
    ```bash
@@ -108,7 +124,10 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 - **OPTION 3:** Run via `Docker Compose` (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
    ```bash
-   docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+   docker-compose \
+      -f docker-compose.yml \
+      -f docker-compose.dev.yml \
+      up
    ```
 
 ---
