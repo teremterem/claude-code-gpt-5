@@ -70,7 +70,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    OPENAI_API_KEY=your-openai-api-key-here
 
    # Optional (see .env.template for details):
-   # LITELLM_MASTER_KEY=your-master-key-here
+   # LITELLM_MASTER_KEY=strong-key-that-you-generated
 
    # Some more optional settings (see .env.template for details)
    ...
