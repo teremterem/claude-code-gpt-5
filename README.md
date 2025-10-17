@@ -130,9 +130,38 @@ If you don't want to use LibreChat, you can run your LiteLLM Server directly.
       up
    ```
 
----
+### Staying Up to Date with the Boilerplate
 
-TODO Show how to pull the latest changes from the `boilerplate/main-boilerplate` branch and merge them into your local `main` branch which is linked to your own repository (in separate README section)
+Once you start customizing your copy, you will occasionally want to bring in the newest boilerplate improvements. The steps below assume you cloned the boilerplate with the `boilerplate` remote (see the setup section above) and that your own repository is attached as `origin`.
+
+1. **Make sure your working tree is clean.**
+   ```bash
+   git status
+   ```
+   Commit or stash anything pending before you proceed.
+
+2. **Fetch the latest boilerplate branch.**
+   ```bash
+   git fetch boilerplate main-boilerplate
+   ```
+
+3. **Switch to your local `main` branch.**
+   ```bash
+   git switch main
+   ```
+
+4. **Merge the upstream updates into your branch.**
+   ```bash
+   git merge --ff-only boilerplate/main-boilerplate
+   ```
+   If Git reports conflicts (or if you prefer a merge commit), rerun the command without `--ff-only` or resolve the reported conflicts before continuing.
+
+5. **Push the refreshed branch to your own repository.**
+   ```bash
+   git push origin main
+   ```
+
+That’s it—your `main` branch now contains the latest boilerplate changes while keeping your customizations intact.
 
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
 
