@@ -152,7 +152,7 @@ See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Esp
 
 ## Publishing Docker images to a Container Registry
 
-TODO Thesis: publishing makes it easy to deploy to your infrastructure
+TODO Thesis: publishing your docker images to a container registry makes it easier to deploy to your infrastructure
 
 TODO Thesis: we will use GitHub Container Registry (GHCR) as an example, but you can use any other container registry and the process will be similar
 
