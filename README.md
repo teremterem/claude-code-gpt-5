@@ -2,7 +2,7 @@
 
 <p align="center">
     <img alt="LibreChat with LiteLLM Server Boilerplate"
-        src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5/main/images/librechat-master-yoda.jpg">
+        src="images/librechat-master-yoda.jpg">
 </p>
 
 **A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect for **LibreChat** (a quick setup of which is included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
