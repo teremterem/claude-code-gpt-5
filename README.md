@@ -2,7 +2,7 @@
 
 <p align="center">
     <img alt="LibreChat with LiteLLM Server Boilerplate"
-        src="images/librechat-master-yoda.jpg">
+        src="librechat-master-yoda.jpg">
 </p>
 
 **A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect for **LibreChat** (a quick setup of which is included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
@@ -150,24 +150,28 @@ See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Esp
 - If you want LibreChat to show multiple providers, adjust or remove the existing `modelSpecs` block; the shipped configuration intentionally limits the UI to the `yoda` model.
 - After editing configuration, restart the compose stack (`./librechat/run-docker-compose.sh` or `docker compose -p litellm-librechat restart api litellm`) so LibreChat reloads the updated YAML.
 
-## Publishing Docker images to a Container Registry
+## Publishing your Docker images to a Container Registry
 
-Publishing your images to a container registry makes deployment simpler and consistent across environments (CI/CD, Kubernetes, Azure Container Apps, etc.). Below we use GitHub Container Registry (GHCR) as an example; other registries (ECR/GCR/ACR/Docker Hub) follow the same pattern with different login/registry URLs.
+Publishing your images to a container registry might make deployment of your LiteLLM Server and LibreChat to your infrastructure (CI/CD, Kubernetes, Azure Container Apps, etc.) more straightforward. Below we use GitHub Container Registry (GHCR) as an example; other registries (ECR/GCR/ACR/Docker Hub) follow the same pattern with different login/registry URLs.
 
 ### Prerequisites
-- Docker installed, with Buildx (multi-arch) enabled
-- A GitHub Personal Access Token (PAT) with `write:packages` scope
+
 - A GitHub user/org you will publish under
+- A GitHub [Personal Access Token (PAT)](https://github.com/settings/tokens) with the `write:packages` scope
+- Docker installed on your machine
+- Multi-arch `buildx` enabled in Docker (see [Docker documentation](https://docs.docker.com/build/install-buildx/))
 
 ### 1) Log in to GHCR
+
 ```bash
 # Replace <GITHUB_USERNAME> and ensure $GITHUB_PAT is set in your shell
 echo "$GITHUB_PAT" | docker login ghcr.io -u <GITHUB_USERNAME> --password-stdin
 ```
 
-> Never commit your PAT. Store it in a secure secret manager or CI secret.
+> **WARNING:** Never commit your PAT to version control. Store it in a secure secret manager or CI secret.
 
 ### 2) Publish your LiteLLM Server image
+
 The root Dockerfile builds the LiteLLM server (listens on port 4000 by default).
 
 Pick an image name under your account/org and a version tag:
@@ -189,6 +193,10 @@ docker build -t "$IMAGE:latest" .
 docker push "$IMAGE:latest"
 ```
 
+TODO Get rid of docker-compose.dev.yml
+
+TODO Update the "run" instruction below
+
 Run the published LiteLLM image:
 ```bash
 docker run -p 4000:4000 \
@@ -197,8 +205,9 @@ docker run -p 4000:4000 \
   "$IMAGE:latest"
 ```
 
-### 3) Publish a LibreChat image with your `librechat.yaml`
-The Dockerfile at `librechat/Dockerfile` extends the official LibreChat image and bakes in your `librechat.yaml`.
+### 3) Publish a LibreChat image with your custom `librechat.yaml`
+
+The Dockerfile at `librechat/Dockerfile` extends the official LibreChat image and bakes in your own version of `librechat.yaml`, which removes the burden of later supplying your custom `librechat.yaml` file into your deployment container "from the outside".
 
 Choose coordinates and build:
 ```bash
@@ -222,6 +231,7 @@ docker run -p 3080:3080 \
 ```
 
 ### Notes and tips
+
 - Replace `ghcr.io/<OWNER>/...` with your own registry path. For other registries, adjust the login and tag (e.g., `123456789.dkr.ecr.us-east-1.amazonaws.com/your-image`).
 - Prefer semantic versions (e.g., 0.1.0) and keep `latest` for convenience.
 - Make images public or grant access in GHCR settings so your deployment environment can pull them.
