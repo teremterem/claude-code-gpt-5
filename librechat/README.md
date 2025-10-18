@@ -22,11 +22,11 @@ Need other deployment topologies or compose variants? Refer to the [official Lib
   - Sets `LITELLM_BASE_URL=http://litellm:4000/v1` for the API container so LibreChat talks to the `litellm` service over the compose network.
   - Includes volumes to speed up local Python dependency management for LiteLLM (`.venv`, uv cache).
 
-- deploy-compose.yml
-  - Deployment-style compose file (copied from the LibreChat official repo). Adds a separate `client` NGINX service that fronts the API and publishes ports 80/443 for production-like hosting while still mounting this folder’s `librechat.yaml`.
-
 - docker-compose.override.yml.example
   - Sample override file kept for reference (copied from the LibreChat official repo). Demonstrates a wide range of optional LibreChat overrides (extra services, alternate images, storage tweaks) that you can copy into a custom override if you need functionality beyond this project’s tailored setup.
+
+- deploy-compose.yml
+  - Deployment-style compose file (copied from the LibreChat official repo). Adds a separate `client` NGINX service that fronts the API and publishes ports 80/443 for production-like hosting while still mounting this folder’s `librechat.yaml`. **Not used in current setup - placed here for reference only.**
 
 - Dockerfile
   - Minimal Dockerfile that extends an official LibreChat image and bakes in `librechat.yaml` at build time. Useful when publishing a preconfigured LibreChat image so external deployments do not need to inject the config file at runtime.
@@ -50,7 +50,7 @@ Need other deployment topologies or compose variants? Refer to the [official Lib
   - Small helper script that orchestrates the LibreChat compose stack in this folder. It standardizes the compose project name and provides a single entry point for bringing the stack up or down with the selected compose files.
 
 - images/, uploads/, logs/
-  - Bind-mounted data directories referenced by the compose files. These hold user-visible assets, uploaded files, and application logs during local runs.
+  - Bind-mounted data directories referenced by the compose files. These hold user-visible assets, uploaded files, and application logs during local runs (excluded from the repo using `.gitignore`).
 
 ## How this folder fits the repo
 
