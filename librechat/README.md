@@ -2,7 +2,7 @@
 
 This folder contains a self-contained LibreChat stack wired to the LiteLLM server in the repository root. It provides compose definitions, a minimal Dockerfile for baking configuration, and the LibreChat application config that points LibreChat to the local LiteLLM endpoint.
 
-> **NOTE:** This folder does not contain LibreChat itself, it only contains the configurations for it.
+> **NOTE:** This folder does not contain LibreChat source code itself, it only contains the configurations for it (with references to pre-built public Docker images).
 
 For setup, run, and maintenance steps, see the [repository root README.md](../README.md).
 
