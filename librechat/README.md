@@ -12,7 +12,7 @@ If you want to learn more about LibreChat, see the [official LibreChat documenta
 
 **docker-compose.yml**
 
-- Baseline compose file (copied from the LibreChat official repo). Defines the core LibreChat services: API (`api`), MongoDB (`mongodb`), Meilisearch (`meilisearch`), a Postgres+pgvector instance (`vectordb`), and the RAG API (`rag_api`).
+- Baseline compose file **(copied from the LibreChat official repo)**. Defines the core LibreChat services: API (`api`), MongoDB (`mongodb`), Meilisearch (`meilisearch`), a Postgres+pgvector instance (`vectordb`), and the RAG API (`rag_api`).
 - Binds this folder’s `.env` into the API container and mounts local directories for images, uploads, and logs.
 
 **docker-compose.override.yml**
@@ -25,11 +25,11 @@ If you want to learn more about LibreChat, see the [official LibreChat documenta
 
 **docker-compose.override.yml.example**
 
-- Sample override file kept for reference (copied from the LibreChat official repo). Demonstrates a wide range of optional LibreChat overrides (extra services, alternate images, storage tweaks) that you can copy into a custom override if you need functionality beyond this project’s tailored setup.
+- Sample override file kept for reference **(copied from the LibreChat official repo)**. Demonstrates a wide range of optional LibreChat overrides (extra services, alternate images, storage tweaks) that you can copy into a custom override if you need functionality beyond this project’s tailored setup.
 
 **deploy-compose.yml**
 
-- Deployment-style compose file (copied from the LibreChat official repo). Adds a separate `client` NGINX service that fronts the API and publishes ports 80/443 for production-like hosting while still mounting this folder’s `librechat.yaml`. **Not used in current setup - placed here for reference only.**
+- Deployment-style compose file **(copied from the LibreChat official repo)**. Adds a separate `client` NGINX service that fronts the API and publishes ports 80/443 for production-like hosting while still mounting this folder’s `librechat.yaml`. **Not used in current setup - placed here for reference only.**
 
 **Dockerfile**
 
@@ -44,7 +44,7 @@ If you want to learn more about LibreChat, see the [official LibreChat documenta
 
 **librechat.example.yaml**
 
-- Sample configuration retained as a reference for the full LibreChat feature surface (copied from the LibreChat official repo). Useful when you need to explore advanced settings or restore defaults not covered by this project’s trimmed-down `librechat.yaml`.
+- Sample configuration retained as a reference for the full LibreChat feature surface **(copied from the LibreChat official repo)**. Useful when you need to explore advanced settings or restore defaults not covered by this project’s trimmed-down `librechat.yaml`.
 
 **.env and .env.example**
 
@@ -56,7 +56,7 @@ If you want to learn more about LibreChat, see the [official LibreChat documenta
 
 **run-docker-compose.sh**
 
-- Small helper script that orchestrates the LibreChat compose stack in this folder. It standardizes the compose project name and provides a single entry point for bringing the stack up or down with the selected compose files.
+- Stops any existing LibreChat stack for this project and starts it again with the compose files in this folder.
 
 **images/, uploads/, logs/**
 
@@ -65,7 +65,7 @@ If you want to learn more about LibreChat, see the [official LibreChat documenta
 ## How this folder fits the repo
 
 - The override compose file introduces a `litellm` service built from the repository root, connecting the LibreChat UI to the LiteLLM server defined by this project.
-- `librechat.yaml` tells LibreChat to route requests to that service using OpenAI-compatible endpoints, while `modelSpecs` keeps the UI scoped to the example `yoda` model to demonstrate a custom provider.
+- `librechat.yaml` tells LibreChat to route requests to that service using an OpenAI-compatible endpoint, while `modelSpecs` keeps the UI scoped to the example `yoda` model to demonstrate a custom provider.
 - The included Dockerfile enables producing a preconfigured LibreChat image that embeds this repository’s `librechat.yaml`, which simplifies external deployments.
 
 For any operational steps (creating environment files, starting the stack, publishing images, etc.), refer to the [main README.md](../README.md) at the repository root.
