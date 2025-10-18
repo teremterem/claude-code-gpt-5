@@ -132,17 +132,21 @@ If you don't want to use LibreChat, you can run your LiteLLM Server directly.
 
 ## Development
 
-- when you do docker compose up (with or without LibreChat), the files in your local repository are mounted into the container, so when you develop locally, a simple compose restart is enough to see your changes in action (supplying --build flag is only necessary if you make changes to the root Dockerfile itself, the dependencies or other definitions in pyproject.toml or the python version in .python-version)
-- setting up the environment with `uv` directly might still be convenient for IDE integration and other local development workflows
+TODO Thesis: when you do docker compose up (with or without LibreChat), the files in your local repository are mounted into the container, so when you develop locally, a simple compose restart is enough to see your changes in action (supplying --build flag is only necessary if you make changes to the root Dockerfile itself, the dependencies or other definitions in pyproject.toml or the python version in .python-version)
+
+TODO Thesis: setting up the environment with `uv` directly might still be convenient for IDE integration and other local development workflows
+
+TODO Thesis: `librechat/librechat.yaml` needs to be updated when you set up new providers and new models (or, rather, agents, that look like models as far as the UI is concerned)
 
 ## Publishing Docker images to a Container Registry
 
-- publishing makes it easy to deploy to your infrastructure
-- we will use GitHub Container Registry (GHCR) as an example, but you can use any other container registry and the process will be similar
+TODO Thesis: publishing makes it easy to deploy to your infrastructure
 
-### Your LiteLLM Server Docker image
+TODO Thesis: we will use GitHub Container Registry (GHCR) as an example, but you can use any other container registry and the process will be similar
 
-### LibreChat Docker image with your own customized config
+### Publishing your LiteLLM Server Docker image
+
+### Publishing LibreChat Docker image with your own `librechat.yaml`
 
 ## Staying up to date with the Boilerplate
 
