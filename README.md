@@ -218,13 +218,29 @@ docker buildx build \
 
 ### If you want to test your published images locally
 
-**Complete LibreChat stack**
+**Complete LibreChat stack (published images)**
 
-TODO
+- Image switching (see comments in `librechat/docker-compose.override.yml` for details):
+  - `services.litellm.image`: set to your published LiteLLM image
+  - `services.api.image`: set to the LibreChat image you want
+- Start the stack:
+  ```bash
+  cd librechat
+  docker compose -p litellm-librechat up
+  ```
+- Access LibreChat UI: http://localhost:3080
 
-**Standalone LiteLLM Server**
+**Standalone LiteLLM Server (published image)**
 
-TODO
+- Image reference: follow the comments in `docker-compose.yml` to point `services.my-litellm-server.image` to your published image.
+- Start:
+  ```bash
+  docker compose up
+  ```
+- Verify:
+  ```bash
+  curl http://localhost:4000/health
+  ```
 
 ## Staying up to date with the Boilerplate
 
