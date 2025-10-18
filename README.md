@@ -140,9 +140,9 @@ In order to set up your own custom provider and model(s), you will need to:
 - Register your new provider in the `custom_provider_map` section of `config.yaml` under your chosen provider key.
 - Declare your new model(s) in the `model_list` section of `config.yaml` under your chosen model key
 
-See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Especially, check out their Search in the top right corner of the documentation website - their AI Assistant ("Ask AI" feature in the "Search" dialog) is quite good.
-
 > **NOTE:** Here, by **"models"** we really mean **agents**, because, to whatever clients connect to your LiteLLM Server (LibreChat or otherwise), they will only look like models. Behind the scenes, in your provider class you will likely have code that orchestrates the execution of one or more LLMs and possibly other tools.
+
+See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Especially, check out their Search in the top right corner of the documentation website - their AI Assistant ("Ask AI" feature in the "Search" dialog) is quite good.
 
 ### Keep LibreChat in sync with LiteLLM
 
