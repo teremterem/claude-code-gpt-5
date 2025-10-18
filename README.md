@@ -132,15 +132,19 @@ If you don't want to use LibreChat, you can run your LiteLLM Server directly.
 
 ## Development
 
-TODO Thesis: when you do docker compose up (with or without LibreChat), the files in your local repository are mounted into the container, so when you develop locally, a simple compose restart is enough to see your changes in action (supplying --build flag is only necessary if you make changes to the root Dockerfile itself, the dependencies or other definitions in pyproject.toml or the python version in .python-version)
+When you run with Docker Compose, your local repository is bind-mounted into the containers (this whole repo - into the `litellm` container, and `librechat/librechat.yaml` - into the `api` container), so code changes are reflected without the need to rebuild the containers. Usually a simple compose restart is enough to pick up updates; use --build only if you change the base image or dependencies (`Dockerfile`, `pyproject.toml`, `.python-version`). The bind mounts are defined in `docker-compose.dev.yml` (LiteLLM-only mode) and `librechat/docker-compose.override.yml` (complete LibreChat stack with your `librechat.yaml` custom configuration).
+
+In order to set up your own custom provider and model(s), you will need to:
 
 - Implement the provider class and required methods in a new module (similar to `yoda_example/`)
-- Register your new provider in `custom_provider_map` of `config.yaml` under your chosen provider key.
-- Declare your new model(s) in `model_list` of `config.yaml` under your chosen model key.
+- Register your new provider in the `custom_provider_map` section of `config.yaml` under your chosen provider key.
+- Declare your new model(s) in the `model_list` section of `config.yaml` under your chosen model key
 
-> **NOTE:** Here, by **"models"** we really mean **agents**, as to whatever clients connect to your LiteLLM Server (LibreChat or otherwise) they will only look like models. Behind the scenes, in your provider class you will have code that orchestrates the execution of one or more LLMs and possibly other tools.
+See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Especially, check out their Search in the top right corner of the documentation website - their AI Assistant ("Ask AI" feature in the "Search" dialog) is quite good.
 
-### Keep LibreChat in Sync with LiteLLM
+> **NOTE:** Here, by **"models"** we really mean **agents**, because, to whatever clients connect to your LiteLLM Server (LibreChat or otherwise), they will only look like models. Behind the scenes, in your provider class you will likely have code that orchestrates the execution of one or more LLMs and possibly other tools.
+
+### Keep LibreChat in sync with LiteLLM
 
 - Mirror the changes to the LiteLLM Server configuration you made in `config.yaml` in `librechat/librechat.yaml`: add entries under `endpoints.custom` for connection details and extend `modelSpecs.list` to surface the model with a human-friendly label.
 - If you want LibreChat to show multiple providers, adjust or remove the existing `modelSpecs` block; the shipped configuration intentionally limits the UI to the `yoda` model.
