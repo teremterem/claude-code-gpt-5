@@ -5,7 +5,7 @@
         src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5/main/images/librechat-master-yoda.jpg">
 </p>
 
-**A lightweight LiteLLM server boilerplate** configured with `uv` and `Docker` for hosting your own OpenAI-compatible and Anthropic-compatible endpoints. Perfect for **LibreChat** (a quick setup of which is included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
+**A lightweight LiteLLM server boilerplate** pre-configured with **uv** and **Docker** for hosting your own OpenAI-compatible and Anthropic-compatible endpoints. Perfect for **LibreChat** (a quick setup of which is included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
 
 > **NOTE:** If you need to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
 
