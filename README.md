@@ -152,13 +152,79 @@ See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Esp
 
 ## Publishing Docker images to a Container Registry
 
-TODO Thesis: publishing your docker images to a container registry makes it easier to deploy to your infrastructure
+Publishing your images to a container registry makes deployment simpler and consistent across environments (CI/CD, Kubernetes, Azure Container Apps, etc.). Below we use GitHub Container Registry (GHCR) as an example; other registries (ECR/GCR/ACR/Docker Hub) follow the same pattern with different login/registry URLs.
 
-TODO Thesis: we will use GitHub Container Registry (GHCR) as an example, but you can use any other container registry and the process will be similar
+### Prerequisites
+- Docker installed, with Buildx (multi-arch) enabled
+- A GitHub Personal Access Token (PAT) with `write:packages` scope
+- A GitHub user/org you will publish under
 
-### Publishing your LiteLLM Server Docker image
+### 1) Log in to GHCR
+```bash
+# Replace <GITHUB_USERNAME> and ensure $GITHUB_PAT is set in your shell
+echo "$GITHUB_PAT" | docker login ghcr.io -u <GITHUB_USERNAME> --password-stdin
+```
 
-### Publishing LibreChat Docker image with your own `librechat.yaml`
+> Never commit your PAT. Store it in a secure secret manager or CI secret.
+
+### 2) Publish your LiteLLM Server image
+The root Dockerfile builds the LiteLLM server (listens on port 4000 by default).
+
+Pick an image name under your account/org and a version tag:
+- IMAGE="ghcr.io/<OWNER>/<image-name>"   # e.g., ghcr.io/acme/my-litellm-server
+- VERSION="0.1.0"
+
+Multi-arch build and push (recommended):
+```bash
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t "$IMAGE:$VERSION" \
+  -t "$IMAGE:latest" \
+  --push .
+```
+
+Single-arch (dev) alternative:
+```bash
+docker build -t "$IMAGE:latest" .
+docker push "$IMAGE:latest"
+```
+
+Run the published LiteLLM image:
+```bash
+docker run -p 4000:4000 \
+  -e OPENAI_API_KEY=... \
+  -e LITELLM_MASTER_KEY=... \
+  "$IMAGE:latest"
+```
+
+### 3) Publish a LibreChat image with your `librechat.yaml`
+The Dockerfile at `librechat/Dockerfile` extends the official LibreChat image and bakes in your `librechat.yaml`.
+
+Choose coordinates and build:
+```bash
+LIBRECHAT_IMAGE="ghcr.io/<OWNER>/librechat-with-config"
+VERSION="0.1.0"
+
+docker buildx build \
+  -f librechat/Dockerfile \
+  --platform linux/amd64,linux/arm64 \
+  -t "$LIBRECHAT_IMAGE:$VERSION" \
+  -t "$LIBRECHAT_IMAGE:latest" \
+  --push .
+```
+
+Run your published LibreChat image (example):
+```bash
+docker run -p 3080:3080 \
+  -e LITELLM_BASE_URL=http://<your-litellm-host>:4000 \
+  -e LITELLM_MASTER_KEY=... \
+  "$LIBRECHAT_IMAGE:latest"
+```
+
+### Notes and tips
+- Replace `ghcr.io/<OWNER>/...` with your own registry path. For other registries, adjust the login and tag (e.g., `123456789.dkr.ecr.us-east-1.amazonaws.com/your-image`).
+- Prefer semantic versions (e.g., 0.1.0) and keep `latest` for convenience.
+- Make images public or grant access in GHCR settings so your deployment environment can pull them.
 
 ## Staying up to date with the Boilerplate
 
