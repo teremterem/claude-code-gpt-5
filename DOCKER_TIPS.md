@@ -30,19 +30,6 @@ ghcr.io/teremterem/my-litellm-server:latest
 
 ## 🏗️ Building from Source
 
-### Docker Compose build
-
-Build and run by overlaying with the dev version of Compose setup:
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
-```
-
-This will map the current directory to the container.
-
-> **NOTE:** To run in the foreground, remove the `-d` flag.
-
-### Direct Docker build
-
 1. First build the image:
    ```bash
    docker build -t my-litellm-server .
@@ -72,11 +59,6 @@ docker stats my-litellm-server
 ```
 
 ## 🛑 Stopping and Cleanup
-
-### Using Docker Compose:
-```bash
-docker-compose down
-```
 
 ### Stop the container:
 ```bash
