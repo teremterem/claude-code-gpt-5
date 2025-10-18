@@ -30,12 +30,19 @@ services:
   api:
     # Let's pin LibreChat to a specific image version
     image: ghcr.io/danny-avila/librechat:v0.8.0
+    # If you want to use your own pre-built LibreChat image from your container
+    # registry:
+    #  1) Replace the image name above with the one you built and pushed to your
+    #     container registry
+    #  2) If you already baked your custom librechat.yaml file into your image,
+    #     comment out the `volumes:` entry below so it doesn't get overridden
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml
+
     depends_on:
       - litellm
       - mongodb
       - rag_api
-    volumes:
-      - ./librechat.yaml:/app/librechat.yaml
     env_file:
       # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
       # ../.env (the .env of the LiteLLM Server itself)

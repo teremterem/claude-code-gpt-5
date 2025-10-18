@@ -193,16 +193,6 @@ docker build -t "$IMAGE:latest" .
 docker push "$IMAGE:latest"
 ```
 
-TODO Update the "run" instruction below
-
-Run the published LiteLLM image:
-```bash
-docker run -p 4000:4000 \
-  -e OPENAI_API_KEY=... \
-  -e LITELLM_MASTER_KEY=... \
-  "$IMAGE:latest"
-```
-
 ### 3) Publish a LibreChat image with your custom `librechat.yaml`
 
 The Dockerfile at `librechat/Dockerfile` extends the official LibreChat image and bakes in your own version of `librechat.yaml`, which removes the burden of later supplying your custom `librechat.yaml` file into your deployment container "from the outside".
@@ -220,19 +210,21 @@ docker buildx build \
   --push .
 ```
 
-Run your published LibreChat image (example):
-```bash
-docker run -p 3080:3080 \
-  -e LITELLM_BASE_URL=http://<your-litellm-host>:4000 \
-  -e LITELLM_MASTER_KEY=... \
-  "$LIBRECHAT_IMAGE:latest"
-```
-
 ### Notes and tips
 
 - Replace `ghcr.io/<OWNER>/...` with your own registry path. For other registries, adjust the login and tag (e.g., `123456789.dkr.ecr.us-east-1.amazonaws.com/your-image`).
 - Prefer semantic versions (e.g., 0.1.0) and keep `latest` for convenience.
 - Make images public or grant access in GHCR settings so your deployment environment can pull them.
+
+### If you want to test your published images locally
+
+**Complete LibreChat stack**
+
+TODO
+
+**Standalone LiteLLM Server**
+
+TODO
 
 ## Staying up to date with the Boilerplate
 
