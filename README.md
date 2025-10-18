@@ -132,11 +132,13 @@ If you don't want to use LibreChat, you can run your LiteLLM Server directly.
 
 ## Development
 
-- Declare new models/providers in `config.yaml` (`custom_provider_map` + `model_list`) before exposing them in LibreChat.
-
 TODO Thesis: when you do docker compose up (with or without LibreChat), the files in your local repository are mounted into the container, so when you develop locally, a simple compose restart is enough to see your changes in action (supplying --build flag is only necessary if you make changes to the root Dockerfile itself, the dependencies or other definitions in pyproject.toml or the python version in .python-version)
 
-TODO Thesis: setting up the environment with `uv` directly might still be convenient for IDE integration and other local development workflows
+- Implement the provider class and required methods in a new module (similar to `yoda_example/`)
+- Register your new provider in `custom_provider_map` of `config.yaml` under your chosen provider key.
+- Declare your new model(s) in `model_list` of `config.yaml` under your chosen model key.
+
+> **NOTE:** Here, by **"models"** we really mean **agents**, as to whatever clients connect to your LiteLLM Server (LibreChat or otherwise) they will only look like models. Behind the scenes, in your provider class you will have code that orchestrates the execution of one or more LLMs and possibly other tools.
 
 ### Keep LibreChat in Sync with LiteLLM
 
