@@ -193,8 +193,6 @@ docker build -t "$IMAGE:latest" .
 docker push "$IMAGE:latest"
 ```
 
-TODO Get rid of docker-compose.dev.yml
-
 TODO Update the "run" instruction below
 
 Run the published LiteLLM image:

@@ -1,7 +1,8 @@
 services:
   my-litellm-server:
-    # TODO What would be the purpose of the image below ? The whole point is to
-    #  build a custom one...
+    # Replace with the image you built and pushed to your container registry
+    # (or use as is together with docker-compose.dev.yml, which builds a custom
+    # image from your source code locally instead):
     image: ghcr.io/teremterem/my-litellm-server:latest
     container_name: my-litellm-server
     ports:
