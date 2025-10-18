@@ -150,6 +150,10 @@ See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Esp
 - If you want LibreChat to show multiple providers, adjust or remove the existing `modelSpecs` block; the shipped configuration intentionally limits the UI to the `yoda` model.
 - After editing configuration, restart the compose stack (`./librechat/run-docker-compose.sh` or `docker compose -p litellm-librechat restart api litellm`) so LibreChat reloads the updated YAML.
 
+See [LibreChat documentation](https://www.librechat.ai/docs) for more details.
+
+> **NOTE:** For more information on the `librechat/` folder in this repository specifically, see its [README.md](librechat/README.md).
+
 ## Publishing your Docker images to a Container Registry
 
 Publishing your images to a container registry might make deployment of your LiteLLM Server and LibreChat to your infrastructure (CI/CD, Kubernetes, Azure Container Apps, etc.) more straightforward. Below we use GitHub Container Registry (GHCR) as an example; other registries (ECR/GCR/ACR/Docker Hub) follow the same pattern with different login/registry URLs.
