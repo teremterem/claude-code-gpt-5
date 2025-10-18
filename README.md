@@ -104,7 +104,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```
    > **NOTE:** The last two variants of the direct `docker compose` command require you to be in the `librechat/` subdirectory, hence the `cd` command.
 
-   **That's it.** You should be able to access the LibreChat UI at **http://localhost:3080**, and after registering an account in your local LibreChat instance, you should be able to see something similar to what you see on the screenshot at the beginning of this README.
+**That's it!** You should be able to access the LibreChat UI at **http://localhost:3080**, and after registering an account in your local LibreChat instance, you should be able to see something similar to what you see on the screenshot at the beginning of this README.
 
 ### Running your LiteLLM Server WITHOUT LibreChat
 
@@ -142,7 +142,7 @@ In order to set up your own custom provider and model(s), you will need to:
 
 > **NOTE:** Here, by **"models"** we really mean **agents**, because, to whatever clients connect to your LiteLLM Server (LibreChat or otherwise), they will only look like models. Behind the scenes, in your provider class you will likely have code that orchestrates the execution of one or more LLMs and possibly other tools.
 
-See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Especially, check out their Search in the top right corner of the documentation website - their AI Assistant (`Ask AI` feature in the "Search" dialog) is quite good.
+See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Especially, check out `Search for anything` in the top right corner of the documentation website - their AI Assistant (`Ask AI` feature in the `Search` dialog) is quite good.
 
 ### Keep LibreChat in sync with LiteLLM
 
