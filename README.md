@@ -14,7 +14,7 @@
 ### Prerequisites
 
 - [OpenAI API key 🔑](https://platform.openai.com/settings/organization/api-keys) (or any other provider's API key that you're planning to use under the hood)
-- Either [Docker Desktop](https://docs.docker.com/desktop/) or [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- Either [Docker Desktop](https://docs.docker.com/desktop/) or [uv](https://docs.astral.sh/uv/getting-started/installation/) (or both)
 
 ### GPT-5 caveat
 
