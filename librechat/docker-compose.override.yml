@@ -1,4 +1,24 @@
 services:
+  litellm:
+    # Build from Claude Code GPT-5 Proxy
+    build: ..
+    container_name: LiteLLM-Server
+    # ports:
+    #   - "4000:4000"
+    restart: unless-stopped
+    volumes:
+      - ..:/app
+      - litellm-app-venv:/app/.venv
+      # To boost performance of `uv sync` operation
+      - litellm-uv-cache:/root/.cache/uv
+    env_file:
+      # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
+      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
+      - .env.non-secure-litellm-master-key
+      # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
+      # value from the file above
+      - ../.env
+
   api:
     # Let's pin LibreChat to a specific image version
     image: ghcr.io/danny-avila/librechat:v0.8.0
@@ -30,26 +50,6 @@ services:
     #  not have its own version number.
     #  Should we go back to using "latest" instead of "v0.6.0" ?
     #  Is there any difference between the two ?
-
-  litellm:
-    # Build from Claude Code GPT-5 Proxy
-    build: ..
-    container_name: LiteLLM-Server
-    # ports:
-    #   - "4000:4000"
-    restart: unless-stopped
-    volumes:
-      - ..:/app
-      - litellm-app-venv:/app/.venv
-      # To boost performance of `uv sync` operation
-      - litellm-uv-cache:/root/.cache/uv
-    env_file:
-      # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
-      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
-      - .env.non-secure-litellm-master-key
-      # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
-      # value from the file above
-      - ../.env
 
 volumes:
   litellm-app-venv:
