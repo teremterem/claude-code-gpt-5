@@ -8,6 +8,15 @@ COMPOSE_PROJECT_NAME="litellm-librechat"
 # LibreChat file is located
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+if [ ! -f .env ]; then
+  echo "❌ Required LibreChat environment file 'librechat/.env' not found."
+  echo "   Please create it by copying 'librechat/.env.example' as described in the README:"
+  echo ""
+  echo "       cp librechat/.env.example librechat/.env"
+  echo ""
+  exit 1
+fi
+
 if ! command -v docker >/dev/null 2>&1; then
   echo "❌ Docker is not installed or not available in PATH."
   exit 1

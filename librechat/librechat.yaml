@@ -9,11 +9,11 @@ endpoints:
         default: ["yoda"]
         fetch: false
       titleConvo: true
-      titleModel: "openai/gpt-4o-mini"
+      titleModel: "yoda"
       summarize: false
-      summaryModel: "openai/gpt-4o-mini"
+      summaryModel: "yoda"
       forcePrompt: false
-      modelDisplayLabel: "Yoda"
+      modelDisplayLabel: "Master Yoda"
 
 # NOTE: The `modelSpecs` section below gives the yoda model a more
 # human-friendly, capitalized name, but it also restricts the list of available
