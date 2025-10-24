@@ -1,6 +1,6 @@
 services:
   litellm:
-    # Build from Claude Code GPT-5 Proxy source code
+    # Build from your LiteLLM Server source code
     build: ..
     volumes:
       - ..:/app
@@ -17,7 +17,7 @@ services:
     # #
     # #  3) Replace the image name with the one you built and pushed to your
     # #     container registry of choice
-    # image: ghcr.io/teremterem/claude-code-gpt-5:latest
+    # image: ghcr.io/teremterem/litellm-server-yoda:latest
 
     container_name: LiteLLM-Server
     # ports:
@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
     env_file:
       # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
-      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
+      # ../.env (the .env of the LiteLLM Server itself)
       - .env.non-secure-litellm-master-key
       # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
       # value from the file above
@@ -53,7 +53,7 @@ services:
       - rag_api
     env_file:
       # A dummy value for LITELLM_MASTER_KEY to avoid error if it is not set in
-      # ../.env (the .env of Claude Code GPT-5 Proxy itself)
+      # ../.env (the .env of the LiteLLM Server itself)
       - .env.non-secure-litellm-master-key
       # If LITELLM_MASTER_KEY is set in ../.env, it will override the dummy
       # value from the file above
