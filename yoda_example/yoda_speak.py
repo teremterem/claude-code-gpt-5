@@ -2,7 +2,15 @@ from typing import Any, AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
-from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
+from litellm import (
+    CustomLLM,
+    CustomStreamWrapper,
+    GenericStreamingChunk,
+    HTTPHandler,
+    ModelResponse,
+    ModelResponseStream,
+    AsyncHTTPHandler,
+)
 
 from common.config import WRITE_TRACES_TO_FILES
 from common.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_chunk_trace
@@ -19,7 +27,7 @@ _YODA_SYSTEM_PROMPT = {
 
 
 class YodaSpeakLLM(CustomLLM):
-    # pylint: disable=too-many-positional-arguments,too-many-locals
+    # pylint: disable=too-many-positional-arguments,too-many-locals,duplicate-code
     """
     Proxy wrapper that forces Yoda-speak responses from the underlying LLM.
     """
@@ -61,7 +69,7 @@ class YodaSpeakLLM(CustomLLM):
                 params_complapi=optional_params,
             )
 
-        response = litellm.completion(
+        response: ModelResponse = litellm.completion(
             model=self.target_model,
             messages=messages_modified,
             logger_fn=logger_fn,
@@ -115,7 +123,7 @@ class YodaSpeakLLM(CustomLLM):
                 params_complapi=optional_params,
             )
 
-        response = await litellm.acompletion(
+        response: ModelResponse = await litellm.acompletion(
             model=self.target_model,
             messages=messages_modified,
             logger_fn=logger_fn,
@@ -169,7 +177,7 @@ class YodaSpeakLLM(CustomLLM):
                 params_complapi=optional_params,
             )
 
-        resp_stream = litellm.completion(
+        resp_stream: CustomStreamWrapper = litellm.completion(
             model=self.target_model,
             messages=messages_modified,
             logger_fn=logger_fn,
@@ -181,7 +189,7 @@ class YodaSpeakLLM(CustomLLM):
             **optional_params,
         )
 
-        for chunk_idx, chunk in enumerate(resp_stream):
+        for chunk_idx, chunk in enumerate[ModelResponseStream](resp_stream):
             generic_chunk = to_generic_streaming_chunk(chunk)
 
             if WRITE_TRACES_TO_FILES:
@@ -228,7 +236,7 @@ class YodaSpeakLLM(CustomLLM):
                 params_complapi=optional_params,
             )
 
-        resp_stream = await litellm.acompletion(
+        resp_stream: CustomStreamWrapper = await litellm.acompletion(
             model=self.target_model,
             messages=messages_modified,
             logger_fn=logger_fn,
