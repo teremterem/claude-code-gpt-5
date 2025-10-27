@@ -22,7 +22,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    OPENAI_API_KEY=your-openai-api-key-here
 
    # Optional (see .env.template for details):
-   # LITELLM_MASTER_KEY=your-master-key-here
+   # LITELLM_MASTER_KEY=strong-key-that-you-generated
 
    # More settings (see .env.template for details)
    ...
