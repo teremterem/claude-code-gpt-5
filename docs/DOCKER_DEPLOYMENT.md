@@ -1,6 +1,6 @@
 # Docker Deployment Guide for Claude Code GPT-5 Proxy
 
-This guide explains how to deploy the Claude Code GPT-5 proxy using Docker and GitHub Container Registry (GHCR).
+This guide explains how to deploy the Claude Code GPT-5 Proxy using Docker and GitHub Container Registry (GHCR).
 
 ## 🐳 Docker Image
 
