@@ -5,8 +5,6 @@
         src="images/librechat-master-yoda.jpg">
 </p>
 
-TODO Should the image url above be relative ? Or should the same image url be absolute in `main-boilerplate` instead ?
-
 TODO Provide a link to `main-boilerplate` branch ?
 
 TODO Make the main README.md link to this file instead of the `main-boilerplate` branch ?
