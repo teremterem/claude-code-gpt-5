@@ -7,10 +7,6 @@
 
 TODO Provide a link to `main-boilerplate` branch ?
 
-TODO Make the main README.md link to this file instead of the `main-boilerplate` branch ?
-
-TODO Any other updates to the contents of this file ?
-
 **A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect for **LibreChat** (a quick setup of which is included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
 
 > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
@@ -167,7 +163,7 @@ See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Esp
 
 See [LibreChat documentation](https://www.librechat.ai/docs) for more details.
 
-> **NOTE:** For more information on the `librechat/` folder in this repository specifically, see its [README.md](librechat/README.md).
+> **NOTE:** For more information on the `librechat/` folder in this repository specifically, see [librechat/README.md](librechat/README.md).
 
 ## Publishing your Docker images to a Container Registry
 
