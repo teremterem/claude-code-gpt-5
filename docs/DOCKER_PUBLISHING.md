@@ -1,6 +1,6 @@
 # Publishing Claude Code GPT-5 Proxy to GHCR (Maintainer's Guide)
 
-This guide is intended for the maintainers of the Claude Code GPT-5 repository to build and publish the Docker image to GitHub Container Registry (GHCR). **If you are simply looking to use the Docker image, see [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) instead.**
+This guide is intended for the maintainers of the Claude Code GPT-5 repository to build and publish the Docker image to GitHub Container Registry (GHCR). **If you are simply looking to use the Docker image, see [DOCKER_TIPS.md](DOCKER_TIPS.md) instead.**
 
 ## Prerequisites
 

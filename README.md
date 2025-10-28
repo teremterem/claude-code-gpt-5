@@ -104,7 +104,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
       ./kill-docker.sh
       ```
 
-      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [docs/DOCKER_DEPLOYMENT.md](docs/DOCKER_DEPLOYMENT.md)
+      > **NOTE:** The `Docker` options above will pull the latest image from `GHCR` and will ignore all your local files except `.env`. For more detailed `Docker` deployment instructions and more options (like building `Docker` image from source yourself, using `Docker Compose`, etc.), see [docs/DOCKER_TIPS.md](docs/DOCKER_TIPS.md)
 
 ### Using with Claude Code 🎮
 
