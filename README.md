@@ -59,7 +59,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 3. **Run the proxy:**
 
-   1) **EITHER via `uv`** (make sure to install [or upgrade to] the **LATEST** version of [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
+   1) **EITHER via `uv`** (make sure to install [uv](https://docs.astral.sh/uv/getting-started/installation/) first):
 
       **OPTION 1:** Use a script for `uv`:
       ```bash
