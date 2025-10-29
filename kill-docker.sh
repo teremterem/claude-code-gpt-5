@@ -4,16 +4,16 @@
 
 set -e
 
-PROXY_CONTAINER_NAME="${PROXY_CONTAINER_NAME:-claude-code-gpt-5}"
+LITELLM_CONTAINER_NAME="${LITELLM_CONTAINER_NAME:-claude-code-gpt-5}"
 
 echo "❌ Killing Claude Code GPT-5 Proxy..."
 
-if docker ps -a --format 'table {{.Names}}' | grep -q "^${PROXY_CONTAINER_NAME}$"; then
+if docker ps -a --format 'table {{.Names}}' | grep -q "^${LITELLM_CONTAINER_NAME}$"; then
     echo "📦 Stopping container..."
-    docker stop ${PROXY_CONTAINER_NAME} || true
+    docker stop ${LITELLM_CONTAINER_NAME} || true
     echo "🗑️  Removing container..."
-    docker rm ${PROXY_CONTAINER_NAME} || true
-    echo "✅ ${PROXY_CONTAINER_NAME} stopped and removed."
+    docker rm ${LITELLM_CONTAINER_NAME} || true
+    echo "✅ ${LITELLM_CONTAINER_NAME} stopped and removed."
 else
-    echo "ℹ️  No container named ${PROXY_CONTAINER_NAME} found."
+    echo "ℹ️  No container named ${LITELLM_CONTAINER_NAME} found."
 fi

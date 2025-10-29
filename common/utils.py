@@ -3,9 +3,9 @@
 """
 NOTE: The utilities in this module were mostly vibe-coded without review.
 """
-import json
 from copy import deepcopy
-from datetime import datetime
+from datetime import UTC, datetime
+import json
 from typing import Any, Optional, Union
 
 from litellm import GenericStreamingChunk, ModelResponse, ResponsesAPIResponse
@@ -35,15 +35,15 @@ def env_var_to_bool(value: Optional[str], default: str = "false") -> bool:
     return (value or default).lower() in ("true", "1", "on", "yes", "y")
 
 
-def generate_timestamp_local_tz() -> str:
+def generate_timestamp_utc() -> str:
     """
-    Generate timestamp in format YYYYmmdd_HHMMSS_fff in local timezone.
+    Generate timestamp in format YYYYmmdd_HHMMSS_fff in UTC.
 
     An example of how these timestamps are used later:
 
     `.traces/20251005_140642_180_RESPONSE_STREAM.md`
     """
-    now = datetime.now()
+    now = datetime.now(UTC)
     # Keep only milliseconds (first 3 digits of microseconds)
     return now.strftime("%Y%m%d_%H%M%S_%f")[:-3]
 

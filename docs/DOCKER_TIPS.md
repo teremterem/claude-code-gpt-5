@@ -1,6 +1,6 @@
-# Docker Deployment Guide for Claude Code GPT-5 Proxy
+# Docker Tips for Claude Code GPT-5 Proxy
 
-This guide explains how to deploy the Claude Code GPT-5 proxy using Docker and GitHub Container Registry (GHCR).
+This guide explains how to deploy the Claude Code GPT-5 Proxy using Docker and GitHub Container Registry (GHCR).
 
 ## 🐳 Docker Image
 
@@ -22,7 +22,7 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    OPENAI_API_KEY=your-openai-api-key-here
 
    # Optional (see .env.template for details):
-   # LITELLM_MASTER_KEY=your-master-key-here
+   # LITELLM_MASTER_KEY=strong-key-that-you-generated
 
    # More settings (see .env.template for details)
    ...
@@ -188,7 +188,7 @@ This will map the current directory to the container.
 
 ### Authentication issues
 1. Verify your API keys are valid and have sufficient credits
-2. Check if OpenAI requires identity verification for GPT-5 access (see [README.md](README.md), section "First time using GPT-5 via API?")
+2. Check if OpenAI requires identity verification for GPT-5 access (see [README.md](../README.md), section "First time using GPT-5 via API?")
 
 ### Performance issues
 1. Ensure sufficient memory is available (recommended: 2GB+)
