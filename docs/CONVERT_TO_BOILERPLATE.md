@@ -1,1 +1,6 @@
-TODO This file will contain instructions on how to convert this repository into a boilerplate repository.
+1. Create a feature branch from `main-boilerplate`
+2. Merge `main` branch into this feature branch
+3. Create a feature branch from this feature branch ?
+
+100499. Squash and merge the feature of the feature branch into the feature branch
+100500. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
