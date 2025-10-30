@@ -1,3 +1,5 @@
+# Convert to Boilerplate [DRAFT]
+
 1. Create a feature branch from `main-boilerplate`
 2. Merge `main` branch into this feature branch
 3. Create a feature branch from this feature branch ?
@@ -26,7 +28,7 @@
 20. Run `uv lock` to regenerate `uv.lock` file (do not use `--upgrade` flag - that's meant to be done while still developing in regular `main` branch)
 21. Restore `uv-run.sh` as it was in the `main-boilerplate` branch
     - TODO Advice to review both first...
-22. Just fully override content of `common/`, `yoda_example/` and `librechat/` with what comes from regular `main` branch
+22. Just fully override content of `common/`, `yoda_example/` and `librechat/` with what comes from regular `main` branch (just let it happen by itself, in other words)
     - TODO Still advice to review both versions of each folder first...
 23. TODO Make the reader think if anything else needs to be done
 24. Delete `docs/CONVERT_TO_BOILERPLATE.md`
