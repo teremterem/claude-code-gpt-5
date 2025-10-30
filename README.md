@@ -161,7 +161,7 @@ See [LiteLLM documentation](https://docs.litellm.ai/docs/) for more details. Esp
 
 See [LibreChat documentation](https://www.librechat.ai/docs) for more details.
 
-> **NOTE:** For more information on the `librechat/` folder in this repository specifically, see its [README.md](librechat/README.md).
+> **NOTE:** For more information on the `librechat/` folder in this repository specifically, see [librechat/README.md](librechat/README.md).
 
 ## Publishing your Docker images to a Container Registry
 

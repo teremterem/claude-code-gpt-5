@@ -9,9 +9,6 @@ from typing import Any, Optional, Union
 from litellm import GenericStreamingChunk
 
 
-NOTHING = object()
-
-
 class ProxyError(RuntimeError):
     def __init__(self, error: Union[BaseException, str], highlight: bool = True):
         if highlight:
