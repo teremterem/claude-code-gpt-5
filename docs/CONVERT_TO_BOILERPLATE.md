@@ -17,16 +17,25 @@
     - TODO Advice to read both variants first, though - just to see if there is anything useful in the non-boilerplate version that might make sense to incorporate into the boilerplate version
 13. Restore `.env.template` as it was in the `main-boilerplate` branch
     - TODO Advice to review both first...
-
----
-
-100495. Delete `docs/CONVERT_TO_BOILERPLATE.md`
-100496. SQUASH and merge the feature of the feature branch into the feature branch
-100497. Test the project
-100498. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
-100499. Tag new version
-100500. Publish TWO new images to GitHub Container Registry:
-   - `ghcr.io/teremterem/litellm-server-yoda:<version>`
-   - `ghcr.io/teremterem/litellm-server-yoda:latest`
-   - `ghcr.io/teremterem/librechat-yoda:<version>`
-   - `ghcr.io/teremterem/librechat-yoda:latest`
+14. Same with `config.yml`
+15. Same with `docker-compose.dev.yml` (or maybe just fix service and container names)
+16. Same with `docker-compose.yml`
+17. Remove `claude-code-gpt-5` related labels from `Dockerfile`
+18. Fix name and description in `pyproject.toml` (take them from boilerplate version)
+19. [NOTE: PROBABLY SHOULD NOT BE DONE, BECAUSE `X.X.X-bpX` VERSION FORMAT IS NOT SUPPORTED IN `pyproject.toml`] ~~Update version too~~
+20. Run `uv lock` to regenerate `uv.lock` file (do not use `--upgrade` flag - that's meant to be done while still developing in regular `main` branch)
+21. Restore `uv-run.sh` as it was in the `main-boilerplate` branch
+    - TODO Advice to review both first...
+22. Just fully override content of `common/`, `yoda_example/` and `librechat/` with what comes from regular `main` branch
+    - TODO Still advice to review both versions of each folder first...
+23. TODO Make the reader think if anything else needs to be done
+24. Delete `docs/CONVERT_TO_BOILERPLATE.md`
+25. SQUASH and merge the feature of the feature branch into the feature branch
+26. Test the project
+27. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
+28. Tag new version
+29. Publish TWO new images to GitHub Container Registry:
+    - `ghcr.io/teremterem/litellm-server-yoda:<version>`
+    - `ghcr.io/teremterem/litellm-server-yoda:latest`
+    - `ghcr.io/teremterem/librechat-yoda:<version>`
+    - `ghcr.io/teremterem/librechat-yoda:latest`
