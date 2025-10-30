@@ -10,6 +10,10 @@
 9. Delete `kill-docker.sh`
 10. Delete `run-docker.sh`
 11. Override `README.md` with `README_BOILERPLATE.md`
+12. Restore this note at the top of this new README:
+    ```markdown
+    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
+    ```
 
 ---
 
