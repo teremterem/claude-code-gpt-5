@@ -15,6 +15,8 @@
     ```
 12. Restore `docs/DOCKER_TIPS.md` as it was in the `main-boilerplate` branch
     - TODO Advice to read both variants first, though - just to see if there is anything useful in the non-boilerplate version that might make sense to incorporate into the boilerplate version
+13. Restore `.env.template` as it was in the `main-boilerplate` branch
+    - TODO Advice to review both first...
 
 ---
 
