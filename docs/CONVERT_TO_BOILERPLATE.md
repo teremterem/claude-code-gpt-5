@@ -9,6 +9,7 @@
 8. Delete `deploy-docker.sh`
 9. Delete `kill-docker.sh`
 10. Delete `run-docker.sh`
+11. Override `README.md` with `README_BOILERPLATE.md`
 
 ---
 
