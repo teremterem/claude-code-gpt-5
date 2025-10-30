@@ -14,6 +14,9 @@
     ```markdown
     > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
     ```
+13. Restore `docs/DOCKER_TIPS.md` as it was in the `main-boilerplate` branch
+    - TODO Advice to read both variants first, though - just to see if there is anything useful in the non-boilerplate version that might make sense to incorporate into the boilerplate version
+
 
 ---
 
