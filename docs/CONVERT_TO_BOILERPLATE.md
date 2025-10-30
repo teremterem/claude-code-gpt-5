@@ -18,6 +18,13 @@
 
 ---
 
-100458. Delete `docs/CONVERT_TO_BOILERPLATE.md`
-100499. SQUASH and merge the feature of the feature branch into the feature branch
-100500. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
+100495. Delete `docs/CONVERT_TO_BOILERPLATE.md`
+100496. SQUASH and merge the feature of the feature branch into the feature branch
+100497. Test the project
+100498. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
+100499. Tag new version
+100500. Publish TWO new images to GitHub Container Registry:
+   - `ghcr.io/teremterem/litellm-server-yoda:<version>`
+   - `ghcr.io/teremterem/litellm-server-yoda:latest`
+   - `ghcr.io/teremterem/librechat-yoda:<version>`
+   - `ghcr.io/teremterem/librechat-yoda:latest`
