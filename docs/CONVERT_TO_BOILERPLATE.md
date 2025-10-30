@@ -2,6 +2,7 @@
 
 1. Create a feature branch from `main-boilerplate`
 2. Merge `main` branch into this feature branch
+   - IGNORE ALL THE MERGE CONFLICTS - JUST OVERRIDE EVERYTHING WITH THE FILES FROM MAIN BRANCH (`cp -r backup/* .` and `cp -r backup/.* .` but DO DELETE `.git` folder from the backup directory first)
 3. Create a feature branch from this feature branch ?
 4. Delete `claude_code_proxy` folder
 5. Delete `docs/DOCKER_PUBLISHING.md`
