@@ -16,6 +16,7 @@ cd <repo-root-dir>
    git switch main
    git pull
    git status
+
    cp -r . ../<repo-main-backup-dir>
    rm -rf ../<repo-main-backup-dir>/.git
    rm ../<repo-main-backup-dir>/.env
@@ -27,6 +28,7 @@ cd <repo-root-dir>
    git switch main-boilerplate
    git pull
    git status
+
    git switch --create <boilerplate-merging-branch>
    git push --set-upstream origin <boilerplate-merging-branch>
    ```
@@ -38,6 +40,7 @@ cd <repo-root-dir>
     git switch <boilerplate-merging-branch>
     git pull
     git status
+
     git merge origin/main
     git status
     ```
@@ -46,38 +49,70 @@ cd <repo-root-dir>
    ```bash
    cp -r ../<repo-main-backup-dir>/* .
    cp -r ../<repo-main-backup-dir>/.* .
+
    git add --all
    git commit
    git push
    git status
    ```
 3. Create **a feature branch from the feature branch**:
-    ```bash
-    git switch <boilerplate-merging-branch>
-    git pull
-    git status
-    git switch --create <boilerplate-merging-branch-manual>
-    git push --set-upstream origin <boilerplate-merging-branch-manual>
-    ```
+   ```bash
+   git switch <boilerplate-merging-branch>
+   git pull
+   git status
 
-### Delete irrelevant parts
+   git switch --create <boilerplate-manual-merging-branch>
+   git push --set-upstream origin <boilerplate-manual-merging-branch>
+   ```
 
-4. Delete `docs/DOCKER_PUBLISHING.md`
-   - TODO Advice to check against similar section(s) in `README_BOILERPLATE.md` first
-5. Delete `docs/CONVERT_TO_BOILERPLATE.md` (and probably the whole `docs/maintainers` folder)
-6. Delete `images/claude-code-gpt-5.jpeg`
-7. Delete `claude_code_proxy` folder
-8. Delete `deploy-docker.sh`
-9. Delete `kill-docker.sh`
-10. Delete `run-docker.sh`
+### Delete irrelevant files
+
+4. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
+   ```bash
+   git switch <boilerplate-manual-merging-branch>
+   git pull
+   git status
+
+   rm -rf claude_code_proxy/
+   rm docs/DOCKER_PUBLISHING.md
+   rm docs/CONVERT_TO_BOILERPLATE.md
+   rm images/claude-code-gpt-5.jpeg
+   rm deploy-docker.sh
+   rm kill-docker.sh
+   rm run-docker.sh
+
+   git add --all
+   git status
+   ```
+   If there is no other relevant stuff in `docs/maintainers/` folder, then delete it altogether:
+   ```bash
+   rm -rf docs/maintainers/
+
+   git add --all
+   git status
+   ```
+
+TODO Advice to check `docs/DOCKER_PUBLISHING.md` against similar section(s) in `README_BOILERPLATE.md` first
+
+TODO Advice to review all these files before the actual deletion
 
 ### Swap README
 
-11. Override `README.md` with `README_BOILERPLATE.md`
-12. Restore this note at the top of this new README:
-    ```markdown
-    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
-    ```
+5. Override `README.md` with `README_BOILERPLATE.md`:
+   mv README_BOILERPLATE.md README.md
+   ```bash
+
+   git add --all
+   git status
+   ```
+6. Restore this note at the top of the new README:
+   ```markdown
+   > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
+   ```
+   ```bash
+   git add --all
+   git status
+   ```
 
 ### Bring back certain boilerplate-specific versions of files
 
