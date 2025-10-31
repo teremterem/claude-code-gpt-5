@@ -1,10 +1,4 @@
-# Converting to Boilerplate (aka My LiteLLM Server)
-
-This guide is intended for the maintainers of the Claude Code GPT-5 repository to derive a "Boilerplate" version of it (aka My LiteLLM Server) upon a new version release. **If you are simply looking to use it as a boilerplate, head over to the [main-boilerplate](https://github.com/teremterem/claude-code-gpt-5/tree/main-boilerplate) branch of this repository and check out the [README](https://github.com/teremterem/claude-code-gpt-5/blob/main-boilerplate/README.md) there.**
-
-## Steps
-
-### Preparation
+# Convert to Boilerplate [DRAFT]
 
 1. Create a feature branch from `main-boilerplate`
 2. Merge `main` branch into this feature branch
