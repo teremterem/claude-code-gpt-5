@@ -48,11 +48,6 @@ cd <repo-root-dir>
 3. Merge `main` branch into this feature branch in the following way:
 
    2.1 Switch to the feature branch and **initiate the merge** of the `main`:
-    ```bash
-    git switch boilerplate-merging-branch
-    git pull
-    git status
-   ```
    ```bash
     git merge origin/main
     git status
@@ -72,11 +67,6 @@ cd <repo-root-dir>
    ```
 
 4. Create **a feature branch from the feature branch:**
-   ```bash
-   git switch boilerplate-merging-branch
-   git pull
-   git status
-   ```
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
    ```bash
    git switch --create boilerplate-MANUAL-merging-branch
@@ -88,11 +78,6 @@ cd <repo-root-dir>
 ### Delete irrelevant files
 
 4. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
-   ```bash
-   git switch boilerplate-MANUAL-merging-branch
-   git pull
-   git status
-   ```
    ```bash
    rm -rf claude_code_proxy/
    rm docs/maintainers/DOCKER_PUBLISHING.md
@@ -128,11 +113,6 @@ TODO Advice to review all these files before the actual deletion
 ### Swap README
 
 5. Override `README.md` with `README_BOILERPLATE.md`:
-   ```bash
-   git switch boilerplate-MANUAL-merging-branch
-   git pull
-   git status
-   ```
    ```bash
    mv README_BOILERPLATE.md README.md
 
