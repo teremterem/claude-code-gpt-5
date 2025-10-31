@@ -4,12 +4,61 @@ This guide is intended for the maintainers of the Claude Code GPT-5 repository t
 
 ## Steps
 
+> **NOTE:** All the commands below are expected to be run from the root directory of the repository:
+```bash
+cd <repo-root-dir>
+```
+
 ### Preparation
 
-1. Create a feature branch from `main-boilerplate`
-2. Merge `main` branch into this feature branch
-   - IGNORE ALL THE MERGE CONFLICTS - JUST OVERRIDE EVERYTHING WITH THE FILES FROM MAIN BRANCH (`cp -r backup/* .` and `cp -r backup/.* .` but DO DELETE `.git` folder from the backup directory first)
-3. Create a feature branch from this feature branch ?
+0. Backup the content of the `main` branch of the repo to a separate directory:
+   ```bash
+   git switch main
+   git pull
+   git status
+   cp -r . ../<repo-main-backup-dir>
+   rm -rf ../<repo-main-backup-dir>/.git
+   rm ../<repo-main-backup-dir>/.env
+   rm ../<repo-main-backup-dir>/librechat/.env
+   ```
+
+1. Create a feature branch from `main-boilerplate`:
+   ```bash
+   git switch main-boilerplate
+   git pull
+   git status
+   git switch --create <boilerplate-merging-branch>
+   git push --set-upstream origin <boilerplate-merging-branch>
+   ```
+
+2. Merge `main` branch into this feature branch in the following way:
+
+   2.1 Switch to the feature branch and **initiate the merge** of the `main`:
+    ```bash
+    git switch <boilerplate-merging-branch>
+    git pull
+    git status
+    git merge origin/main
+    git status
+    ```
+
+   2.2 **IGNORE ALL THE MERGE CONFLICTS** - just override everything with the files that you put away to the temporary directory and conclude the merge:
+   ```bash
+   cp -r ../<repo-main-backup-dir>/* .
+   cp -r ../<repo-main-backup-dir>/.* .
+   git add --all
+   git commit
+   git push
+   git status
+   ```
+3. Create **a feature branch from the feature branch**:
+    ```bash
+    git switch <boilerplate-merging-branch>
+    git pull
+    git status
+    git switch --create <boilerplate-merging-branch-manual>
+    git push --set-upstream origin <boilerplate-merging-branch-manual>
+    ```
 
 ### Delete irrelevant parts
 
