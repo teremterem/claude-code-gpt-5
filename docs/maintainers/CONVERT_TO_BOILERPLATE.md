@@ -32,16 +32,17 @@ cd <repo-root-dir>
    ```
 
 1. Create a feature branch from `main-boilerplate`:
-   > **ATTENTION! If it already exists, first make sure to delete it both - locally and from the remote.**
    ```bash
    git switch main-boilerplate
    git pull
    git status
    ```
+   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
    ```bash
    git switch --create boilerplate-merging-branch
+   ```
+   ```bash
    git push --set-upstream origin boilerplate-merging-branch
-   git status
    ```
 
 3. Merge `main` branch into this feature branch in the following way:
@@ -71,16 +72,17 @@ cd <repo-root-dir>
    ```
 
 4. Create **a feature branch from the feature branch:**
-   > **ATTENTION! If it already exists, first make sure to delete it both - locally and from the remote.**
    ```bash
    git switch boilerplate-merging-branch
    git pull
    git status
    ```
+   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
    ```bash
    git switch --create boilerplate-MANUAL-merging-branch
+   ```
+   ```bash
    git push --set-upstream origin boilerplate-MANUAL-merging-branch
-   git status
    ```
 
 ### Delete irrelevant files
