@@ -39,6 +39,7 @@ cd <repo-root-dir>
    ```bash
    git switch --create boilerplate-merging-branch
    git push --set-upstream origin boilerplate-merging-branch
+   git status
    ```
 
 2. Merge `main` branch into this feature branch in the following way:
