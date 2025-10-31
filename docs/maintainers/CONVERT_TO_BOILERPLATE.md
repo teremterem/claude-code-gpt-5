@@ -49,9 +49,9 @@ cd <repo-root-dir>
 
    2.1 Switch to the feature branch and **initiate the merge** of the `main`:
    ```bash
-    git merge origin/main
-    git status
-    ```
+   git merge origin/main
+   git status
+   ```
 
    2.2 **IGNORE ALL THE MERGE CONFLICTS** - just override everything with the files that you put away to the temporary directory and conclude the merge:
    ```bash
