@@ -45,7 +45,7 @@ This guide is intended for the maintainers of the Claude Code GPT-5 repository t
 
 19. Remove `claude-code-gpt-5` related labels from `Dockerfile`
 20. Fix name and description in `pyproject.toml` (take them from boilerplate version)
-21. [NOTE: PROBABLY SHOULD NOT BE DONE, BECAUSE `X.X.X-bpX` VERSION FORMAT IS NOT SUPPORTED IN `pyproject.toml`] ~~Update version too~~
+21. [NOTE: PROBABLY SHOULD NOT BE DONE, BECAUSE `X.X.X-bpX` VERSION FORMAT IS NOT SUPPORTED IN `pyproject.toml`] Update version too `X.X.X.X` (last component for the version of the boilerplate itself within the global claude code proxy release)
 22. Run `uv lock` to regenerate `uv.lock` file (do not use `--upgrade` flag - that's meant to be done while still developing in regular `main` branch)
     - TODO Advice to review both first...
 
@@ -61,8 +61,10 @@ This guide is intended for the maintainers of the Claude Code GPT-5 repository t
 26. Test the project
 27. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
 28. Tag new version
-29. Publish TWO new images to GitHub Container Registry:
-    - `ghcr.io/teremterem/litellm-server-yoda:<version>`
+29. Publish TWO new images to GitHub Container Registry (TODO Provide a command to do this):
+    - `ghcr.io/teremterem/litellm-server-yoda:X.X.X.X`
+    - `ghcr.io/teremterem/litellm-server-yoda:X.X.X`
     - `ghcr.io/teremterem/litellm-server-yoda:latest`
-    - `ghcr.io/teremterem/librechat-yoda:<version>`
+    - `ghcr.io/teremterem/librechat-yoda:X.X.X.X`
+    - `ghcr.io/teremterem/librechat-yoda:X.X.X`
     - `ghcr.io/teremterem/librechat-yoda:latest`
