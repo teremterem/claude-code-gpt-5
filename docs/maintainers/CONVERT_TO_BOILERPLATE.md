@@ -95,8 +95,8 @@ cd <repo-root-dir>
    ```
    ```bash
    rm -rf claude_code_proxy/
-   rm docs/DOCKER_PUBLISHING.md
-   rm docs/CONVERT_TO_BOILERPLATE.md
+   rm docs/maintainers/DOCKER_PUBLISHING.md
+   rm docs/maintainers/CONVERT_TO_BOILERPLATE.md
    rm images/claude-code-gpt-5.jpeg
    rm deploy-docker.sh
    rm kill-docker.sh
