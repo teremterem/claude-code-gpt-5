@@ -128,8 +128,8 @@ TODO Advice to review all these files before the actual deletion
 ### Swap README
 
 5. Override `README.md` with `README_BOILERPLATE.md`:
-   mv README_BOILERPLATE.md README.md
    ```bash
+   mv README_BOILERPLATE.md README.md
 
    git add --all
    git status
