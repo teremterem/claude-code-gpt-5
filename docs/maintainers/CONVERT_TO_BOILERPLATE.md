@@ -129,6 +129,11 @@ TODO Advice to review all these files before the actual deletion
 
 5. Override `README.md` with `README_BOILERPLATE.md`:
    ```bash
+   git switch boilerplate-MANUAL-merging-branch
+   git pull
+   git status
+   ```
+   ```bash
    mv README_BOILERPLATE.md README.md
 
    git add --all
