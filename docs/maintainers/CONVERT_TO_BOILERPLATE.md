@@ -32,6 +32,7 @@ cd <repo-root-dir>
    ```
 
 1. Create a feature branch from `main-boilerplate`:
+   > **ATTENTION! If it already exists, first make sure to delete it both - locally and from the remote.**
    ```bash
    git switch main-boilerplate
    git pull
@@ -43,7 +44,7 @@ cd <repo-root-dir>
    git status
    ```
 
-2. Merge `main` branch into this feature branch in the following way:
+3. Merge `main` branch into this feature branch in the following way:
 
    2.1 Switch to the feature branch and **initiate the merge** of the `main`:
     ```bash
@@ -69,7 +70,8 @@ cd <repo-root-dir>
    git status
    ```
 
-3. Create **a feature branch from the feature branch**:
+4. Create **a feature branch from the feature branch:**
+   > **ATTENTION! If it already exists, first make sure to delete it both - locally and from the remote.**
    ```bash
    git switch boilerplate-merging-branch
    git pull
