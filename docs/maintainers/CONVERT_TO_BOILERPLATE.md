@@ -66,7 +66,7 @@ cd <repo-root-dir>
    git status
    ```
    ```bash
-   git commit
+   git commit -m 'Merge remote-tracking branch '\''origin/main'\'' into boilerplate-merging-branch'
    git push
    git status
    ```
