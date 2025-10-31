@@ -148,6 +148,8 @@ TODO Advice to review all these files before the actual deletion
    ```markdown
    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
    ```
+   ---
+
    ```bash
    git add --all
    git status
