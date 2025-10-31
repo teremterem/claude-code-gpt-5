@@ -17,10 +17,10 @@ cd <repo-root-dir>
    git pull
    git status
 
-   cp -r . ../<repo-main-backup-dir>
-   rm -rf ../<repo-main-backup-dir>/.git
-   rm ../<repo-main-backup-dir>/.env
-   rm ../<repo-main-backup-dir>/librechat/.env
+   cp -r . ../repo-main-backup-dir
+   rm -rf ../repo-main-backup-dir/.git
+   rm ../repo-main-backup-dir/.env
+   rm ../repo-main-backup-dir/librechat/.env
    ```
 
 1. Create a feature branch from `main-boilerplate`:
@@ -29,15 +29,15 @@ cd <repo-root-dir>
    git pull
    git status
 
-   git switch --create <boilerplate-merging-branch>
-   git push --set-upstream origin <boilerplate-merging-branch>
+   git switch --create boilerplate-merging-branch
+   git push --set-upstream origin boilerplate-merging-branch
    ```
 
 2. Merge `main` branch into this feature branch in the following way:
 
    2.1 Switch to the feature branch and **initiate the merge** of the `main`:
     ```bash
-    git switch <boilerplate-merging-branch>
+    git switch boilerplate-merging-branch
     git pull
     git status
 
@@ -47,8 +47,8 @@ cd <repo-root-dir>
 
    2.2 **IGNORE ALL THE MERGE CONFLICTS** - just override everything with the files that you put away to the temporary directory and conclude the merge:
    ```bash
-   cp -r ../<repo-main-backup-dir>/* .
-   cp -r ../<repo-main-backup-dir>/.* .
+   cp -r ../repo-main-backup-dir/* .
+   cp -r ../repo-main-backup-dir/.* .
 
    git add --all
    git commit
@@ -57,19 +57,19 @@ cd <repo-root-dir>
    ```
 3. Create **a feature branch from the feature branch**:
    ```bash
-   git switch <boilerplate-merging-branch>
+   git switch boilerplate-merging-branch
    git pull
    git status
 
-   git switch --create <boilerplate-manual-merging-branch>
-   git push --set-upstream origin <boilerplate-manual-merging-branch>
+   git switch --create boilerplate-manual-merging-branch
+   git push --set-upstream origin boilerplate-manual-merging-branch
    ```
 
 ### Delete irrelevant files
 
 4. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
    ```bash
-   git switch <boilerplate-manual-merging-branch>
+   git switch boilerplate-manual-merging-branch
    git pull
    git status
 
@@ -105,7 +105,7 @@ TODO Advice to review all these files before the actual deletion
    git add --all
    git status
    ```
-6. Restore this note at the top of the new README:
+6. Restore the following note at the top of the new README (replace the existing **ATTENTION** clause with it):
    ```markdown
    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
    ```
