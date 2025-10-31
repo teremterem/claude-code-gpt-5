@@ -13,10 +13,17 @@ cd <repo-root-dir>
 
 0. Backup the content of the `main` branch of the repo to a separate directory:
    ```bash
+   rm -ri ../repo-main-backup-dir
+   ```
+   > **NOTE:** The command above will ask about deleting each and every file. If the directory exists already, this will make you cognizant of this fact. **Retry without `-i` to actually delete it** (no confirmations will be asked).
+
+   Proceed with the backup:
+   ```bash
    git switch main
    git pull
    git status
-
+   ```
+   ```bash
    cp -r . ../repo-main-backup-dir
    rm -rf ../repo-main-backup-dir/.git
    rm ../repo-main-backup-dir/.env
@@ -28,7 +35,8 @@ cd <repo-root-dir>
    git switch main-boilerplate
    git pull
    git status
-
+   ```
+   ```bash
    git switch --create boilerplate-merging-branch
    git push --set-upstream origin boilerplate-merging-branch
    ```
@@ -40,7 +48,8 @@ cd <repo-root-dir>
     git switch boilerplate-merging-branch
     git pull
     git status
-
+   ```
+   ```bash
     git merge origin/main
     git status
     ```
@@ -49,8 +58,10 @@ cd <repo-root-dir>
    ```bash
    cp -r ../repo-main-backup-dir/* .
    cp -r ../repo-main-backup-dir/.* .
-
    git add --all
+   git status
+   ```
+   ```bash
    git commit
    git push
    git status
@@ -60,19 +71,22 @@ cd <repo-root-dir>
    git switch boilerplate-merging-branch
    git pull
    git status
-
-   git switch --create boilerplate-manual-merging-branch
-   git push --set-upstream origin boilerplate-manual-merging-branch
+   ```
+   ```bash
+   git switch --create boilerplate-MANUAL-merging-branch
+   git push --set-upstream origin boilerplate-MANUAL-merging-branch
+   git status
    ```
 
 ### Delete irrelevant files
 
 4. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
    ```bash
-   git switch boilerplate-manual-merging-branch
+   git switch boilerplate-MANUAL-merging-branch
    git pull
    git status
-
+   ```
+   ```bash
    rm -rf claude_code_proxy/
    rm docs/DOCKER_PUBLISHING.md
    rm docs/CONVERT_TO_BOILERPLATE.md
@@ -84,11 +98,19 @@ cd <repo-root-dir>
    git add --all
    git status
    ```
+
    If there is no other relevant stuff in `docs/maintainers/` folder, then delete it altogether:
    ```bash
    rm -rf docs/maintainers/
 
    git add --all
+   git status
+   ```
+
+   Commit and push:
+   ```bash
+   git commit -m "Delete irrelevant files"
+   git push
    git status
    ```
 
@@ -105,12 +127,22 @@ TODO Advice to review all these files before the actual deletion
    git add --all
    git status
    ```
+   ```bash
+   git commit -m "Override README with README_BOILERPLATE.md"
+   git push
+   git status
+   ```
 6. Restore the following note at the top of the new README (replace the existing **ATTENTION** clause with it):
    ```markdown
    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
    ```
    ```bash
    git add --all
+   git status
+   ```
+   ```bash
+   git commit -m "Restore note about going back to CLI Proxy version"
+   git push
    git status
    ```
 
