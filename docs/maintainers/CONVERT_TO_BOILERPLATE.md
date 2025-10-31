@@ -66,6 +66,7 @@ cd <repo-root-dir>
    git push
    git status
    ```
+
 3. Create **a feature branch from the feature branch**:
    ```bash
    git switch boilerplate-merging-branch
