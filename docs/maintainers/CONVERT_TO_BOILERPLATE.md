@@ -26,6 +26,7 @@ cd <repo-root-dir>
    ```bash
    cp -r . ../repo-main-backup-dir
    rm -rf ../repo-main-backup-dir/.git
+   rm -rf ../repo-main-backup-dir/.venv
    rm ../repo-main-backup-dir/.env
    rm ../repo-main-backup-dir/librechat/.env
    ```
