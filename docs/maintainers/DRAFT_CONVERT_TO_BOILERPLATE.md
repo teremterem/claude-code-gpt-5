@@ -4,31 +4,160 @@ This guide is intended for the maintainers of the Claude Code GPT-5 repository t
 
 ## Steps
 
+> **NOTE:** All the commands below are expected to be run from the root directory of the repository:
+```bash
+cd <repo-root-dir>
+```
+
 ### Preparation
 
-1. Create a feature branch from `main-boilerplate`
-2. Merge `main` branch into this feature branch
-   - IGNORE ALL THE MERGE CONFLICTS - JUST OVERRIDE EVERYTHING WITH THE FILES FROM MAIN BRANCH (`cp -r backup/* .` and `cp -r backup/.* .` but DO DELETE `.git` folder from the backup directory first)
-3. Create a feature branch from this feature branch ?
+1. Backup the content of the `main` branch of the repo to a separate directory:
+   ```bash
+   rm -ri ../repo-main-backup-dir
+   ```
+   > **NOTE:** The command above will ask about deleting each and every file. If the directory exists already, this will make you cognizant of this fact. **Retry without `-i` to actually delete it** (no confirmations will be asked).
 
-### Delete irrelevant parts
+   Proceed with the backup:
+   ```bash
+   git switch main
+   git pull
+   git status
+   ```
+   ```bash
+   cp -r . ../repo-main-backup-dir
+   rm -rf ../repo-main-backup-dir/.git
+   rm -rf ../repo-main-backup-dir/.venv
+   rm ../repo-main-backup-dir/.env
+   rm ../repo-main-backup-dir/librechat/.env
+   ```
 
-4. Delete `docs/DOCKER_PUBLISHING.md`
-   - TODO Advice to check against similar section(s) in `README_BOILERPLATE.md` first
-5. Delete `docs/CONVERT_TO_BOILERPLATE.md` (and probably the whole `docs/maintainers` folder)
-6. Delete `images/claude-code-gpt-5.jpeg`
-7. Delete `claude_code_proxy` folder
-8. Delete `deploy-docker.sh`
-9. Delete `kill-docker.sh`
-10. Delete `run-docker.sh`
+2. Backup the content of the `main-boilerplate` branch of the repo to a separate directory:
+   ```bash
+   rm -ri ../repo-boilerplate-backup-dir
+   ```
+   > **NOTE:** The command above will ask about deleting each and every file. If the directory exists already, this will make you cognizant of this fact. **Retry without `-i` to actually delete it** (no confirmations will be asked).
 
-### Swap README
+   Proceed with the backup:
+   ```bash
+   git switch main-boilerplate
+   git pull
+   git status
+   ```
+   ```bash
+   cp -r . ../repo-boilerplate-backup-dir
+   rm -rf ../repo-boilerplate-backup-dir/.git
+   rm -rf ../repo-boilerplate-backup-dir/.venv
+   rm ../repo-boilerplate-backup-dir/.env
+   rm ../repo-boilerplate-backup-dir/librechat/.env
+   ```
 
-11. Override `README.md` with `README_BOILERPLATE.md`
-12. Restore this note at the top of this new README:
-    ```markdown
-    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
-    ```
+3. Create a feature branch from `main-boilerplate`:
+   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
+   ```bash
+   git switch --create boilerplate-merging-branch
+   ```
+   ```bash
+   git push --set-upstream origin boilerplate-merging-branch
+   ```
+
+4. Merge `main` branch into this feature branch in the following way:
+
+   2.1 Switch to the feature branch and **initiate the merge** of the `main`:
+   ```bash
+   git merge origin/main
+   git status
+   ```
+
+   2.2 **IGNORE ALL THE MERGE CONFLICTS (if any).** Override everything with the files from the `main` branch and conclude the merge **(do this regardless of the presence or absence of merge conflicts):**
+   ```bash
+   cp -r ../repo-main-backup-dir/* .
+   cp -r ../repo-main-backup-dir/.* .
+   git add --all
+   git status
+   ```
+   ```bash
+   git commit -m 'Merge remote-tracking branch '\''origin/main'\'' into boilerplate-merging-branch'
+   git push
+   git status
+   ```
+
+5. Create **a feature branch from the feature branch:**
+   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
+   ```bash
+   git switch --create boilerplate-MANUAL-merging-branch
+   ```
+   ```bash
+   git push --set-upstream origin boilerplate-MANUAL-merging-branch
+   ```
+
+### Delete irrelevant files
+
+6. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
+   ```bash
+   rm -rf claude_code_proxy/
+   rm docs/maintainers/DOCKER_PUBLISHING.md
+   rm docs/maintainers/CONVERT_TO_BOILERPLATE.md
+   rm images/claude-code-gpt-5.jpeg
+   rm deploy-docker.sh
+   rm kill-docker.sh
+   rm run-docker.sh
+
+   git add --all
+   git status
+   ```
+
+   If there is no other relevant stuff in `docs/maintainers/` folder, then delete it altogether:
+   ```bash
+   rm -rf docs/maintainers/
+
+   git add --all
+   git status
+   ```
+
+   Commit and push:
+   ```bash
+   git commit -m "Delete irrelevant files"
+   git push
+   git status
+   ```
+
+TODO Advice to check `docs/DOCKER_PUBLISHING.md` against similar section(s) in `README_BOILERPLATE.md` first
+
+TODO Advice to review all these files before the actual deletion
+
+### Swap the README
+
+7. Override `README.md` with `README_BOILERPLATE.md`:
+   ```bash
+   mv README_BOILERPLATE.md README.md
+
+   git add --all
+   git status
+   ```
+   ```bash
+   git commit -m "Override README with README_BOILERPLATE.md"
+   git push
+   git status
+   ```
+8. Edit the new `README.md` to restore a **NOTE** clause at the top of it:
+   ```bash
+   vim README.md
+   ```
+
+   **Replace the existing ATTENTION clause at the top with the following text:**
+   ```markdown
+   > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
+   ```
+
+   ```bash
+   git add --all
+   git status
+   ```
+   ```bash
+   git commit -m "Restore note about going back to CLI Proxy version"
+   git push
+   git status
+   ```
 
 ### Bring back certain boilerplate-specific versions of files
 
@@ -45,7 +174,7 @@ This guide is intended for the maintainers of the Claude Code GPT-5 repository t
 
 19. Remove `claude-code-gpt-5` related labels from `Dockerfile`
 20. Fix name and description in `pyproject.toml` (take them from boilerplate version)
-21. [NOTE: PROBABLY SHOULD NOT BE DONE, BECAUSE `X.X.X-bpX` VERSION FORMAT IS NOT SUPPORTED IN `pyproject.toml`] ~~Update version too~~
+21. [NOTE: PROBABLY SHOULD NOT BE DONE, BECAUSE `X.X.X-bpX` VERSION FORMAT IS NOT SUPPORTED IN `pyproject.toml`] Update version too `X.X.X.X` (last component for the version of the boilerplate itself within the global claude code proxy release)
 22. Run `uv lock` to regenerate `uv.lock` file (do not use `--upgrade` flag - that's meant to be done while still developing in regular `main` branch)
     - TODO Advice to review both first...
 
@@ -61,8 +190,10 @@ This guide is intended for the maintainers of the Claude Code GPT-5 repository t
 26. Test the project
 27. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
 28. Tag new version
-29. Publish TWO new images to GitHub Container Registry:
-    - `ghcr.io/teremterem/litellm-server-yoda:<version>`
+29. Publish TWO new images to GitHub Container Registry (TODO Provide a command to do this):
+    - `ghcr.io/teremterem/litellm-server-yoda:X.X.X.X`
+    - `ghcr.io/teremterem/litellm-server-yoda:X.X.X`
     - `ghcr.io/teremterem/litellm-server-yoda:latest`
-    - `ghcr.io/teremterem/librechat-yoda:<version>`
+    - `ghcr.io/teremterem/librechat-yoda:X.X.X.X`
+    - `ghcr.io/teremterem/librechat-yoda:X.X.X`
     - `ghcr.io/teremterem/librechat-yoda:latest`
