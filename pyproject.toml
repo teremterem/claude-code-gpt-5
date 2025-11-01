@@ -2,9 +2,9 @@
 line-length = 119
 
 [project]
-name = "my-litellm-server"
+name = "claude-code-gpt-5"
 version = "1.0.0b3"
-description = "LiteLLM server boilerplate"
+description = "Connect Claude Code CLI to GPT-5"
 readme = "README.md"
 
 requires-python = ">=3.8.1,<4.0, !=3.9.7"  # Copied from https://github.com/BerriAI/litellm/blob/main/pyproject.toml
