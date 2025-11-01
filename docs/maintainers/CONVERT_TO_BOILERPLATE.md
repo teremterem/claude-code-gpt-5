@@ -68,7 +68,7 @@ cd <repo-root-dir>
    git status
    ```
 
-   2.2 **IGNORE ALL THE MERGE CONFLICTS** - just override everything with the files that you put away to the temporary directory and conclude the merge:
+   2.2 **IGNORE ALL THE MERGE CONFLICTS (if any).** Override everything with the files from the `main` branch and conclude the merge **(do this regardless of the presence or absence of merge conflicts):**
    ```bash
    cp -r ../repo-main-backup-dir/* .
    cp -r ../repo-main-backup-dir/.* .
