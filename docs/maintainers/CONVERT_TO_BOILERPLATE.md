@@ -212,7 +212,27 @@ cd <repo-root-dir>
 
 ### Correct certain files manually
 
-10. REMOVE the following lines from `Dockerfile`:
+10. REMOVE the following entries from `config.yml`:
+
+    ```bash
+    vim config.yml
+    ```
+
+    ```yaml
+    # litellm_settings: custom_provider_map:
+    - provider: claude_code_router
+      custom_handler: claude_code_proxy.claude_code_router.claude_code_router
+    ```
+
+    ```yaml
+    # model_list:
+    - model_name: "*"
+      litellm_params:
+        model: "claude_code_router/*"
+        drop_params: true  # Automatically drop unsupported parameters
+    ```
+
+11. REMOVE the following lines from `Dockerfile`:
 
     ```bash
     vim Dockerfile
@@ -224,7 +244,7 @@ cd <repo-root-dir>
           org.opencontainers.image.licenses=MIT
     ```
 
-11. Update the `name`, `version` and `description` fields in `pyproject.toml` in the following way:
+12. Update the `name`, `version` and `description` fields in `pyproject.toml` in the following way:
 
     ```bash
     vim pyproject.toml
@@ -240,7 +260,7 @@ cd <repo-root-dir>
 
     As you can see, the `version` number has four components. **The last component is the version of the boilerplate itself within the global claude code proxy release.**
 
-12. Regenerate `uv.lock` file:
+13. Regenerate `uv.lock` file:
 
     ```bash
     uv lock --no-upgrade
@@ -253,7 +273,7 @@ cd <repo-root-dir>
     git status
     ```
 
-13. Commit and push:
+14. Commit and push:
 
     ```bash
     git commit -m "Update pyproject.toml, Dockerfile and uv.lock"
