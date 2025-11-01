@@ -121,9 +121,9 @@ cd <repo-root-dir>
    git status
    ```
 
-TODO Advice to check `docs/DOCKER_PUBLISHING.md` against similar section(s) in `README_BOILERPLATE.md` first
+   TODO Advice to check `docs/DOCKER_PUBLISHING.md` against similar section(s) in `README_BOILERPLATE.md` first
 
-TODO Advice to review all these files before the actual deletion
+   TODO Advice to review all these files before the actual deletion
 
 ### Swap the README
 
@@ -159,16 +159,28 @@ TODO Advice to review all these files before the actual deletion
    git status
    ```
 
-### Bring back certain boilerplate-specific versions of files
+### Restore boilerplate-specific versions of certain files
 
-13. Restore `docs/DOCKER_TIPS.md` as it was in the `main-boilerplate` branch
-    - TODO Advice to read both variants first, though - just to see if there is anything useful in the non-boilerplate version that might make sense to incorporate into the boilerplate version
-14. Restore `.env.template` as it was in the `main-boilerplate` branch
-    - TODO Advice to review both first...
-15. Same with `config.yml`
-16. Same with `docker-compose.dev.yml` (or maybe just fix service and container names)
-17. Same with `docker-compose.yml`
-18. Restore `uv-run.sh` as it was in the `main-boilerplate` branch
+9. Copy the following files over from the `main-boilerplate` branch:
+   ```bash
+   cp ../repo-boilerplate-backup-dir/docs/DOCKER_TIPS.md docs/
+   cp ../repo-boilerplate-backup-dir/.env.template .
+   cp ../repo-boilerplate-backup-dir/config.yml .
+   cp ../repo-boilerplate-backup-dir/docker-compose.dev.yml .
+   cp ../repo-boilerplate-backup-dir/docker-compose.yml .
+   cp ../repo-boilerplate-backup-dir/uv-run.sh .
+
+   git add --all
+   git status
+   ```
+
+   TODO Advice to review both variants (the diff) to see if there is anything useful in the non-boilerplate version that might make sense to incorporate into the boilerplate version
+
+   ```bash
+   git commit -m "Restore boilerplate-specific versions of certain files"
+   git push
+   git status
+   ```
 
 ### Correct certain parts manually
 
