@@ -246,7 +246,7 @@ cd <repo-root-dir>
     uv lock --no-upgrade
     ```
 
-    > **NOTE:** You are not meant to use `--upgrade` flag while converting to boilerplate - that is meant to be done before, as part of the `main` branch development.
+    > **NOTE:** You are not meant to upgrade any packages with the `--upgrade` flag while converting to boilerplate - that is meant to be done earlier, as part of the `main` branch development.
 
     ```bash
     git add --all
