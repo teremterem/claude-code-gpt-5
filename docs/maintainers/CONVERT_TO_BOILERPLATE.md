@@ -184,7 +184,16 @@ cd <repo-root-dir>
 
 ### Correct certain parts manually
 
-19. Remove `claude-code-gpt-5` related labels from `Dockerfile`
+10. REMOVE the following lines from `Dockerfile`:
+   ```bash
+   vim Dockerfile
+   ```
+   ```dockerfile
+   LABEL org.opencontainers.image.source=https://github.com/teremterem/claude-code-gpt-5 \
+         org.opencontainers.image.description="Connect Claude Code CLI to GPT-5" \
+         org.opencontainers.image.licenses=MIT
+   ```
+
 20. Fix name and description in `pyproject.toml` (take them from boilerplate version)
 21. [NOTE: PROBABLY SHOULD NOT BE DONE, BECAUSE `X.X.X-bpX` VERSION FORMAT IS NOT SUPPORTED IN `pyproject.toml`] Update version too `X.X.X.X` (last component for the version of the boilerplate itself within the global claude code proxy release)
 22. Run `uv lock` to regenerate `uv.lock` file (do not use `--upgrade` flag - that's meant to be done while still developing in regular `main` branch)
