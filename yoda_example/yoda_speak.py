@@ -2,11 +2,19 @@ from typing import Any, AsyncGenerator, Callable, Generator, Optional, Union
 
 import httpx
 import litellm
-from litellm import CustomLLM, GenericStreamingChunk, HTTPHandler, ModelResponse, AsyncHTTPHandler
+from litellm import (
+    CustomLLM,
+    CustomStreamWrapper,
+    GenericStreamingChunk,
+    HTTPHandler,
+    ModelResponse,
+    ModelResponseStream,
+    AsyncHTTPHandler,
+)
 
 from common.config import WRITE_TRACES_TO_FILES
 from common.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_chunk_trace
-from common.utils import generate_timestamp_utc, to_generic_streaming_chunk
+from common.utils import ProxyError, generate_timestamp_utc, to_generic_streaming_chunk
 
 
 _YODA_SYSTEM_PROMPT = {
@@ -19,7 +27,7 @@ _YODA_SYSTEM_PROMPT = {
 
 
 class YodaSpeakLLM(CustomLLM):
-    # pylint: disable=too-many-positional-arguments,too-many-locals
+    # pylint: disable=too-many-positional-arguments,too-many-locals,duplicate-code
     """
     Proxy wrapper that forces Yoda-speak responses from the underlying LLM.
     """
@@ -47,40 +55,44 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> ModelResponse:
-        timestamp = generate_timestamp_utc()
-        calling_method = "completion"
+        try:
+            timestamp = generate_timestamp_utc()
+            calling_method = "completion"
 
-        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
+            messages_modified = messages + [_YODA_SYSTEM_PROMPT]
 
-        if WRITE_TRACES_TO_FILES:
-            write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_original=messages,
-                messages_complapi=messages_modified,
-                params_complapi=optional_params,
+            if WRITE_TRACES_TO_FILES:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_original=messages,
+                    messages_complapi=messages_modified,
+                    params_complapi=optional_params,
+                )
+
+            response: ModelResponse = litellm.completion(
+                model=self.target_model,
+                messages=messages_modified,
+                logger_fn=logger_fn,
+                headers=headers or {},
+                timeout=timeout,
+                client=client,
+                # Drop any params that are not supported by the provider
+                drop_params=True,
+                **optional_params,
             )
 
-        response = litellm.completion(
-            model=self.target_model,
-            messages=messages_modified,
-            logger_fn=logger_fn,
-            headers=headers or {},
-            timeout=timeout,
-            client=client,
-            # Drop any params that are not supported by the provider
-            drop_params=True,
-            **optional_params,
-        )
+            if WRITE_TRACES_TO_FILES:
+                write_response_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    response_complapi=response,
+                )
 
-        if WRITE_TRACES_TO_FILES:
-            write_response_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                response_complapi=response,
-            )
+            return response
 
-        return response
+        except Exception as e:
+            raise ProxyError(e) from e
 
     async def acompletion(
         self,
@@ -101,40 +113,44 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> ModelResponse:
-        timestamp = generate_timestamp_utc()
-        calling_method = "acompletion"
+        try:
+            timestamp = generate_timestamp_utc()
+            calling_method = "acompletion"
 
-        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
+            messages_modified = messages + [_YODA_SYSTEM_PROMPT]
 
-        if WRITE_TRACES_TO_FILES:
-            write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_original=messages,
-                messages_complapi=messages_modified,
-                params_complapi=optional_params,
+            if WRITE_TRACES_TO_FILES:
+                write_request_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    messages_original=messages,
+                    messages_complapi=messages_modified,
+                    params_complapi=optional_params,
+                )
+
+            response: ModelResponse = await litellm.acompletion(
+                model=self.target_model,
+                messages=messages_modified,
+                logger_fn=logger_fn,
+                headers=headers or {},
+                timeout=timeout,
+                client=client,
+                # Drop any params that are not supported by the provider
+                drop_params=True,
+                **optional_params,
             )
 
-        response = await litellm.acompletion(
-            model=self.target_model,
-            messages=messages_modified,
-            logger_fn=logger_fn,
-            headers=headers or {},
-            timeout=timeout,
-            client=client,
-            # Drop any params that are not supported by the provider
-            drop_params=True,
-            **optional_params,
-        )
+            if WRITE_TRACES_TO_FILES:
+                write_response_trace(
+                    timestamp=timestamp,
+                    calling_method=calling_method,
+                    response_complapi=response,
+                )
 
-        if WRITE_TRACES_TO_FILES:
-            write_response_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                response_complapi=response,
-            )
+            return response
 
-        return response
+        except Exception as e:
+            raise ProxyError(e) from e
 
     def streaming(
         self,
@@ -155,45 +171,49 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[HTTPHandler] = None,
     ) -> Generator[GenericStreamingChunk, None, None]:
-        timestamp = generate_timestamp_utc()
-        calling_method = "streaming"
+        try:
+            timestamp = generate_timestamp_utc()
+            calling_method = "streaming"
 
-        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
-
-        if WRITE_TRACES_TO_FILES:
-            write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_original=messages,
-                messages_complapi=messages_modified,
-                params_complapi=optional_params,
-            )
-
-        resp_stream = litellm.completion(
-            model=self.target_model,
-            messages=messages_modified,
-            logger_fn=logger_fn,
-            headers=headers or {},
-            timeout=timeout,
-            client=client,
-            # Drop any params that are not supported by the provider
-            drop_params=True,
-            **optional_params,
-        )
-
-        for chunk_idx, chunk in enumerate(resp_stream):
-            generic_chunk = to_generic_streaming_chunk(chunk)
+            messages_modified = messages + [_YODA_SYSTEM_PROMPT]
 
             if WRITE_TRACES_TO_FILES:
-                write_streaming_chunk_trace(
+                write_request_trace(
                     timestamp=timestamp,
                     calling_method=calling_method,
-                    chunk_idx=chunk_idx,
-                    complapi_chunk=chunk,
-                    generic_chunk=generic_chunk,
+                    messages_original=messages,
+                    messages_complapi=messages_modified,
+                    params_complapi=optional_params,
                 )
 
-            yield generic_chunk
+            resp_stream: CustomStreamWrapper = litellm.completion(
+                model=self.target_model,
+                messages=messages_modified,
+                logger_fn=logger_fn,
+                headers=headers or {},
+                timeout=timeout,
+                client=client,
+                # Drop any params that are not supported by the provider
+                drop_params=True,
+                **optional_params,
+            )
+
+            for chunk_idx, chunk in enumerate[ModelResponseStream](resp_stream):
+                generic_chunk = to_generic_streaming_chunk(chunk)
+
+                if WRITE_TRACES_TO_FILES:
+                    write_streaming_chunk_trace(
+                        timestamp=timestamp,
+                        calling_method=calling_method,
+                        chunk_idx=chunk_idx,
+                        complapi_chunk=chunk,
+                        generic_chunk=generic_chunk,
+                    )
+
+                yield generic_chunk
+
+        except Exception as e:
+            raise ProxyError(e) from e
 
     async def astreaming(
         self,
@@ -214,47 +234,51 @@ class YodaSpeakLLM(CustomLLM):
         timeout: Optional[Union[float, httpx.Timeout]] = None,
         client: Optional[AsyncHTTPHandler] = None,
     ) -> AsyncGenerator[GenericStreamingChunk, None]:
-        timestamp = generate_timestamp_utc()
-        calling_method = "astreaming"
+        try:
+            timestamp = generate_timestamp_utc()
+            calling_method = "astreaming"
 
-        messages_modified = messages + [_YODA_SYSTEM_PROMPT]
-
-        if WRITE_TRACES_TO_FILES:
-            write_request_trace(
-                timestamp=timestamp,
-                calling_method=calling_method,
-                messages_original=messages,
-                messages_complapi=messages_modified,
-                params_complapi=optional_params,
-            )
-
-        resp_stream = await litellm.acompletion(
-            model=self.target_model,
-            messages=messages_modified,
-            logger_fn=logger_fn,
-            headers=headers or {},
-            timeout=timeout,
-            client=client,
-            # Drop any params that are not supported by the provider
-            drop_params=True,
-            **optional_params,
-        )
-
-        chunk_idx = 0
-        async for chunk in resp_stream:
-            generic_chunk = to_generic_streaming_chunk(chunk)
+            messages_modified = messages + [_YODA_SYSTEM_PROMPT]
 
             if WRITE_TRACES_TO_FILES:
-                write_streaming_chunk_trace(
+                write_request_trace(
                     timestamp=timestamp,
                     calling_method=calling_method,
-                    chunk_idx=chunk_idx,
-                    complapi_chunk=chunk,
-                    generic_chunk=generic_chunk,
+                    messages_original=messages,
+                    messages_complapi=messages_modified,
+                    params_complapi=optional_params,
                 )
 
-            yield generic_chunk
-            chunk_idx += 1
+            resp_stream: CustomStreamWrapper = await litellm.acompletion(
+                model=self.target_model,
+                messages=messages_modified,
+                logger_fn=logger_fn,
+                headers=headers or {},
+                timeout=timeout,
+                client=client,
+                # Drop any params that are not supported by the provider
+                drop_params=True,
+                **optional_params,
+            )
+
+            chunk_idx = 0
+            async for chunk in resp_stream:
+                generic_chunk = to_generic_streaming_chunk(chunk)
+
+                if WRITE_TRACES_TO_FILES:
+                    write_streaming_chunk_trace(
+                        timestamp=timestamp,
+                        calling_method=calling_method,
+                        chunk_idx=chunk_idx,
+                        complapi_chunk=chunk,
+                        generic_chunk=generic_chunk,
+                    )
+
+                yield generic_chunk
+                chunk_idx += 1
+
+        except Exception as e:
+            raise ProxyError(e) from e
 
 
 yoda_speak_llm = YodaSpeakLLM()
