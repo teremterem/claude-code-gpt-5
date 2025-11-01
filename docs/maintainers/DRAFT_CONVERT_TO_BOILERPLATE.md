@@ -121,9 +121,9 @@ cd <repo-root-dir>
    git status
    ```
 
-TODO Advice to check `docs/DOCKER_PUBLISHING.md` against similar section(s) in `README_BOILERPLATE.md` first
+   TODO Advice to check `docs/DOCKER_PUBLISHING.md` against similar section(s) in `README_BOILERPLATE.md` first
 
-TODO Advice to review all these files before the actual deletion
+   TODO Advice to review all these files before the actual deletion
 
 ### Swap the README
 
