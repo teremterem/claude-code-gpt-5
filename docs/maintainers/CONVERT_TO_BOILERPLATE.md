@@ -124,11 +124,15 @@ TODO Advice to review all these files before the actual deletion
    git push
    git status
    ```
-6. Restore the following note at the top of the new README (replace the existing **ATTENTION** clause with it):
+6. Edit the new `README.md` to restore a **NOTE** clause at the top of it:
+   ```bash
+   vim README.md
+   ```
+
+   **Replace the existing ATTENTION clause at the top with the following text:**
    ```markdown
    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
    ```
-   ---
 
    ```bash
    git add --all
