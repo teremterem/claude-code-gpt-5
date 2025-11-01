@@ -1,13 +1,17 @@
-# Docker Tips for Claude Code GPT-5 Proxy
+# Docker Tips for the LiteLLM Server
 
-This guide explains how to deploy the Claude Code GPT-5 Proxy using Docker and GitHub Container Registry (GHCR).
+This guide explains how to deploy the LiteLLM Server using Docker. It DOES NOT cover the deployment of the LibreChat UI - for the latter see the [README](../README.md).
 
-## 🐳 Docker Image
+## 🐳 Dummy Docker Images
 
-The Docker image is available in GitHub Container Registry:
-
+LiteLLM Server that contains the Yoda example:
 ```
-ghcr.io/teremterem/claude-code-gpt-5:latest
+ghcr.io/teremterem/litellm-server-yoda:latest
+```
+
+LibreChat image with the config for the Yoda example baked in:
+```
+ghcr.io/teremterem/librechat-yoda:latest
 ```
 
 ## 🚀 Quick Start
@@ -28,110 +32,46 @@ ghcr.io/teremterem/claude-code-gpt-5:latest
    ...
    ```
 
-### Method 1: Using the deployment script
+## 🏗️ Building from Source
 
-3. **Run the deployment script:**
-
-   Run in the foreground:
+1. First build the image:
    ```bash
-   ./run-docker.sh
+   docker build -t my-litellm-server .
    ```
 
-   Alternatively, to run in the background:
-   ```bash
-   ./deploy-docker.sh
-   ```
-
-4. **Check the logs** (if you ran in the background):
-   ```bash
-   docker logs -f claude-code-gpt-5
-   ```
-
-### Method 2: Using Docker Compose
-
-3. **Start the service:**
-   ```bash
-   docker-compose up -d
-   ```
-   > **NOTE:** To run in the foreground, remove the `-d` flag.
-
-4. **Check the logs:**
-   ```bash
-   docker-compose logs -f
-   ```
-
-### Method 3: Direct Docker run
-
-3. **Run the container:**
+2. Then run the container:
    ```bash
    docker run -d \
-     --name claude-code-gpt-5 \
+     --name my-litellm-server \
      -p 4000:4000 \
      --env-file .env \
      --restart unless-stopped \
-     ghcr.io/teremterem/claude-code-gpt-5:latest
+     my-litellm-server
    ```
-
    > **NOTE:** To run in the foreground, remove the `-d` flag.
-
-   > **NOTE:** You can also supply the environment variables individually via the `-e` parameter, instead of `--env-file .env`
-
-4. **Check the logs:**
-   ```bash
-   docker logs -f claude-code-gpt-5
-   ```
-
-## 🔧 Usage with Claude Code
-
-Once the proxy is running, use it with Claude Code:
-
-1. **Install Claude Code** (if not already installed):
-   ```bash
-   npm install -g @anthropic-ai/claude-code
-   ```
-
-2. **Use with GPT-5 via the proxy:**
-   ```bash
-   ANTHROPIC_BASE_URL=http://localhost:4000 claude
-   ```
-
-   **If you set a master key, pass it as the Anthropic API key for the CLI:**
-   ```bash
-   ANTHROPIC_API_KEY="<LITELLM_MASTER_KEY>" \
-   ANTHROPIC_BASE_URL=http://localhost:4000 \
-   claude
-   ```
-   > **NOTE:** In the latter case, if you've previously authenticated, run `claude /logout` first.
 
 ## 📊 Monitoring
 
 ### Check container status:
 ```bash
-docker ps | grep claude-code-gpt-5
+docker ps | grep my-litellm-server
 ```
 
 ### Monitor resource usage:
 ```bash
-docker stats claude-code-gpt-5
+docker stats my-litellm-server
 ```
 
 ## 🛑 Stopping and Cleanup
 
 ### Stop the container:
 ```bash
-docker stop claude-code-gpt-5
+docker stop my-litellm-server
 ```
 
 ### Remove the container:
 ```bash
-docker rm claude-code-gpt-5
-```
-
-> **NOTE:** `./kill-docker.sh` can be used to both stop and remove the container in one go.
-
-### Using Docker Compose:
-```bash
-docker-compose down
+docker rm my-litellm-server
 ```
 
 ## 🏥 Health Check
@@ -144,55 +84,16 @@ curl http://localhost:4000/health
 
 > **WARNING:** LiteLLM's `/health` endpoint also checks the responsiveness of the deployed Language Models, which **incurs extra costs !!!** Keep this in mind if you decide to set up an automatic health check for your deployment.
 
-## 🏗️ Building from Source
-
-If you need to build the image yourself, follow the instructions below.
-
-> **NOTE:** You still need to set up the `.env` file as described in the beginning of the [Quick Start](#-quick-start) section.
-
-### Direct Docker build
-
-1. First build the image:
-   ```bash
-   docker build -t claude-code-gpt-5 .
-   ```
-
-2. Then run the container:
-   ```bash
-   docker run -d \
-     --name claude-code-gpt-5 \
-     -p 4000:4000 \
-     --env-file .env \
-     --restart unless-stopped \
-     claude-code-gpt-5
-   ```
-   > **NOTE:** To run in the foreground, remove the `-d` flag.
-
-### Docker Compose build
-
-Build and run by overlaying with the dev version of Compose setup:
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
-```
-
-This will map the current directory to the container.
-
-> **NOTE:** To run in the foreground, remove the `-d` flag.
-
 ## 🔧 Troubleshooting
 
 ### Container won't start
 1. Check if port 4000 is available: `lsof -i :4000`
 2. Verify environment variables are set correctly
-3. Check container logs: `docker logs -f claude-code-gpt-5`
+3. Check container logs: `docker logs -f my-litellm-server`
 
 ### Authentication issues
 1. Verify your API keys are valid and have sufficient credits
-2. Check if OpenAI requires identity verification for GPT-5 access (see [README.md](../README.md), section "First time using GPT-5 via API?")
-
-### Performance issues
-1. Ensure sufficient memory is available (recommended: 2GB+)
-2. Check network connectivity to OpenAI and Anthropic APIs
+2. Check if OpenAI requires identity verification if you are trying to use GPT-5 (see [README.md](../README.md), section "GPT-5 caveat")
 
 ## 🔐 Security Notes
 
@@ -200,11 +101,3 @@ This will map the current directory to the container.
 - Use environment variables or Docker secrets for sensitive data
 - Consider running the container in a restricted network environment
 - Regularly update the image to get security patches
-
-## 📝 Architecture
-
-```
-Claude Code CLI → LiteLLM Proxy (Port 4000) → OpenAI GPT-5 API
-```
-
-The proxy handles model routing and ensures compatibility between Claude Code's expectations and OpenAI's GPT-5 responses.

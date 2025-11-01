@@ -1,8 +1,8 @@
 # Meant to be overlaid on top of docker-compose.yml
 services:
-  claude-code-gpt-5:
+  my-litellm-server:
     build: .
-    image: claude-code-gpt-5:dev
+    image: my-litellm-server:dev
     volumes:
       - .:/app
       - app-venv:/app/.venv
