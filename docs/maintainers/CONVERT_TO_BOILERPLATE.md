@@ -5,6 +5,7 @@ This guide is intended for the maintainers of the Claude Code GPT-5 repository t
 ## Steps
 
 > **NOTE:** All the commands below are expected to be run from the root directory of the repository:
+
 ```bash
 cd <repo-root-dir>
 ```
@@ -12,17 +13,21 @@ cd <repo-root-dir>
 ### Preparation
 
 1. Backup the content of the `main` branch of the repo to a separate directory:
+
    ```bash
    rm -ri ../repo-main-backup-dir
    ```
+
    > **NOTE:** The command above will ask about deleting each and every file. If the directory exists already, this will make you cognizant of this fact. **Retry without `-i` to actually delete it** (no confirmations will be asked).
 
    Proceed with the backup:
+
    ```bash
    git switch main
    git pull
    git status
    ```
+
    ```bash
    cp -r . ../repo-main-backup-dir
    rm -rf ../repo-main-backup-dir/.git
@@ -32,17 +37,21 @@ cd <repo-root-dir>
    ```
 
 2. Backup the content of the `main-boilerplate` branch of the repo to a separate directory:
+
    ```bash
    rm -ri ../repo-boilerplate-backup-dir
    ```
+
    > **NOTE:** The command above will ask about deleting each and every file. If the directory exists already, this will make you cognizant of this fact. **Retry without `-i` to actually delete it** (no confirmations will be asked).
 
    Proceed with the backup:
+
    ```bash
    git switch main-boilerplate
    git pull
    git status
    ```
+
    ```bash
    cp -r . ../repo-boilerplate-backup-dir
    rm -rf ../repo-boilerplate-backup-dir/.git
@@ -52,10 +61,13 @@ cd <repo-root-dir>
    ```
 
 3. Create a feature branch from `main-boilerplate`:
+
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
+
    ```bash
    git switch --create boilerplate-merging-branch
    ```
+
    ```bash
    git push --set-upstream origin boilerplate-merging-branch
    ```
@@ -63,18 +75,21 @@ cd <repo-root-dir>
 4. Merge `main` branch into this feature branch in the following way:
 
    2.1 Switch to the feature branch and **initiate the merge** of the `main`:
+
    ```bash
    git merge origin/main
    git status
    ```
 
    2.2 **IGNORE ALL THE MERGE CONFLICTS (if any).** Override everything with the files from the `main` branch and conclude the merge **(do this regardless of the presence or absence of merge conflicts):**
+
    ```bash
    cp -r ../repo-main-backup-dir/* .
    cp -r ../repo-main-backup-dir/.* .
    git add --all
    git status
    ```
+
    ```bash
    git commit -m 'Merge remote-tracking branch '\''origin/main'\'' into boilerplate-merging-branch'
    git push
@@ -82,10 +97,13 @@ cd <repo-root-dir>
    ```
 
 5. Create **a feature branch from the feature branch:**
+
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
+
    ```bash
    git switch --create boilerplate-MANUAL-merging-branch
    ```
+
    ```bash
    git push --set-upstream origin boilerplate-MANUAL-merging-branch
    ```
@@ -93,6 +111,7 @@ cd <repo-root-dir>
 ### Delete irrelevant files
 
 6. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
+
    ```bash
    rm -rf claude_code_proxy/
    rm docs/maintainers/DOCKER_PUBLISHING.md
@@ -107,6 +126,7 @@ cd <repo-root-dir>
    ```
 
    If there is no other relevant stuff in `docs/maintainers/` folder, then delete it altogether:
+
    ```bash
    rm -rf docs/maintainers/
 
@@ -115,6 +135,7 @@ cd <repo-root-dir>
    ```
 
    Commit and push:
+
    ```bash
    git commit -m "Delete irrelevant files"
    git push
@@ -128,23 +149,28 @@ cd <repo-root-dir>
 ### Swap the README
 
 7. Override `README.md` with `README_BOILERPLATE.md`:
+
    ```bash
    mv README_BOILERPLATE.md README.md
 
    git add --all
    git status
    ```
+
    ```bash
    git commit -m "Override README with README_BOILERPLATE.md"
    git push
    git status
    ```
+
 8. Edit the new `README.md` to restore a **NOTE** clause at the top of it:
+
    ```bash
    vim README.md
    ```
 
    **Replace the existing ATTENTION clause at the top with the following text:**
+
    ```markdown
    > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
    ```
@@ -153,6 +179,7 @@ cd <repo-root-dir>
    git add --all
    git status
    ```
+
    ```bash
    git commit -m "Restore note about going back to CLI Proxy version"
    git push
@@ -162,6 +189,7 @@ cd <repo-root-dir>
 ### Restore boilerplate-specific versions of certain files
 
 9. Copy the following files over from the `main-boilerplate` branch:
+
    ```bash
    cp ../repo-boilerplate-backup-dir/docs/DOCKER_TIPS.md docs/
    cp ../repo-boilerplate-backup-dir/.env.template .
@@ -185,19 +213,53 @@ cd <repo-root-dir>
 ### Correct certain parts manually
 
 10. REMOVE the following lines from `Dockerfile`:
-   ```bash
-   vim Dockerfile
-   ```
-   ```dockerfile
-   LABEL org.opencontainers.image.source=https://github.com/teremterem/claude-code-gpt-5 \
-         org.opencontainers.image.description="Connect Claude Code CLI to GPT-5" \
-         org.opencontainers.image.licenses=MIT
-   ```
 
-20. Fix name and description in `pyproject.toml` (take them from boilerplate version)
-21. [NOTE: PROBABLY SHOULD NOT BE DONE, BECAUSE `X.X.X-bpX` VERSION FORMAT IS NOT SUPPORTED IN `pyproject.toml`] Update version too `X.X.X.X` (last component for the version of the boilerplate itself within the global claude code proxy release)
-22. Run `uv lock` to regenerate `uv.lock` file (do not use `--upgrade` flag - that's meant to be done while still developing in regular `main` branch)
-    - TODO Advice to review both first...
+    ```bash
+    vim Dockerfile
+    ```
+
+    ```dockerfile
+    LABEL org.opencontainers.image.source=https://github.com/teremterem/claude-code-gpt-5 \
+          org.opencontainers.image.description="Connect Claude Code CLI to GPT-5" \
+          org.opencontainers.image.licenses=MIT
+    ```
+
+11. Update the `name`, `version` and `description` fields in `pyproject.toml` in the following way:
+
+    ```bash
+    vim pyproject.toml
+    ```
+
+    ```toml
+    # ...
+    name = "my-litellm-server"
+    version = "X.X.X.X"  # Replace with numbers
+    description = "LiteLLM server boilerplate"
+    # ...
+    ```
+
+    As you can see, the `version` number has four components. **The last component is the version of the boilerplate itself within the global claude code proxy release.**
+
+12. Regenerate `uv.lock` file:
+
+    ```bash
+    uv lock --no-upgrade
+    ```
+
+    > **NOTE:** You are not meant to use `--upgrade` flag while converting to boilerplate - that is meant to be done before, as part of the `main` branch development.
+
+    ```bash
+    git add --all
+    git status
+    ```
+
+13. Commit and push:
+
+    ```bash
+    git commit -m "Update pyproject.toml, Dockerfile and uv.lock"
+    git push
+    git status
+    ```
 
 ### Parts to merge the usual way
 
