@@ -11,7 +11,7 @@ cd <repo-root-dir>
 
 ### Preparation
 
-0. Backup the content of the `main` branch of the repo to a separate directory:
+1. Backup the content of the `main` branch of the repo to a separate directory:
    ```bash
    rm -ri ../repo-main-backup-dir
    ```
@@ -31,12 +31,27 @@ cd <repo-root-dir>
    rm ../repo-main-backup-dir/librechat/.env
    ```
 
-1. Create a feature branch from `main-boilerplate`:
+2. Backup the content of the `main-boilerplate` branch of the repo to a separate directory:
+   ```bash
+   rm -ri ../repo-boilerplate-backup-dir
+   ```
+   > **NOTE:** The command above will ask about deleting each and every file. If the directory exists already, this will make you cognizant of this fact. **Retry without `-i` to actually delete it** (no confirmations will be asked).
+
+   Proceed with the backup:
    ```bash
    git switch main-boilerplate
    git pull
    git status
    ```
+   ```bash
+   cp -r . ../repo-boilerplate-backup-dir
+   rm -rf ../repo-boilerplate-backup-dir/.git
+   rm -rf ../repo-boilerplate-backup-dir/.venv
+   rm ../repo-boilerplate-backup-dir/.env
+   rm ../repo-boilerplate-backup-dir/librechat/.env
+   ```
+
+3. Create a feature branch from `main-boilerplate`:
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
    ```bash
    git switch --create boilerplate-merging-branch
@@ -45,7 +60,7 @@ cd <repo-root-dir>
    git push --set-upstream origin boilerplate-merging-branch
    ```
 
-3. Merge `main` branch into this feature branch in the following way:
+4. Merge `main` branch into this feature branch in the following way:
 
    2.1 Switch to the feature branch and **initiate the merge** of the `main`:
    ```bash
@@ -66,7 +81,7 @@ cd <repo-root-dir>
    git status
    ```
 
-4. Create **a feature branch from the feature branch:**
+5. Create **a feature branch from the feature branch:**
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
    ```bash
    git switch --create boilerplate-MANUAL-merging-branch
@@ -77,7 +92,7 @@ cd <repo-root-dir>
 
 ### Delete irrelevant files
 
-4. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
+6. Delete the following files and folders, as they are not supposed to be part of the boilerplate:
    ```bash
    rm -rf claude_code_proxy/
    rm docs/maintainers/DOCKER_PUBLISHING.md
@@ -112,7 +127,7 @@ TODO Advice to review all these files before the actual deletion
 
 ### Swap the README
 
-5. Override `README.md` with `README_BOILERPLATE.md`:
+7. Override `README.md` with `README_BOILERPLATE.md`:
    ```bash
    mv README_BOILERPLATE.md README.md
 
@@ -124,7 +139,7 @@ TODO Advice to review all these files before the actual deletion
    git push
    git status
    ```
-6. Edit the new `README.md` to restore a **NOTE** clause at the top of it:
+8. Edit the new `README.md` to restore a **NOTE** clause at the top of it:
    ```bash
    vim README.md
    ```
