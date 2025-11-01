@@ -210,7 +210,7 @@ cd <repo-root-dir>
    git status
    ```
 
-### Correct certain parts manually
+### Correct certain files manually
 
 10. REMOVE the following lines from `Dockerfile`:
 
