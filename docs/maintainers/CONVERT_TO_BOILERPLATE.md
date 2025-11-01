@@ -212,10 +212,10 @@ cd <repo-root-dir>
 
 ### Correct certain files manually
 
-10. REMOVE the following entries from `config.yml`:
+10. REMOVE the following entries from `config.yaml`:
 
     ```bash
-    vim config.yml
+    vim config.yaml
     ```
 
     ```yaml
