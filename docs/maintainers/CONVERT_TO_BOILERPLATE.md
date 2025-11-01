@@ -268,12 +268,12 @@ cd <repo-root-dir>
 
     > **NOTE:** You are not meant to upgrade any packages with the `--upgrade` flag while converting to boilerplate - that is meant to be done earlier, as part of the `main` branch development.
 
+14. Commit and push:
+
     ```bash
     git add --all
     git status
     ```
-
-14. Commit and push:
 
     ```bash
     git commit -m "Update pyproject.toml, Dockerfile and uv.lock"
