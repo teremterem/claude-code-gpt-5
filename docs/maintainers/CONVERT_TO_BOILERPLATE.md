@@ -110,7 +110,7 @@ TODO Advice to check `docs/DOCKER_PUBLISHING.md` against similar section(s) in `
 
 TODO Advice to review all these files before the actual deletion
 
-### Swap README
+### Swap the README
 
 5. Override `README.md` with `README_BOILERPLATE.md`:
    ```bash
