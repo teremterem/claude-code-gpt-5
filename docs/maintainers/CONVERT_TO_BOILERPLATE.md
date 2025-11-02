@@ -346,10 +346,36 @@ So, in order to conclude the conversion, do the following:
     git status
     ```
 
-24. Publish TWO new images to GitHub Container Registry (TODO Expand with real commands):
-    - `ghcr.io/teremterem/litellm-server-yoda:X.X.X.X`
-    - `ghcr.io/teremterem/litellm-server-yoda:X.X.X`
-    - `ghcr.io/teremterem/litellm-server-yoda:latest`
-    - `ghcr.io/teremterem/librechat-yoda:X.X.X.X`
-    - `ghcr.io/teremterem/librechat-yoda:X.X.X`
-    - `ghcr.io/teremterem/librechat-yoda:latest`
+24. Go to the GitHub Releases page and create a new release:
+    - Title: `X.X.X.X (boilerplate release)`
+    - Description: release notes
+    - Discussion: **create a new discussion**
+    - Mark as latest: **false**
+
+25. Login to GHCR:
+
+    ```bash
+    echo <YOUR_GITHUB_PAT> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --password-stdin
+    ```
+
+26. Build the `litellm-server-yoda` image and push it to GHCR:
+
+    ```bash
+    docker buildx build \
+      --platform linux/amd64,linux/arm64 \
+      -t ghcr.io/teremterem/litellm-server-yoda:<X.X.X.X> \
+      -t ghcr.io/teremterem/litellm-server-yoda:<X.X.X> \
+      -t ghcr.io/teremterem/litellm-server-yoda:latest \
+      --push .
+    ```
+
+27. Build the `librechat-yoda` image and push it to GHCR:
+
+    ```bash
+    docker buildx build \
+      --platform linux/amd64,linux/arm64 \
+      -t ghcr.io/teremterem/librechat-yoda:<X.X.X.X> \
+      -t ghcr.io/teremterem/librechat-yoda:<X.X.X> \
+      -t ghcr.io/teremterem/librechat-yoda:latest \
+      --push .
+    ```
