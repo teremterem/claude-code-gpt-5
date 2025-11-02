@@ -81,7 +81,7 @@ cd <repo-root-dir>
    git status
    ```
 
-   2.2 **IGNORE ALL THE MERGE CONFLICTS (if any).** Override everything with the files from the `main` branch and conclude the merge **(do this regardless of the presence or absence of merge conflicts):**
+   **2.2 IGNORE ALL THE MERGE CONFLICTS (if any).** Override everything with the files from the `main` branch and conclude the merge **(do this regardless of the presence or absence of merge conflicts):**
 
    ```bash
    cp -r ../repo-main-backup-dir/* .
@@ -96,7 +96,7 @@ cd <repo-root-dir>
    git status
    ```
 
-5. Create **a feature branch from the feature branch:**
+**5. Create a feature branch from the feature branch:**
 
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
 
@@ -300,7 +300,7 @@ So, in order to conclude the conversion, do the following:
 
     (Or do this through the GitHub web interface, if you prefer.)
 
-16. **Thoroughly review the diff in this PR and make changes in the `boilerplate-MANUAL-merging-branch` branch if needed.**
+**16. Thoroughly review the diff in this PR and make changes in the `boilerplate-MANUAL-merging-branch` branch if needed.**
 
 ### Final steps
 
@@ -308,7 +308,7 @@ So, in order to conclude the conversion, do the following:
 
 18. SQUASH and merge `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`
 
-19. **Test the `boilerplate-merging-branch` branch.**
+**19. Test the `boilerplate-merging-branch` branch.**
 
 20. Merge `boilerplate-merging-branch` into `main-boilerplate` using the Pull Request created in step 15 **(DO NOT SQUASH, DO MERGE COMMIT INSTEAD!)**
 
