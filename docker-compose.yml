@@ -1,7 +1,12 @@
 services:
-  claude-code-gpt-5:
-    image: ghcr.io/teremterem/claude-code-gpt-5:latest
-    container_name: claude-code-gpt-5
+  my-litellm-server:
+    # # (Optional) Uncomment the `image:` entry below and set it to point at
+    # # the image you built and pushed to your container registry of choice.
+    # #
+    # # Otherwise leave this file untouched and use it with
+    # # `docker-compose.dev.yml` to build the image locally from source code.
+    # image: ghcr.io/teremterem/litellm-server-yoda:latest
+    container_name: my-litellm-server
     ports:
       - "4000:4000"
     restart: unless-stopped
