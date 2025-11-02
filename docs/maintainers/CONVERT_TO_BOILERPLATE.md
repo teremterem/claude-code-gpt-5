@@ -285,8 +285,8 @@ cd <repo-root-dir>
 
 The remaining files and folders should be merged the usual way. Files and folders like:
 - `common/`
-- `yoda_example/`
 - `librechat/`
+- `yoda_example/`
 - the rest of the files in the root directory
 - etc.
 
