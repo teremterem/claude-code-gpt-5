@@ -281,10 +281,26 @@ cd <repo-root-dir>
     git status
     ```
 
-### Parts to merge the usual way
+### Merge the rest of the files the usual way
 
-23. Just fully override content of `common/`, `yoda_example/` and `librechat/` with what comes from regular `main` branch (just let it happen by itself, in other words)
-    - TODO Still advice to review both versions of each folder first...
+The remaining files and folders should be merged the usual way. Files and folders like:
+- `common/`
+- `yoda_example/`
+- `librechat/`
+- the rest of the files in the root directory
+- etc.
+
+So, in order to conclude the conversion, do the following:
+
+15. For convenience, create a GitHub Pull Request of the `boilerplate-MANUAL-merging-branch` branch into the `main-merging-branch` branch:
+
+   ```bash
+   gh pr create --base main-merging-branch --head boilerplate-MANUAL-merging-branch --title "Merge boilerplate-MANUAL-merging-branch into main-merging-branch"
+   ```
+
+   (Or do this through the GitHub web interface)
+
+TODO Still advice to carefully review the diffs for files
 
 ### Final steps
 
