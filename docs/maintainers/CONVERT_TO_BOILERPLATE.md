@@ -312,11 +312,11 @@ So, in order to conclude the conversion, do the following:
     gh pr merge --squash --delete-branch --auto
     ```
 
-   ```bash
-   git switch boilerplate-merging-branch
-   git pull
-   git status
-   ```
+    ```bash
+    git switch boilerplate-merging-branch
+    git pull
+    git status
+    ```
 
 19. **Thoroughly test `boilerplate-merging-branch`.**
 
