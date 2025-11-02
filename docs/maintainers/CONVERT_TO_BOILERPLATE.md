@@ -295,7 +295,7 @@ So, in order to conclude the conversion, do the following:
 15. Create a GitHub Pull Request of `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`:
 
     ```bash
-    gh pr create --base boilerplate-merging-branch --head boilerplate-MANUAL-merging-branch --title "Merge `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`" --body ""
+    gh pr create --base boilerplate-merging-branch --head boilerplate-MANUAL-merging-branch --title 'Merge '\`'boilerplate-MANUAL-merging-branch'\`' into '\`'boilerplate-merging-branch'\` --body ""
     ```
 
     (Or do this through the GitHub web interface, if you prefer.)
@@ -304,7 +304,7 @@ So, in order to conclude the conversion, do the following:
 
 ### Final steps
 
-17. Take a moment to think if nothing was forgotten (maybe there was something new, that wasn't covered by this guide but still requires attention).
+17. Take a moment to think if nothing was forgotten (e.g. something new was introduced, which this guide doesn't cover yet).
 
 18. SQUASH and merge `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch` using the Pull Request created in step 15:
 
@@ -323,7 +323,7 @@ So, in order to conclude the conversion, do the following:
 20. Create a GitHub Pull Request of `boilerplate-merging-branch` into `main-boilerplate`:
 
     ```bash
-    gh pr create --base main-boilerplate --head boilerplate-merging-branch --title "Merge `boilerplate-merging-branch` into `main-boilerplate`" --body ""
+    gh pr create --base main-boilerplate --head boilerplate-merging-branch --title 'Merge '\`'boilerplate-merging-branch'\`' into '\`'main-boilerplate'\` --body ""
     ```
 
     (Or do this through the GitHub web interface, if you prefer.)
