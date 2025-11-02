@@ -308,9 +308,9 @@ So, in order to conclude the conversion, do the following:
 
 18. SQUASH and merge `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`
 
-19. **Test the `boilerplate-merging-branch` branch.**
+19. **Test `boilerplate-merging-branch`.**
 
-20. Merge `boilerplate-merging-branch` into `main-boilerplate` using the Pull Request created in step 15 **(DO NOT SQUASH, DO MERGE COMMIT INSTEAD!)**
+20. Merge `boilerplate-merging-branch` into `main-boilerplate` using the Pull Request created in step 15ю **DO NOT SQUASH, DO MERGE COMMIT INSTEAD!** We want `main-boilerplate` to be marked as in-sync with the `main` branch.
 
 TODO Expand the steps below with real commands
 
