@@ -300,16 +300,23 @@ So, in order to conclude the conversion, do the following:
 
     (Or do this through the GitHub web interface, if you prefer.)
 
-TODO Still advice to carefully review the diffs for files
+16. **Thoroughly review the diff in this PR and make changes in the `boilerplate-MANUAL-merging-branch` branch if needed.**
 
 ### Final steps
 
-24. TODO Make the reader think if anything else needs to be done
-25. SQUASH and merge the feature of the feature branch into the feature branch
-26. Test the project
-27. Merge this feature branch into `main-boilerplate` (DO NOT SQUASH, JUST MERGE!)
-28. Tag new version
-29. Publish TWO new images to GitHub Container Registry (TODO Provide a command to do this):
+17. Take a moment to think if nothing was forgotten (maybe there was something new, that wasn't covered by this guide but still requires attention).
+
+18. SQUASH and merge `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`
+
+19. **Test the `boilerplate-merging-branch` branch.**
+
+20. Merge `boilerplate-merging-branch` into `main-boilerplate` using the Pull Request created in step 15 **(DO NOT SQUASH, DO MERGE COMMIT INSTEAD!)**
+
+TODO Expand the steps below with real commands
+
+21. Tag new version
+
+22. Publish TWO new images to GitHub Container Registry (TODO Provide a command to do this):
     - `ghcr.io/teremterem/litellm-server-yoda:X.X.X.X`
     - `ghcr.io/teremterem/litellm-server-yoda:X.X.X`
     - `ghcr.io/teremterem/litellm-server-yoda:latest`
