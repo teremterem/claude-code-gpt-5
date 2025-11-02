@@ -294,11 +294,11 @@ So, in order to conclude the conversion, do the following:
 
 15. For convenience, create a GitHub Pull Request of the `boilerplate-MANUAL-merging-branch` branch into the `main-merging-branch` branch:
 
-   ```bash
-   gh pr create --base main-merging-branch --head boilerplate-MANUAL-merging-branch --title "Merge boilerplate-MANUAL-merging-branch into main-merging-branch"
-   ```
+    ```bash
+    gh pr create --base main-merging-branch --head boilerplate-MANUAL-merging-branch --title "Merge boilerplate-MANUAL-merging-branch into main-merging-branch"
+    ```
 
-   (Or do this through the GitHub web interface)
+   (Or do this through the GitHub web interface, if you prefer.)
 
 TODO Still advice to carefully review the diffs for files
 
