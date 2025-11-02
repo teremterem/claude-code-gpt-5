@@ -334,11 +334,11 @@ So, in order to conclude the conversion, do the following:
     gh pr merge --squash --delete-branch --auto
     ```
 
-   ```bash
-   git switch main-boilerplate
-   git pull
-   git status
-   ```
+    ```bash
+    git switch main-boilerplate
+    git pull
+    git status
+    ```
 
 22. **Do a very shallow test of `main-boilerplate`.** (Proper testing was performed in step 19.)
 
