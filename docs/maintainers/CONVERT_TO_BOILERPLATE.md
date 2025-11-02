@@ -62,7 +62,7 @@ cd <repo-root-dir>
 
 3. Create a feature branch from `main-boilerplate`:
 
-   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
+   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-merging-branch` already exists, first make sure to delete it both - locally and from the remote.
 
    ```bash
    git switch --create boilerplate-merging-branch
@@ -98,7 +98,7 @@ cd <repo-root-dir>
 
 5. **Create a feature branch from the feature branch:**
 
-   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` branch already exists, first make sure to delete it both - locally and from the remote.
+   > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` already exists, first make sure to delete it both - locally and from the remote.
 
    ```bash
    git switch --create boilerplate-MANUAL-merging-branch
@@ -292,7 +292,7 @@ The remaining files and folders should be merged the usual way. Files and folder
 
 So, in order to conclude the conversion, do the following:
 
-15. For convenience, create a GitHub Pull Request of the `boilerplate-MANUAL-merging-branch` branch into the `main-merging-branch` branch:
+15. For convenience, create a GitHub Pull Request of `boilerplate-MANUAL-merging-branch` into `main-merging-branch`:
 
     ```bash
     gh pr create --base boilerplate-merging-branch --head boilerplate-MANUAL-merging-branch --title "Merge `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`" --body ""
@@ -300,7 +300,7 @@ So, in order to conclude the conversion, do the following:
 
     (Or do this through the GitHub web interface, if you prefer.)
 
-16. **Thoroughly review the diff in this PR and make changes in the `boilerplate-MANUAL-merging-branch` branch if needed.**
+16. **Thoroughly review the diff in this PR and make changes in `boilerplate-MANUAL-merging-branch` if needed.**
 
 ### Final steps
 
