@@ -292,7 +292,7 @@ The remaining files and folders should be merged the usual way. Files and folder
 
 So, in order to conclude the conversion, do the following:
 
-15. For convenience, create a GitHub Pull Request of `boilerplate-MANUAL-merging-branch` into `main-merging-branch`:
+15. Create a GitHub Pull Request of `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`:
 
     ```bash
     gh pr create --base boilerplate-merging-branch --head boilerplate-MANUAL-merging-branch --title "Merge `boilerplate-MANUAL-merging-branch` into `boilerplate-merging-branch`" --body ""
@@ -312,15 +312,45 @@ So, in order to conclude the conversion, do the following:
     gh pr merge --squash --delete-branch --auto
     ```
 
-19. **Test `boilerplate-merging-branch`.**
+   ```bash
+   git switch boilerplate-merging-branch
+   git pull
+   git status
+   ```
 
-20. Merge `boilerplate-merging-branch` into `main-boilerplate`. **DO NOT SQUASH, DO MERGE COMMIT INSTEAD!** We want `main-boilerplate` to be marked as in-sync with the `main` branch.
+19. **Thoroughly test `boilerplate-merging-branch`.**
 
-TODO Expand the steps below with real commands
+20. Create a GitHub Pull Request of `boilerplate-merging-branch` into `main-boilerplate`:
 
-21. Tag new version
+    ```bash
+    gh pr create --base main-boilerplate --head boilerplate-merging-branch --title "Merge `boilerplate-merging-branch` into `main-boilerplate`" --body ""
+    ```
 
-22. Publish TWO new images to GitHub Container Registry (TODO Provide a command to do this):
+    (Or do this through the GitHub web interface, if you prefer.)
+
+21. Merge `boilerplate-merging-branch` into `main-boilerplate` using the Pull Request created in step 20. **DO NOT SQUASH, DO MERGE COMMIT INSTEAD!** We want `main-boilerplate` to be marked as in-sync with the `main` branch.
+
+    ```bash
+    gh pr merge --squash --delete-branch --auto
+    ```
+
+   ```bash
+   git switch main-boilerplate
+   git pull
+   git status
+   ```
+
+22. **Do a very shallow test of `main-boilerplate`.** (Proper testing was performed in step 19.)
+
+23. Tag the new version:
+
+    ```bash
+    git tag -a X.X.X.X -m "Release X.X.X.X" # Replace with the actual version number
+    git push --tags
+    git status
+    ```
+
+24. Publish TWO new images to GitHub Container Registry (TODO Expand with real commands):
     - `ghcr.io/teremterem/litellm-server-yoda:X.X.X.X`
     - `ghcr.io/teremterem/litellm-server-yoda:X.X.X`
     - `ghcr.io/teremterem/litellm-server-yoda:latest`
