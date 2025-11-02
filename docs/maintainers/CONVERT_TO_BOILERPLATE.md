@@ -348,7 +348,7 @@ So, in order to conclude the conversion, do the following:
 
 24. Go to the GitHub Releases page and create a new release:
     - Title: `X.X.X.X (boilerplate release)`
-    - Description: release notes
+    - Description: \<release notes\>
     - Discussion: **create a new discussion**
     - Mark as latest: **false**
 
