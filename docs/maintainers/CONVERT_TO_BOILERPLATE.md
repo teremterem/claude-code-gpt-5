@@ -298,7 +298,7 @@ So, in order to conclude the conversion, do the following:
     gh pr create --base main-merging-branch --head boilerplate-MANUAL-merging-branch --title "Merge boilerplate-MANUAL-merging-branch into main-merging-branch"
     ```
 
-   (Or do this through the GitHub web interface, if you prefer.)
+    (Or do this through the GitHub web interface, if you prefer.)
 
 TODO Still advice to carefully review the diffs for files
 
