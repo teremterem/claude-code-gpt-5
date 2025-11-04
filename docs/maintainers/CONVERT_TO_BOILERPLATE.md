@@ -114,8 +114,7 @@ cd <repo-root-dir>
 
    ```bash
    rm -rf claude_code_proxy/
-   rm docs/maintainers/CONVERT_TO_BOILERPLATE.md
-   rm docs/maintainers/RELEASE.md
+   rm -rf docs/maintainers/
    rm images/claude-code-gpt-5.jpeg
    rm deploy-docker.sh
    rm kill-docker.sh
@@ -124,17 +123,6 @@ cd <repo-root-dir>
    git add --all
    git status
    ```
-
-   If there is no other relevant stuff in `docs/maintainers/` folder, then delete it altogether:
-
-   ```bash
-   rm -rf docs/maintainers/
-
-   git add --all
-   git status
-   ```
-
-   Commit and push:
 
    ```bash
    git commit -m "Delete irrelevant files"
