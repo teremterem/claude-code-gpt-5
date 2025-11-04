@@ -389,3 +389,7 @@ So, in order to conclude the conversion, do the following.
       -t ghcr.io/teremterem/librechat-yoda:latest \
       --push .
     ```
+
+---
+
+That's it! You have converted the Claude Code GPT-5 Proxy to a Boilerplate version (aka My LiteLLM Server) and published the Docker images to GHCR.
