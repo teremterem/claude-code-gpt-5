@@ -391,4 +391,4 @@ So, in order to conclude the conversion, do the following.
 
 ---
 
-That's it! You have converted the Claude Code GPT-5 Proxy to a Boilerplate version (aka My LiteLLM Server) and published the Docker images to GHCR.
+That's it! You have converted the Claude Code GPT-5 Proxy to a Boilerplate version (aka My LiteLLM Server) and published the Docker images to GHCR. Now you can go back to the [RELEASE.md](RELEASE.md) guide to release the new version of the Claude Code GPT-5 Proxy itself.
