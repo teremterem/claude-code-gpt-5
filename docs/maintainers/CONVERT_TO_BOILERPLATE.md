@@ -346,7 +346,7 @@ So, in order to conclude the conversion, do the following.
 24. Tag the new version:
 
     ```bash
-    git tag -a X.X.X.X  # Replace with the actual version number
+    git tag -a <X.X.X.X>  # Replace <X.X.X.X>
     ```
 
     ```bash
@@ -364,7 +364,8 @@ So, in order to conclude the conversion, do the following.
 26. Login to GHCR:
 
     ```bash
-    echo <YOUR_GITHUB_PAT> | docker login ghcr.io -u <YOUR_GITHUB_USERNAME> --password-stdin
+    # Replace <GITHUB_PAT> and <GITHUB_USERNAME>
+    echo <GITHUB_PAT> | docker login ghcr.io -u <GITHUB_USERNAME> --password-stdin
     ```
 
 27. Build the `litellm-server-yoda` image and push it to GHCR:
@@ -372,8 +373,8 @@ So, in order to conclude the conversion, do the following.
     ```bash
     docker buildx build \
       --platform linux/amd64,linux/arm64 \
-      -t ghcr.io/teremterem/litellm-server-yoda:<X.X.X.X> \
-      -t ghcr.io/teremterem/litellm-server-yoda:<X.X.X> \
+      -t ghcr.io/teremterem/litellm-server-yoda:<X.X.X.X> \  # Replace <X.X.X.X>
+      -t ghcr.io/teremterem/litellm-server-yoda:<X.X.X> \  # Replace <X.X.X>
       -t ghcr.io/teremterem/litellm-server-yoda:latest \
       --push .
     ```
@@ -383,8 +384,8 @@ So, in order to conclude the conversion, do the following.
     ```bash
     docker buildx build \
       --platform linux/amd64,linux/arm64 \
-      -t ghcr.io/teremterem/librechat-yoda:<X.X.X.X> \
-      -t ghcr.io/teremterem/librechat-yoda:<X.X.X> \
+      -t ghcr.io/teremterem/librechat-yoda:<X.X.X.X> \  # Replace <X.X.X.X>
+      -t ghcr.io/teremterem/librechat-yoda:<X.X.X> \  # Replace <X.X.X>
       -t ghcr.io/teremterem/librechat-yoda:latest \
       --push .
     ```
