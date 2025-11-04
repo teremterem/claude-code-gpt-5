@@ -308,7 +308,6 @@ So, in order to conclude the conversion, do the following.
 
     **The goal is to see if there isn't anything that needs to be incorporated from the non-boilerplate version into the boilerplate version MANUALLY.**
 
-
 ### Final steps
 
 17. Take a moment to think if nothing was forgotten (e.g. something new was introduced, which this guide doesn't cover yet).
