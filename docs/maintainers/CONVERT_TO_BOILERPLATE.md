@@ -303,7 +303,7 @@ So, in order to conclude the conversion, do the following.
 
     Things to look for:
 
-    - Check the deleted `docs/RELEASE.md` against relevant sections in the new `README.md` (the content of which came from `README_BOILERPLATE.md`) to see if there isn't anything useful that could be incorporated into those sections of the README.md.
+    - Check the deleted `docs/maintainers/RELEASE.md` against relevant sections in the new `README.md` (the content of which came from `README_BOILERPLATE.md`) to see if there isn't anything useful that could be incorporated into those sections of the README.md.
     - Look through EVERYTHING: deleted files, modified files, added files; in case of modified files, look through both - the old and the new versions of the changed lines.
 
     **The goal is to see if there isn't anything that needs to be incorporated from the non-boilerplate version into the boilerplate version MANUALLY.**
