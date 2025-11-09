@@ -45,6 +45,7 @@
 - `usage` only appears on the closing chunks; keep `GenericStreamingChunk.usage` unset for intermediate emissions and populate it once the payload arrives. Reference: `Response Chunk #28` in `ChatCompletions_API_streaming_examples2/20251109_125816_01437_RESPONSE_STREAM.md`.
 - Copy the numeric counters (`prompt_tokens`, `completion_tokens`, `total_tokens`) directly; they already reflect request-level totals. Reference: `Response Chunk #35` in `ChatCompletions_API_streaming_examples2/20251109_125816_01973_RESPONSE_STREAM.md`.
 - Preserve every nested `*_tokens_details` block and cache counter exactly as provided (including zeros and `null` values) so downstream consumers retain provider-specific accounting. Reference: the `usage` block in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
+- Cached-token metrics can shift between the `cache_creation_*` and `cache_read_*` counters across calls; never normalize these values. Reference: `Response Chunk #41` in `ChatCompletions_API_streaming_examples3/20251109_131644_45210_RESPONSE_STREAM.md` (`cache_creation_tokens` populated) versus `Response Chunk #19` in `ChatCompletions_API_streaming_examples3/20251109_131704_44443_RESPONSE_STREAM.md` (`cache_read_input_tokens` populated).
 
 ### File coverage log
 - Processed `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md` – introduced the baseline field set (top-level metadata, single `choices` array, simple `delta`, and optional `usage` in the final chunk).
@@ -79,3 +80,7 @@
 - Processed `ChatCompletions_API_streaming_examples2/20251109_130011_19426_RESPONSE_STREAM.md` – concise JSON metadata emission; schema unchanged.
 - Processed `ChatCompletions_API_streaming_examples2/20251109_130011_19523_RESPONSE_STREAM.md` – short JSON snippet beginning mid-object; highlights that deltas can start with leading newlines.
 - Processed `ChatCompletions_API_streaming_examples2/20251109_130011_19635_RESPONSE_STREAM.md` – brief greeting without tool calls; no additional fields observed.
+- Processed `ChatCompletions_API_streaming_examples3/20251109_131623_12733_RESPONSE_STREAM.md` – long conversational run; reaffirmed plain-text streaming with terminal `usage`.
+- Processed `ChatCompletions_API_streaming_examples3/20251109_131644_45210_RESPONSE_STREAM.md` – extensive tool-call sequence with `cache_creation_tokens` populated.
+- Processed `ChatCompletions_API_streaming_examples3/20251109_131704_44443_RESPONSE_STREAM.md` – follow-up tool-call run with `cache_read_input_tokens` populated.
+- Processed `ChatCompletions_API_streaming_examples3/20251109_131623_12694_RESPONSE_STREAM.md`, `20251109_131623_12025_RESPONSE_STREAM.md`, `20251109_131658_64510_RESPONSE_STREAM.md`, `20251109_131704_44354_RESPONSE_STREAM.md`, `20251109_131644_44925_RESPONSE_STREAM.md`, `20251109_131644_45119_RESPONSE_STREAM.md`, `20251109_131653_76018_RESPONSE_STREAM.md`, and `20251109_131704_44443_RESPONSE_STREAM.md` – additional short responses and tool-call traces; no new schema fields beyond the cache metric variations already documented.
