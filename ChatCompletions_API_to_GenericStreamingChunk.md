@@ -26,6 +26,7 @@
 - Copy the entire `delta` object into a fresh `GenericStreamingDelta` structure, mirroring the keys present in the stream.
 - `delta.content` → assign to `GenericStreamingDelta.content`, concatenating downstream as needed. Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
 - `delta.role` → populate `GenericStreamingDelta.role`, noting that later chunks often send `null`. Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
+- Subsequent deltas regularly omit the role (`null`); mirror the streamed value inside each chunk instead of injecting the previously observed role. Reference: `Response Chunk #0` vs `Response Chunk #1` in `ChatCompletions_API_streaming_examples2/20251109_125816_01437_RESPONSE_STREAM.md`.
 - `delta.provider_specific_fields` → carry forward unchanged onto the delta. Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
 - `delta.function_call` → forward as-is (the current capture shows `null`, but preserve the object structure if present). Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
 - `delta.tool_calls` → preserve the list (even when `null`) for later combination with tool streaming logic. Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
@@ -39,6 +40,11 @@
 - `tool_call.function.name` → set on the target tool-call structure; allow `null` for intermediate frames. Reference: `Response Chunk #8` in `ChatCompletions_API_streaming_examples/20251108_222824_10592_RESPONSE_STREAM.md`.
 - `tool_call.function.arguments` → append the streamed arguments string exactly as received (they often arrive piecemeal across chunks). Reference: `Response Chunk #9` in `ChatCompletions_API_streaming_examples/20251108_222824_10592_RESPONSE_STREAM.md`.
 - When multiple tool calls are active simultaneously, use each entry’s `index` to merge follow-up fragments into the correct call record; maintain per-index buffers in your eventual implementation. Reference: `Response Chunk #16` in `ChatCompletions_API_streaming_examples/20251108_222816_94922_RESPONSE_STREAM.md`.
+
+### Usage payload details
+- `usage` only appears on the closing chunks; keep `GenericStreamingChunk.usage` unset for intermediate emissions and populate it once the payload arrives. Reference: `Response Chunk #28` in `ChatCompletions_API_streaming_examples2/20251109_125816_01437_RESPONSE_STREAM.md`.
+- Copy the numeric counters (`prompt_tokens`, `completion_tokens`, `total_tokens`) directly; they already reflect request-level totals. Reference: `Response Chunk #35` in `ChatCompletions_API_streaming_examples2/20251109_125816_01973_RESPONSE_STREAM.md`.
+- Preserve every nested `*_tokens_details` block and cache counter exactly as provided (including zeros and `null` values) so downstream consumers retain provider-specific accounting. Reference: the `usage` block in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
 
 ### File coverage log
 - Processed `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md` – introduced the baseline field set (top-level metadata, single `choices` array, simple `delta`, and optional `usage` in the final chunk).
@@ -68,3 +74,8 @@
 - Processed `ChatCompletions_API_streaming_examples/20251108_222751_77605_RESPONSE_STREAM.md` – short JSON metadata stream at smaller token counts; no schema updates.
 - Processed `ChatCompletions_API_streaming_examples/20251108_222659_08898_RESPONSE_STREAM.md` – short completion culminating in a `usage` block; fields already covered by earlier entries.
 - Processed `ChatCompletions_API_streaming_examples/20251108_222659_09025_RESPONSE_STREAM.md` – friendly introductory stream with no additional schema elements.
+- Processed `ChatCompletions_API_streaming_examples2/20251109_125816_01437_RESPONSE_STREAM.md` – long-form conversational stream with no tool calls; reaffirmed role-null deltas and end-of-stream `usage`.
+- Processed `ChatCompletions_API_streaming_examples2/20251109_125816_01973_RESPONSE_STREAM.md` – extended sonnet narration; confirmed `usage` payloads land only with the terminal chunk.
+- Processed `ChatCompletions_API_streaming_examples2/20251109_130011_19426_RESPONSE_STREAM.md` – concise JSON metadata emission; schema unchanged.
+- Processed `ChatCompletions_API_streaming_examples2/20251109_130011_19523_RESPONSE_STREAM.md` – short JSON snippet beginning mid-object; highlights that deltas can start with leading newlines.
+- Processed `ChatCompletions_API_streaming_examples2/20251109_130011_19635_RESPONSE_STREAM.md` – brief greeting without tool calls; no additional fields observed.
