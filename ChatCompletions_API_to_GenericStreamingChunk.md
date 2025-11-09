@@ -25,6 +25,7 @@
 ### Delta payload
 - Copy the entire `delta` object into a fresh `GenericStreamingDelta` structure, mirroring the keys present in the stream.
 - `delta.content` → assign to `GenericStreamingDelta.content`, concatenating downstream as needed. Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
+- When a chunk only carries tool-call metadata, providers often emit `""` for `delta.content`; keep the empty string instead of normalizing it away so chunk ordering stays aligned. Reference: `Response Chunk #64` in `ChatCompletions_API_streaming_examples/20251108_222808_70283_RESPONSE_STREAM.md`.
 - `delta.role` → populate `GenericStreamingDelta.role`, noting that later chunks often send `null`. Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
 - Subsequent deltas regularly omit the role (`null`); mirror the streamed value inside each chunk instead of injecting the previously observed role. Reference: `Response Chunk #0` vs `Response Chunk #1` in `ChatCompletions_API_streaming_examples/20251109_125816_01437_RESPONSE_STREAM.md`.
 - `delta.provider_specific_fields` → carry forward unchanged onto the delta. Reference: `Response Chunk #0` in `ChatCompletions_API_streaming_examples/20251108_222915_51732_RESPONSE_STREAM.md`.
@@ -38,6 +39,7 @@
 - `tool_call.type` → transfer directly (the capture shows `"function"`; preserve any other provider values). Reference: `Response Chunk #8` in `ChatCompletions_API_streaming_examples/20251108_222824_10592_RESPONSE_STREAM.md`.
 - `tool_call.index` → mirror the numeric slot so batched tool deltas stay aligned. Reference: `Response Chunk #8` in `ChatCompletions_API_streaming_examples/20251108_222824_10592_RESPONSE_STREAM.md`.
 - `tool_call.function.name` → set on the target tool-call structure; allow `null` for intermediate frames. Reference: `Response Chunk #8` in `ChatCompletions_API_streaming_examples/20251108_222824_10592_RESPONSE_STREAM.md`.
+- If a tool call streams its `id` or `function.name` once and then sends `null` in follow-up fragments, treat the `null` as “no new data” and retain the previously seen value for that index. Reference: `Response Chunk #0` vs `Response Chunk #4` in `ChatCompletions_API_streaming_examples/20251109_131653_76018_RESPONSE_STREAM.md`.
 - `tool_call.function.arguments` → append the streamed arguments string exactly as received (they often arrive piecemeal across chunks). Reference: `Response Chunk #9` in `ChatCompletions_API_streaming_examples/20251108_222824_10592_RESPONSE_STREAM.md`.
 - When multiple tool calls are active simultaneously, use each entry’s `index` to merge follow-up fragments into the correct call record; maintain per-index buffers in your eventual implementation. Reference: `Response Chunk #16` in `ChatCompletions_API_streaming_examples/20251108_222816_94922_RESPONSE_STREAM.md`.
 
