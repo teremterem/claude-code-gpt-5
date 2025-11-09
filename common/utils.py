@@ -5,6 +5,7 @@ NOTE: The utilities in this module were mostly vibe-coded without review.
 """
 import os
 from datetime import UTC, datetime
+from collections.abc import Mapping, Sequence
 from typing import Any, Dict, List, Optional, Union
 
 from litellm import GenericStreamingChunk, ModelResponseStream
@@ -58,93 +59,127 @@ def generate_timestamp_utc() -> str:
 
 
 def to_generic_streaming_chunk(chunk: ModelResponseStream) -> GenericStreamingChunk:
-    return GenericStreamingChunk(**_build_generic_streaming_chunk_payload(chunk))
+    chunk_data = _as_dict(_coerce_to_plain_obj(chunk))
+    chunk_payload = _build_chunk_payload(chunk_data)
+    return GenericStreamingChunk(**chunk_payload)
 
 
-def _build_generic_streaming_chunk_payload(chunk: ModelResponseStream) -> Dict[str, Any]:
-    chunk_dict = _model_to_dict(chunk)
+def _build_chunk_payload(chunk_data: Dict[str, Any]) -> Dict[str, Any]:
+    choices_raw = chunk_data.get("choices") or []
+    choices = [_build_choice(choice) for choice in _as_list(choices_raw)]
 
     payload: Dict[str, Any] = {
-        "id": chunk_dict.get("id"),
-        "created": chunk_dict.get("created"),
-        "model": chunk_dict.get("model"),
-        "object": chunk_dict.get("object"),
-        "system_fingerprint": chunk_dict.get("system_fingerprint"),
-        "provider_specific_fields": chunk_dict.get("provider_specific_fields"),
-        "citations": chunk_dict.get("citations"),
-        "choices": _convert_choices(chunk_dict.get("choices") or []),
+        "id": chunk_data.get("id"),
+        "created": chunk_data.get("created"),
+        "model": chunk_data.get("model"),
+        "object": chunk_data.get("object"),
+        "system_fingerprint": chunk_data.get("system_fingerprint"),
+        "provider_specific_fields": chunk_data.get("provider_specific_fields"),
+        "citations": chunk_data.get("citations"),
+        "choices": choices,
     }
 
-    if "usage" in chunk_dict:
-        payload["usage"] = chunk_dict.get("usage")
+    if "usage" in chunk_data:
+        payload["usage"] = chunk_data.get("usage")
 
     return payload
 
 
-def _convert_choices(choices: List[Any]) -> List[Dict[str, Any]]:
-    converted: List[Dict[str, Any]] = []
-    for choice in choices:
-        choice_dict = _model_to_dict(choice)
-        choice_payload: Dict[str, Any] = {
-            "index": choice_dict.get("index"),
-            "finish_reason": choice_dict.get("finish_reason"),
-            "logprobs": choice_dict.get("logprobs"),
-        }
+def _build_choice(choice: Any) -> Dict[str, Any]:
+    choice_dict = _as_dict(_coerce_to_plain_obj(choice))
+    delta_dict = _build_delta(choice_dict.get("delta"))
 
-        if "delta" in choice_dict:
-            choice_payload["delta"] = _convert_delta(choice_dict.get("delta"))
+    choice_payload: Dict[str, Any] = {
+        "index": choice_dict.get("index"),
+        "delta": delta_dict,
+        "finish_reason": choice_dict.get("finish_reason"),
+        "logprobs": choice_dict.get("logprobs"),
+    }
 
-        if "provider_specific_fields" in choice_dict:
-            choice_payload["provider_specific_fields"] = choice_dict.get("provider_specific_fields")
-
-        converted.append(choice_payload)
-    return converted
+    return choice_payload
 
 
-def _convert_delta(delta: Any) -> Any:
-    if delta is None:
+def _build_delta(delta: Any) -> Dict[str, Any]:
+    delta_dict = _as_dict(_coerce_to_plain_obj(delta))
+    processed: Dict[str, Any] = {}
+
+    for key, value in delta_dict.items():
+        if key == "tool_calls":
+            processed[key] = _build_tool_calls(value)
+        else:
+            processed[key] = value
+
+    return processed
+
+
+def _build_tool_calls(tool_calls: Any) -> Any:
+    if tool_calls is None:
         return None
 
-    delta_dict = _model_to_dict(delta)
-    converted_delta: Dict[str, Any] = dict(delta_dict)
-
-    if "tool_calls" in converted_delta and converted_delta["tool_calls"] is not None:
-        tool_calls = converted_delta["tool_calls"]
-        if isinstance(tool_calls, list):
-            converted_delta["tool_calls"] = [_convert_tool_call(tc) for tc in tool_calls]
-
-    return converted_delta
+    calls_list = _as_list(tool_calls)
+    return [_build_tool_call_delta(call) for call in calls_list]
 
 
-def _convert_tool_call(tool_call: Any) -> Any:
-    if tool_call is None:
-        return None
+def _build_tool_call_delta(tool_call: Any) -> Dict[str, Any]:
+    tool_call_dict = _as_dict(_coerce_to_plain_obj(tool_call))
+    processed: Dict[str, Any] = {}
 
-    tool_call_dict = _model_to_dict(tool_call)
-    converted_tool_call: Dict[str, Any] = dict(tool_call_dict)
+    for key, value in tool_call_dict.items():
+        if key == "function":
+            processed[key] = _as_dict(_coerce_to_plain_obj(value)) if value is not None else None
+        else:
+            processed[key] = value
 
-    if "function" in converted_tool_call:
-        function_payload = converted_tool_call.get("function")
-        converted_tool_call["function"] = _convert_tool_call_function(function_payload)
-
-    return converted_tool_call
-
-
-def _convert_tool_call_function(function_payload: Any) -> Any:
-    if function_payload is None:
-        return None
-
-    function_dict = _model_to_dict(function_payload)
-    return dict(function_dict)
+    return processed
 
 
-def _model_to_dict(value: Any) -> Dict[str, Any]:
+def _coerce_to_plain_obj(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {key: _coerce_to_plain_obj(val) for key, val in value.items()}
+
+    if isinstance(value, list):
+        return [_coerce_to_plain_obj(item) for item in value]
+
+    for attr_name in ("model_dump", "dict", "to_dict"):
+        attr = getattr(value, attr_name, None)
+        if attr:
+            if callable(attr):
+                try:
+                    result = attr(mode="python")  # type: ignore[call-arg]
+                except TypeError:
+                    try:
+                        result = attr()
+                    except TypeError:
+                        result = attr
+            else:
+                result = attr
+            return _coerce_to_plain_obj(result)
+
+    if hasattr(value, "__iter__") and hasattr(value, "keys"):
+        try:
+            return {key: _coerce_to_plain_obj(value[key]) for key in value.keys()}  # type: ignore[index]
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    if hasattr(value, "__dict__") and value.__dict__:
+        return {key: _coerce_to_plain_obj(val) for key, val in vars(value).items() if not key.startswith("_")}
+
+    return value
+
+
+def _as_dict(value: Any) -> Dict[str, Any]:
+    if isinstance(value, Mapping):
+        return dict(value)
+    return {}
+
+
+def _as_list(value: Any) -> List[Any]:
     if value is None:
-        return {}
-    if isinstance(value, dict):
+        return []
+    if isinstance(value, list):
         return value
-    if hasattr(value, "model_dump"):
-        return value.model_dump()
-    if hasattr(value, "dict"):
-        return value.dict()  # type: ignore[no-any-return]
-    raise TypeError(f"Unsupported value type for conversion: {type(value)!r}")
+    if isinstance(value, tuple):
+        return list(value)
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return list(value)
+    return [value]
