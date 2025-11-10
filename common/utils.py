@@ -47,15 +47,18 @@ def env_var_to_bool(value: Optional[str], default: str = "false") -> bool:
 
 def generate_timestamp_utc() -> str:
     """
-    Generate timestamp in format YYYYmmdd_HHMMSS_fffff in UTC.
+    Generate timestamp in format YYYYmmdd_HHMMSS_fff-fff in UTC.
 
     An example of how these timestamps are used later:
 
-    `.traces/20251005_140642_18034_RESPONSE_STREAM.md`
+    `.traces/20251005_140642_180-342_RESPONSE_STREAM.md`
     """
     now = datetime.now(UTC)
-    # Keep only the first 5 digits of microseconds
-    return now.strftime("%Y%m%d_%H%M%S_%f")[:-1]
+
+    str_repr = now.strftime("%Y%m%d_%H%M%S_%f")
+    # Let's separate the milliseconds from the microseconds with a hyphen to
+    # make it more readable
+    return f"{str_repr[:-3]}-{str_repr[-3:]}"
 
 
 def to_generic_streaming_chunk(chunk: ModelResponseStream) -> GenericStreamingChunk:
