@@ -26,9 +26,9 @@ from common.tracing_in_markdown import (
 )
 from common.utils import (
     ProxyError,
-    convert_chat_messages_to_respapi,
-    convert_chat_params_to_respapi,
-    convert_respapi_to_model_response,
+    # convert_chat_messages_to_respapi,
+    # convert_chat_params_to_respapi,
+    # convert_respapi_to_model_response,
     generate_timestamp_utc,
     to_generic_streaming_chunk,
 )
