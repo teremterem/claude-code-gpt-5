@@ -14,7 +14,7 @@ from litellm import (
 
 from common.config import WRITE_TRACES_TO_FILES
 from common.tracing_in_markdown import write_request_trace, write_response_trace, write_streaming_chunk_trace
-from common.utils import ProxyError, generate_timestamp_utc, to_generic_streaming_chunk
+from common.utils import ProxyError, generate_timestamp_utc, model_response_stream_to_generic_streaming_chunk
 
 
 _YODA_SYSTEM_PROMPT = {
@@ -199,7 +199,7 @@ class YodaSpeakLLM(CustomLLM):
             )
 
             for chunk_idx, chunk in enumerate[ModelResponseStream](resp_stream):
-                generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunk = model_response_stream_to_generic_streaming_chunk(chunk)
 
                 if WRITE_TRACES_TO_FILES:
                     write_streaming_chunk_trace(
@@ -263,7 +263,7 @@ class YodaSpeakLLM(CustomLLM):
 
             chunk_idx = 0
             async for chunk in resp_stream:
-                generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunk = model_response_stream_to_generic_streaming_chunk(chunk)
 
                 if WRITE_TRACES_TO_FILES:
                     write_streaming_chunk_trace(
