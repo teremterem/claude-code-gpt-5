@@ -1,11 +1,8 @@
 # pylint: disable=too-many-branches,too-many-locals,too-many-statements,too-many-return-statements
 # pylint: disable=too-many-nested-blocks
-"""
-NOTE: The utilities in this module were mostly vibe-coded without review.
-"""
 import os
 from datetime import UTC, datetime
-from typing import Optional, Union
+from typing import Generator, Optional, Union
 
 from litellm import GenericStreamingChunk, ModelResponseStream, StreamingChoices
 from litellm.types.utils import Delta
@@ -61,15 +58,20 @@ def generate_timestamp_utc() -> str:
     return f"{str_repr[:-3]}_{str_repr[-3:]}"
 
 
-def model_response_stream_to_generic_streaming_chunk(chunk: ModelResponseStream) -> GenericStreamingChunk:
+def model_response_stream_to_generic_streaming_chunks(
+    chunk: ModelResponseStream,
+) -> Generator[GenericStreamingChunk, None, None]:
     """
-    Convert a LiteLLM ModelResponseStream chunk into a GenericStreamingChunk.
+    Convert a LiteLLM ModelResponseStream chunk into one or more
+    GenericStreamingChunk(s).
 
     Args:
         chunk: The LiteLLM ModelResponseStream chunk to convert.
 
-    Returns:
-        The converted GenericStreamingChunk.
+    Yields:
+        The converted GenericStreamingChunk(s) - there may be more than one
+        chunk if the original ModelResponseStream chunk contained multiple tool
+        calls.
     """
     generic_chunk = GenericStreamingChunk(
         text="",
@@ -77,15 +79,18 @@ def model_response_stream_to_generic_streaming_chunk(chunk: ModelResponseStream)
         is_finished=False,
         finish_reason="",
         usage=None,  # TODO Where to read it from ?
-        index=0,  # TODO Where to read it from ?
+        index=0,  # TODO Is this field important ?
         provider_specific_fields=chunk.provider_specific_fields,
     )
-    _populate_streaming_choices(generic_chunk, chunk.choices)
-    return generic_chunk
+    yield from _populate_from_streaming_choices(generic_chunk, chunk.choices)
 
 
-def _populate_streaming_choices(generic_chunk: GenericStreamingChunk, choices: list[StreamingChoices]) -> None:
+def _populate_from_streaming_choices(
+    generic_chunk: GenericStreamingChunk,
+    choices: list[StreamingChoices],
+) -> Generator[GenericStreamingChunk, None, None]:
     if not choices:
+        yield generic_chunk
         return
     choice = choices[0]
     # TODO Raise an error if there are more than one choice ?
@@ -98,11 +103,15 @@ def _populate_streaming_choices(generic_chunk: GenericStreamingChunk, choices: l
     # TODO OpenAI GPT-5 (maybe other models too ?) sends one more chunk after the a "final" chunk with
     #  `finish_reason: "stop"` and that extra chunk will have `is_finished: False` because there will not be a finish
     #  reason anymore. Is this a problem ?
-    _populate_delta(generic_chunk, choice.delta)
+    yield from _populate_from_delta(generic_chunk, choice.delta)
 
 
-def _populate_delta(generic_chunk: GenericStreamingChunk, delta: Optional[Delta]) -> None:
+def _populate_from_delta(
+    generic_chunk: GenericStreamingChunk,
+    delta: Optional[Delta],
+) -> Generator[GenericStreamingChunk, None, None]:
     if not delta:
+        yield generic_chunk
         return
     # TODO Where to put `delta.reasoning_content` ?
     # TODO Where to put `delta.thinking_blocks` ?
@@ -115,3 +124,17 @@ def _populate_delta(generic_chunk: GenericStreamingChunk, delta: Optional[Delta]
     # TODO Merge `delta.provider_specific_fields` into `generic_chunk.provider_specific_fields` ?
     generic_chunk["text"] = delta.content
     # TODO generic_chunk.tool_use = delta.tool_calls
+    yield from _populate_tool_use(generic_chunk, delta)
+
+
+def _populate_tool_use(
+    generic_chunk: GenericStreamingChunk,
+    delta: Optional[Delta],
+) -> Generator[GenericStreamingChunk, None, None]:
+    if not delta:
+        yield generic_chunk
+        return
+
+    # TODO TODO TODO
+
+    yield generic_chunk
