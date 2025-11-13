@@ -30,7 +30,7 @@ from common.utils import (
     # convert_chat_params_to_respapi,
     # convert_respapi_to_model_response,
     generate_timestamp_utc,
-    to_generic_streaming_chunk,
+    model_response_stream_to_generic_streaming_chunk,
 )
 
 
@@ -340,7 +340,7 @@ class ClaudeCodeRouter(CustomLLM):
                 )
 
             for chunk_idx, chunk in enumerate[ModelResponseStream | ResponsesAPIStreamingResponse](resp_stream):
-                generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunk = model_response_stream_to_generic_streaming_chunk(chunk)
 
                 if WRITE_TRACES_TO_FILES:
                     if routed_request.model_route.use_responses_api:
@@ -417,7 +417,7 @@ class ClaudeCodeRouter(CustomLLM):
 
             chunk_idx = 0
             async for chunk in resp_stream:
-                generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunk = model_response_stream_to_generic_streaming_chunk(chunk)
 
                 if WRITE_TRACES_TO_FILES:
                     if routed_request.model_route.use_responses_api:
