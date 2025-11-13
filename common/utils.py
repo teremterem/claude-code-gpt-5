@@ -80,7 +80,7 @@ def model_response_stream_to_generic_streaming_chunk(chunk: ModelResponseStream)
         index=0,
         provider_specific_fields=chunk.provider_specific_fields,
     )
-    _populate_streaming_choices(generic_chunk, chunk)
+    _populate_streaming_choices(generic_chunk, chunk.choices)
     return generic_chunk
 
 
