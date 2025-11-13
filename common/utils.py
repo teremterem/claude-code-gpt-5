@@ -5,8 +5,7 @@ NOTE: The utilities in this module were mostly vibe-coded without review.
 """
 import os
 from datetime import UTC, datetime
-from collections.abc import Mapping, Sequence
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from litellm import GenericStreamingChunk, ModelResponseStream
 
@@ -62,14 +61,20 @@ def generate_timestamp_utc() -> str:
 
 
 def to_generic_streaming_chunk(chunk: ModelResponseStream) -> GenericStreamingChunk:
-    chunk_data = _as_dict(_coerce_to_plain_obj(chunk))
+    if hasattr(chunk, "model_dump"):
+        chunk_data = chunk.model_dump(mode="python")
+    else:
+        chunk_data = chunk.dict()
+
     chunk_payload = _build_chunk_payload(chunk_data)
     return GenericStreamingChunk(**chunk_payload)
 
 
 def _build_chunk_payload(chunk_data: Dict[str, Any]) -> Dict[str, Any]:
     choices_raw = chunk_data.get("choices") or []
-    choices = [_build_choice(choice) for choice in _as_list(choices_raw)]
+    if not isinstance(choices_raw, list):
+        choices_raw = [choices_raw]
+    choices = [_build_choice(choice) for choice in choices_raw]
 
     payload: Dict[str, Any] = {
         "id": chunk_data.get("id"),
@@ -88,29 +93,27 @@ def _build_chunk_payload(chunk_data: Dict[str, Any]) -> Dict[str, Any]:
     return payload
 
 
-def _build_choice(choice: Any) -> Dict[str, Any]:
-    choice_dict = _as_dict(_coerce_to_plain_obj(choice))
-    delta_dict = _build_delta(choice_dict.get("delta"))
+def _build_choice(choice: Dict[str, Any]) -> Dict[str, Any]:
+    choice_dict = choice if isinstance(choice, dict) else {}
+    delta_dict = _build_delta(choice_dict.get("delta") or {})
 
     if not delta_dict.get("content"):
-        text_fallback = _coerce_to_optional_str(choice_dict.get("text"))
+        text_fallback = choice_dict.get("text")
         if text_fallback:
-            delta_dict["content"] = text_fallback
+            delta_dict["content"] = str(text_fallback)
 
-    choice_payload: Dict[str, Any] = {
+    return {
         "index": choice_dict.get("index"),
         "delta": delta_dict,
         "finish_reason": choice_dict.get("finish_reason"),
         "logprobs": choice_dict.get("logprobs"),
     }
 
-    return choice_payload
 
-
-def _build_delta(delta: Any) -> Dict[str, Any]:
-    delta_dict = _as_dict(_coerce_to_plain_obj(delta))
+def _build_delta(delta: Dict[str, Any]) -> Dict[str, Any]:
+    delta_dict = delta if isinstance(delta, dict) else {}
     processed: Dict[str, Any] = {}
-    collected_tool_calls: List[Dict[str, Any]] = []
+    collected_tool_calls: list[Dict[str, Any]] = []
     tool_calls_was_none = False
 
     for key, value in delta_dict.items():
@@ -121,20 +124,17 @@ def _build_delta(delta: Any) -> Dict[str, Any]:
                 normalized_tool_calls = _build_tool_calls(value)
                 if normalized_tool_calls:
                     collected_tool_calls.extend(normalized_tool_calls)
+        elif key == "tool_use":
+            anthropic_tool_call = _build_anthropic_tool_use(value)
+            if anthropic_tool_call:
+                collected_tool_calls.append(anthropic_tool_call)
+                processed[key] = anthropic_tool_call
+        elif key == "function_call":
+            normalized_function_call = _build_function_call(value)
+            if normalized_function_call:
+                collected_tool_calls.append(_tool_call_from_function_call(normalized_function_call))
+                processed[key] = normalized_function_call
         else:
-            if key == "tool_use":
-                anthropic_tool_call = _build_anthropic_tool_use(value)
-                if anthropic_tool_call:
-                    collected_tool_calls.append(anthropic_tool_call)
-                    processed[key] = anthropic_tool_call
-                    continue
-            if key == "function_call":
-                normalized_function_call = _build_function_call(value)
-                if normalized_function_call:
-                    collected_tool_calls.append(_tool_call_from_function_call(normalized_function_call))
-                    processed[key] = normalized_function_call
-                    continue
-
             processed[key] = value
 
     if collected_tool_calls:
@@ -147,17 +147,18 @@ def _build_delta(delta: Any) -> Dict[str, Any]:
     return processed
 
 
-def _build_tool_calls(tool_calls: Any) -> Any:
+def _build_tool_calls(tool_calls: Any) -> Optional[list[Dict[str, Any]]]:
     if tool_calls is None:
         return None
+    if not isinstance(tool_calls, list):
+        tool_calls = [tool_calls]
+    return [_build_tool_call_delta(call or {}) for call in tool_calls]
 
-    calls_list = _as_list(tool_calls)
-    return [_build_tool_call_delta(call) for call in calls_list]
 
-
-def _build_tool_call_delta(tool_call: Any) -> Dict[str, Any]:
-    tool_call_dict = _as_dict(_coerce_to_plain_obj(tool_call))
+def _build_tool_call_delta(tool_call: Dict[str, Any]) -> Dict[str, Any]:
+    tool_call_dict = tool_call if isinstance(tool_call, dict) else {}
     function_payload = _build_tool_call_function(tool_call_dict)
+
     index_value = tool_call_dict.get("index")
     try:
         index_normalized = int(index_value) if index_value is not None else 0
@@ -167,7 +168,8 @@ def _build_tool_call_delta(tool_call: Any) -> Dict[str, Any]:
     type_value = tool_call_dict.get("type")
     type_normalized = type_value if isinstance(type_value, str) and type_value else "function"
 
-    id_normalized = _coerce_to_optional_str(tool_call_dict.get("id"))
+    id_value = tool_call_dict.get("id")
+    id_normalized = str(id_value) if id_value is not None and not isinstance(id_value, str) else id_value
 
     normalized: Dict[str, Any] = {
         "index": index_normalized,
@@ -195,19 +197,23 @@ def _build_tool_call_function(tool_call_dict: Dict[str, Any]) -> Optional[Dict[s
     if function_value is None:
         return None
 
-    function_dict = _as_dict(_coerce_to_plain_obj(function_value))
+    if not isinstance(function_value, dict):
+        return None
 
-    name_value = function_dict.get("name")
+    name_value = function_value.get("name")
     name_normalized = name_value if isinstance(name_value, str) else None
 
-    arguments_normalized = _coerce_to_optional_str(function_dict.get("arguments"))
+    arguments_value = function_value.get("arguments")
+    arguments_normalized = (
+        arguments_value if isinstance(arguments_value, str) or arguments_value is None else str(arguments_value)
+    )
 
     normalized_function: Dict[str, Any] = {
         "name": name_normalized,
         "arguments": arguments_normalized,
     }
 
-    for key, value in function_dict.items():
+    for key, value in function_value.items():
         if key in ("name", "arguments"):
             continue
         normalized_function[key] = value
@@ -215,43 +221,38 @@ def _build_tool_call_function(tool_call_dict: Dict[str, Any]) -> Optional[Dict[s
     return normalized_function
 
 
-def _build_anthropic_tool_use(tool_use: Any) -> Optional[Dict[str, Any]]:
-    if tool_use is None:
-        return None
-
-    tool_use_dict = _as_dict(_coerce_to_plain_obj(tool_use))
-    if not tool_use_dict:
+def _build_anthropic_tool_use(tool_use: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    if not tool_use or not isinstance(tool_use, dict):
         return None
 
     synthetic_tool_call = {
-        "index": tool_use_dict.get("index", 0),
-        "id": tool_use_dict.get("id"),
-        "type": tool_use_dict.get("type", "function"),
+        "index": tool_use.get("index", 0),
+        "id": tool_use.get("id"),
+        "type": tool_use.get("type", "function"),
         "function": {
-            "name": tool_use_dict.get("name"),
-            "arguments": tool_use_dict.get("input"),
+            "name": tool_use.get("name"),
+            "arguments": tool_use.get("input"),
         },
     }
 
     return _build_tool_call_delta(synthetic_tool_call)
 
 
-def _build_function_call(function_call: Any) -> Optional[Dict[str, Any]]:
-    if function_call is None:
+def _build_function_call(function_call: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    if not function_call or not isinstance(function_call, dict):
         return None
 
-    function_call_dict = _as_dict(_coerce_to_plain_obj(function_call))
-    if not function_call_dict:
-        return None
-
-    normalized_arguments = _coerce_to_optional_str(function_call_dict.get("arguments"))
+    arguments_value = function_call.get("arguments")
+    arguments_normalized = (
+        arguments_value if isinstance(arguments_value, str) or arguments_value is None else str(arguments_value)
+    )
 
     normalized: Dict[str, Any] = {
-        "name": function_call_dict.get("name") if isinstance(function_call_dict.get("name"), str) else None,
-        "arguments": normalized_arguments,
+        "name": function_call.get("name") if isinstance(function_call.get("name"), str) else None,
+        "arguments": arguments_normalized,
     }
 
-    for key, value in function_call_dict.items():
+    for key, value in function_call.items():
         if key in ("name", "arguments"):
             continue
         normalized[key] = value
@@ -267,71 +268,3 @@ def _tool_call_from_function_call(function_call: Dict[str, Any]) -> Dict[str, An
         "function": function_call,
     }
     return _build_tool_call_delta(synthetic_tool_call)
-
-
-def _coerce_to_plain_obj(value: Any) -> Any:
-    if isinstance(value, Mapping):
-        return {key: _coerce_to_plain_obj(val) for key, val in value.items()}
-
-    if isinstance(value, list):
-        return [_coerce_to_plain_obj(item) for item in value]
-
-    for attr_name in ("model_dump", "dict", "to_dict"):
-        attr = getattr(value, attr_name, None)
-        if attr:
-            if callable(attr):
-                try:
-                    result = attr(mode="python")  # type: ignore[call-arg]
-                except TypeError:
-                    try:
-                        result = attr()
-                    except TypeError:
-                        result = attr
-            else:
-                result = attr
-            return _coerce_to_plain_obj(result)
-
-    if hasattr(value, "__iter__") and hasattr(value, "keys"):
-        try:
-            return {key: _coerce_to_plain_obj(value[key]) for key in value.keys()}  # type: ignore[index]
-        except Exception:  # pylint: disable=broad-except
-            pass
-
-    if hasattr(value, "__dict__") and value.__dict__:
-        return {key: _coerce_to_plain_obj(val) for key, val in vars(value).items() if not key.startswith("_")}
-
-    return value
-
-
-def _as_dict(value: Any) -> Dict[str, Any]:
-    if isinstance(value, Mapping):
-        return dict(value)
-    return {}
-
-
-def _as_list(value: Any) -> List[Any]:
-    if value is None:
-        return []
-    if isinstance(value, list):
-        return value
-    if isinstance(value, tuple):
-        return list(value)
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        return list(value)
-    return [value]
-
-
-def _coerce_to_optional_str(value: Any) -> Optional[str]:
-    if value is None:
-        return None
-    if isinstance(value, str):
-        return value
-    if isinstance(value, (bytes, bytearray)):
-        try:
-            return value.decode()
-        except Exception as exc:  # pylint: disable=broad-except
-            raise ProxyError(f"Failed to decode bytes as string: {exc}") from exc
-    try:
-        return str(value)
-    except Exception as exc:  # pylint: disable=broad-except
-        raise ProxyError(f"Failed to convert value to string: {exc}") from exc
