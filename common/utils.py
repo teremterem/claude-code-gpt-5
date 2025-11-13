@@ -93,12 +93,12 @@ def _populate_streaming_choices(generic_chunk: GenericStreamingChunk, choices: l
     # TODO Where to put `choice.logprobs` ?
     # TODO Where to put `choice.enhancements` ?
     # TODO Where to put `choice.**params` (other arbitrary fields) ?
-    generic_chunk.finish_reason = choice.finish_reason
+    generic_chunk["finish_reason"] = choice.finish_reason
 
     _populate_delta(generic_chunk, choice.delta)
 
 
-def _populate_delta(generic_chunk: GenericStreamingChunk, delta: Delta) -> None:
+def _populate_delta(generic_chunk: GenericStreamingChunk, delta: Optional[Delta]) -> None:
     if not delta:
         return
     # TODO Where to put `delta.reasoning_content` ?
@@ -110,5 +110,5 @@ def _populate_delta(generic_chunk: GenericStreamingChunk, delta: Delta) -> None:
     # TODO Where to put `delta.annotations` ?
     # TODO Where to put `delta.**params` (other arbitrary fields) ?
     # TODO Merge `delta.provider_specific_fields` into `generic_chunk.provider_specific_fields` ?
-    generic_chunk.text = delta.content
+    generic_chunk["text"] = delta.content
     # TODO generic_chunk.tool_use = delta.tool_calls
