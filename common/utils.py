@@ -74,10 +74,10 @@ def model_response_stream_to_generic_streaming_chunk(chunk: ModelResponseStream)
     generic_chunk = GenericStreamingChunk(
         text="",
         tool_use=None,
-        is_finished=False,
+        is_finished=False,  # TODO Where to read it from ?
         finish_reason="",
-        usage=None,
-        index=0,
+        usage=None,  # TODO Where to read it from ?
+        index=0,  # TODO Where to read it from ?
         provider_specific_fields=chunk.provider_specific_fields,
     )
     _populate_streaming_choices(generic_chunk, chunk.choices)
