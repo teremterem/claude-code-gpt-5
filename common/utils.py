@@ -7,7 +7,8 @@ import os
 from datetime import UTC, datetime
 from typing import Optional, Union
 
-from litellm import GenericStreamingChunk, ModelResponseStream
+from litellm import GenericStreamingChunk, ModelResponseStream, StreamingChoices
+from litellm.types.utils import Delta
 
 
 class ProxyError(RuntimeError):
@@ -70,12 +71,44 @@ def model_response_stream_to_generic_streaming_chunk(chunk: ModelResponseStream)
     Returns:
         The converted GenericStreamingChunk.
     """
-    return GenericStreamingChunk(
+    generic_chunk = GenericStreamingChunk(
         text="",
         tool_use=None,
         is_finished=False,
         finish_reason="",
         usage=None,
         index=0,
-        provider_specific_fields=None,
+        provider_specific_fields=chunk.provider_specific_fields,
     )
+    _populate_streaming_choices(generic_chunk, chunk)
+    return generic_chunk
+
+
+def _populate_streaming_choices(generic_chunk: GenericStreamingChunk, choices: list[StreamingChoices]) -> None:
+    if not choices:
+        return
+    choice = choices[0]
+    # TODO Raise an error if there are more than one choice ?
+
+    # TODO Where to put `choice.logprobs` ?
+    # TODO Where to put `choice.enhancements` ?
+    # TODO Where to put `choice.**params` (other arbitrary fields) ?
+    generic_chunk.finish_reason = choice.finish_reason
+
+    _populate_delta(generic_chunk, choice.delta)
+
+
+def _populate_delta(generic_chunk: GenericStreamingChunk, delta: Delta) -> None:
+    if not delta:
+        return
+    # TODO Where to put `delta.reasoning_content` ?
+    # TODO Where to put `delta.thinking_blocks` ?
+    # TODO Where to put `delta.role` ?
+    # TODO Merge `delta.function_call` into `generic_chunk.tool_use` ?
+    # TODO Where to put `delta.audio` ?
+    # TODO Where to put `delta.images` ?
+    # TODO Where to put `delta.annotations` ?
+    # TODO Where to put `delta.**params` (other arbitrary fields) ?
+    # TODO Merge `delta.provider_specific_fields` into `generic_chunk.provider_specific_fields` ?
+    generic_chunk.text = delta.content
+    # TODO generic_chunk.tool_use = delta.tool_calls
