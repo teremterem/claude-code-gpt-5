@@ -74,7 +74,7 @@ def model_response_stream_to_generic_streaming_chunk(chunk: ModelResponseStream)
     generic_chunk = GenericStreamingChunk(
         text="",
         tool_use=None,
-        is_finished=False,  # TODO Where to read it from ?
+        is_finished=False,
         finish_reason="",
         usage=None,  # TODO Where to read it from ?
         index=0,  # TODO Where to read it from ?
@@ -94,7 +94,10 @@ def _populate_streaming_choices(generic_chunk: GenericStreamingChunk, choices: l
     # TODO Where to put `choice.enhancements` ?
     # TODO Where to put `choice.**params` (other arbitrary fields) ?
     generic_chunk["finish_reason"] = choice.finish_reason
-
+    generic_chunk["is_finished"] = bool(choice.finish_reason)
+    # TODO OpenAI GPT-5 (maybe other models too ?) sends one more chunk after the a "final" chunk with
+    #  `finish_reason: "stop"` and that extra chunk will have `is_finished: False` because there will not be a finish
+    #  reason anymore. Is this a problem ?
     _populate_delta(generic_chunk, choice.delta)
 
 
