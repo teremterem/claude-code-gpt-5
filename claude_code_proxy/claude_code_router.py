@@ -22,15 +22,15 @@ from common.config import WRITE_TRACES_TO_FILES
 from common.tracing_in_markdown import (
     write_request_trace,
     write_response_trace,
-    write_streaming_chunk_trace,
+    write_streaming_chunks_trace,
 )
 from common.utils import (
     ProxyError,
-    convert_chat_messages_to_respapi,
-    convert_chat_params_to_respapi,
-    convert_respapi_to_model_response,
+    # convert_chat_messages_to_respapi,
+    # convert_chat_params_to_respapi,
+    # convert_respapi_to_model_response,
     generate_timestamp_utc,
-    to_generic_streaming_chunk,
+    model_response_stream_to_generic_streaming_chunks,
 )
 
 
@@ -340,7 +340,7 @@ class ClaudeCodeRouter(CustomLLM):
                 )
 
             for chunk_idx, chunk in enumerate[ModelResponseStream | ResponsesAPIStreamingResponse](resp_stream):
-                generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunks = list[GenericStreamingChunk](model_response_stream_to_generic_streaming_chunks(chunk))
 
                 if WRITE_TRACES_TO_FILES:
                     if routed_request.model_route.use_responses_api:
@@ -348,16 +348,16 @@ class ClaudeCodeRouter(CustomLLM):
                     else:
                         respapi_chunk, complapi_chunk = None, chunk
 
-                    write_streaming_chunk_trace(
+                    write_streaming_chunks_trace(
                         timestamp=routed_request.timestamp,
                         calling_method=routed_request.calling_method,
                         chunk_idx=chunk_idx,
                         respapi_chunk=respapi_chunk,
                         complapi_chunk=complapi_chunk,
-                        generic_chunk=generic_chunk,
+                        generic_chunks=generic_chunks,
                     )
 
-                yield generic_chunk
+                yield from generic_chunks
 
         except Exception as e:
             raise ProxyError(e) from e
@@ -417,7 +417,7 @@ class ClaudeCodeRouter(CustomLLM):
 
             chunk_idx = 0
             async for chunk in resp_stream:
-                generic_chunk = to_generic_streaming_chunk(chunk)
+                generic_chunks = list[GenericStreamingChunk](model_response_stream_to_generic_streaming_chunks(chunk))
 
                 if WRITE_TRACES_TO_FILES:
                     if routed_request.model_route.use_responses_api:
@@ -425,16 +425,17 @@ class ClaudeCodeRouter(CustomLLM):
                     else:
                         respapi_chunk, complapi_chunk = None, chunk
 
-                    write_streaming_chunk_trace(
+                    write_streaming_chunks_trace(
                         timestamp=routed_request.timestamp,
                         calling_method=routed_request.calling_method,
                         chunk_idx=chunk_idx,
                         respapi_chunk=respapi_chunk,
                         complapi_chunk=complapi_chunk,
-                        generic_chunk=generic_chunk,
+                        generic_chunks=generic_chunks,
                     )
 
-                yield generic_chunk
+                for generic_chunk in generic_chunks:
+                    yield generic_chunk
                 chunk_idx += 1
 
         except Exception as e:
