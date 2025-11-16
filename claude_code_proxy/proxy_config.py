@@ -14,7 +14,22 @@ REMAP_CLAUDE_OPUS_TO = os.getenv("REMAP_CLAUDE_OPUS_TO", "gpt-5-reason-high")
 
 ENFORCE_ONE_TOOL_CALL_PER_RESPONSE = env_var_to_bool(os.getenv("ENFORCE_ONE_TOOL_CALL_PER_RESPONSE"), "true")
 
+# TODO Move these two constants to common/config.py ?
 ALWAYS_USE_RESPONSES_API = env_var_to_bool(os.getenv("ALWAYS_USE_RESPONSES_API"), "false")
+RESPAPI_ONLY_MODELS = (
+    "codex-mini-latest",
+    "computer-use-preview",
+    "gpt-5.1-codex",
+    "gpt-5-codex",
+    "gpt-5-pro",
+    "o1-pro",
+    "o3-pro",
+    "o3-deep-research",
+    "o4-mini-deep-research",
+    "gpt-5.1-codex-mini",
+    "gpt-oss-120b",
+    "gpt-oss-20b",
+)
 
 ANTHROPIC = "anthropic"
 OPENAI = "openai"
