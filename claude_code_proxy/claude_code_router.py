@@ -361,6 +361,19 @@ class ClaudeCodeRouter(CustomLLM):
 
                 yield generic_chunk
 
+            # EOF fallback: if provider ended stream without a terminal event and
+            # we have a pending tool with buffered args, emit once.
+            # TODO Refactor or get rid of the try/except block below after the
+            #  code in `common/utils.py` is owned (after the vibe-code there is
+            #  replaced with proper code)
+            try:
+                eof_chunk = responses_eof_finalize_chunk()
+                if eof_chunk is not None:
+                    yield eof_chunk
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Ignore; best-effort fallback
+                pass
+
         except Exception as e:
             raise ProxyError(e) from e
 
@@ -441,13 +454,14 @@ class ClaudeCodeRouter(CustomLLM):
 
             # EOF fallback: if provider ended stream without a terminal event and
             # we have a pending tool with buffered args, emit once.
-            # TODO Repeat this logic in the `streaming` method too (if still
-            #  relevant after the refactoring) ?
+            # TODO Refactor or get rid of the try/except block below after the
+            #  code in `common/utils.py` is owned (after the vibe-code there is
+            #  replaced with proper code)
             try:
                 eof_chunk = responses_eof_finalize_chunk()
                 if eof_chunk is not None:
                     yield eof_chunk
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # Ignore; best-effort fallback
                 pass
 
