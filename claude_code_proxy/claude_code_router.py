@@ -16,7 +16,7 @@ from litellm import (
     ResponsesAPIStreamingResponse,
 )
 
-from claude_code_proxy.proxy_config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
+from claude_code_proxy.proxy_config import ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
 from claude_code_proxy.route_model import ModelRoute
 from common.config import WRITE_TRACES_TO_FILES
 from common.tracing_in_markdown import (
@@ -35,13 +35,12 @@ from common.utils import (
 )
 
 
-def _adapt_for_non_anthropic_models(model: str, messages_complapi: list, params_complapi: dict) -> None:
+def _adapt_for_non_anthropic_models(messages_complapi: list, params_complapi: dict) -> None:
     """
     Perform necessary prompt injections to adjust certain requests to work with
     non-Anthropic models.
 
     Args:
-        model: The model string (e.g., "openai/gpt-5") to adapt for
         messages: Messages list to modify "in place"
         optional_params: Request params which may include tools/functions (may
             also be modified "in place")
@@ -50,9 +49,11 @@ def _adapt_for_non_anthropic_models(model: str, messages_complapi: list, params_
         Modified messages list with additional instruction for non-Anthropic
         models
     """
-    if model.startswith(f"{ANTHROPIC}/"):
-        # Do not alter requests for Anthropic models
-        return
+    # Claude Code 2.x sends `context_management` on /v1/messages, but OpenAI's
+    # ChatCompletions and Responses APIs do not support it
+    # TODO How to reproduce the problem that the line below is fixing ?
+    #  (This fix was contributed)
+    params_complapi.pop("context_management", None)
 
     if (
         params_complapi.get("max_tokens") == 1
@@ -113,12 +114,6 @@ class RoutedRequest:
         self.params_complapi.update(self.model_route.extra_params)
         self.params_complapi["stream"] = stream
 
-        # Drop Anthropic-only parameters
-        # Claude Code 2.x sends `context_management` on /v1/messages, but
-        # OpenAI's Chat Completions/Responses APIs do not support it
-        # TODO Do not drop it if the model is a Claude model
-        self.params_complapi.pop("context_management", None)
-
         if self.model_route.use_responses_api:
             # TODO What's a more reasonable way to decide when to unset
             #  temperature ?
@@ -128,11 +123,11 @@ class RoutedRequest:
         trace_name = f"{self.timestamp}-OUTBOUND-{self.calling_method}"
         self.params_complapi.setdefault("metadata", {})["trace_name"] = trace_name
 
-        _adapt_for_non_anthropic_models(
-            model=self.model_route.target_model,
-            messages_complapi=self.messages_complapi,
-            params_complapi=self.params_complapi,
-        )
+        if not self.model_route.is_target_anthropic:
+            _adapt_for_non_anthropic_models(
+                messages_complapi=self.messages_complapi,
+                params_complapi=self.params_complapi,
+            )
 
         if self.model_route.use_responses_api:
             self.messages_respapi = convert_chat_messages_to_respapi(self.messages_complapi)

@@ -17,7 +17,8 @@ class ModelRoute:
     remapped_to: str  # May or may not have a provider prefix
     target_model: str  # ALWAYS has a provider prefix ("provider/model_name")
     extra_params: dict[str, Any]
-    use_responses_api: bool = ALWAYS_USE_RESPONSES_API
+    is_target_anthropic: bool
+    use_responses_api: bool
 
     def __init__(self, requested_model: str) -> None:
         self.requested_model = requested_model.strip()
@@ -82,7 +83,9 @@ class ModelRoute:
             # was not specified explicitly)
             self.target_model = f"{OPENAI}/{model_name_only}"
 
-        if self.target_model.startswith(ANTHROPIC):
+        self.is_target_anthropic = self.target_model.startswith(f"{ANTHROPIC}/")
+
+        if self.is_target_anthropic:
             self.use_responses_api = False
         else:
             self.use_responses_api = ALWAYS_USE_RESPONSES_API or any(
