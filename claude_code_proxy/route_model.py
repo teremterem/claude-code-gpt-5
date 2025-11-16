@@ -12,16 +12,16 @@ from claude_code_proxy.proxy_config import (
 
 
 RESPAPI_ONLY_MODELS = (
+    "codex-mini-latest",
+    "computer-use-preview",
     "gpt-5.1-codex",
     "gpt-5-codex",
     "gpt-5-pro",
+    "o1-pro",
+    "o3-pro",
     "o3-deep-research",
     "o4-mini-deep-research",
-    "o3-pro",
-    "o1-pro",
-    "computer-use-preview",
     "gpt-5.1-codex-mini",
-    "codex-mini-latest",
     "gpt-oss-120b",
     "gpt-oss-20b",
 )
