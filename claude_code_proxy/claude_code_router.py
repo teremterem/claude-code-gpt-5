@@ -122,6 +122,10 @@ class RoutedRequest:
         num_tools = len(self.params_complapi.get("tools") or []) + len(self.params_complapi.get("functions") or [])
         if ENFORCE_ONE_TOOL_CALL_PER_RESPONSE and num_tools > 1:
             # Add the single tool call instruction as the last message
+            # TODO Get rid of this hack after the token conversion code in
+            #  `common/utils.py` is reimplemented. (Seems that it's not the
+            #  Claude Code CLI that doesn't support multiple tool calls in a
+            #  single response, it's our token conversion code that doesn't.)
             system_prompt_items.append(
                 "* When using tools, call AT MOST one tool per response. Never attempt multiple tool calls in a "
                 "single response. The client does not support multiple tool calls in a single response. If multiple "
@@ -130,9 +134,15 @@ class RoutedRequest:
             )
 
         if self.model_route.use_responses_api:
+            # TODO A temporary measure until the token conversion code is
+            #  reimplemented. (Right now, whenever the model tries to
+            #  communicate that it needs to correct its course of action, it
+            #  just stops doing the task, which I suspect is a token conversion
+            #  issue.)
             system_prompt_items.append(
-                "* Never just silently use tools, always accompany your tool use with an explanation of why you are "
-                "using it, so the user knows what you are doing."
+                "* Until you're COMPLETELY done with your task, DO NOT EXPLAIN TO THE USER ANYTHING AT ALL, even if "
+                "you need to correct your course of action (just use REASONING for that, which the user cannot see). "
+                "A summary of your work at the very end is enough."
             )
 
         if system_prompt_items:
