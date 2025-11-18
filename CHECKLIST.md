@@ -1,4 +1,4 @@
-* Upgrade dependencies
+* ~~Upgrade dependencies~~
 * Choose default models
 * Drop .venv
 * Test new defaults
