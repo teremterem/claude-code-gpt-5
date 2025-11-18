@@ -35,62 +35,6 @@ from common.utils import (
 )
 
 
-def _adapt_for_non_anthropic_models(messages_complapi: list, params_complapi: dict) -> None:
-    """
-    Perform necessary prompt injections to adjust certain requests to work with
-    non-Anthropic models.
-
-    Args:
-        messages: Messages list to modify "in place"
-        optional_params: Request params which may include tools/functions (may
-            also be modified "in place")
-
-    Returns:
-        Modified messages list with additional instruction for non-Anthropic
-        models
-    """
-    # Claude Code 2.x sends `context_management` on /v1/messages, but OpenAI's
-    # ChatCompletions and Responses APIs do not support it
-    # TODO How to reproduce the problem that the line below is fixing ?
-    #  (This fix was contributed)
-    params_complapi.pop("context_management", None)
-
-    if (
-        params_complapi.get("max_tokens") == 1
-        and len(messages_complapi) == 1
-        and messages_complapi[0].get("role") == "user"
-        and messages_complapi[0].get("content") in ["quota", "test"]
-    ):
-        # This is a "connectivity test" request by Claude Code => we need to make sure non-Anthropic models don't fail
-        # because of exceeding max_tokens
-        params_complapi["max_tokens"] = 100
-        messages_complapi[0]["role"] = "system"
-        messages_complapi[0][
-            "content"
-        ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
-        return
-
-    if not ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
-        return
-
-    # Only add the instruction if at least two tools and/or functions are present in the request (in total)
-    num_tools = len(params_complapi.get("tools") or []) + len(params_complapi.get("functions") or [])
-    if num_tools < 2:
-        return
-
-    # Add the single tool call instruction as the last message
-    tool_instruction = {
-        "role": "system",
-        "content": (
-            "IMPORTANT: When using tools, call AT MOST one tool per response. Never attempt multiple tool calls in a "
-            "single response. The client does not support multiple tool calls in a single response. If multiple "
-            "tools are needed, choose the next best single tool, return exactly one tool call, and wait for the next "
-            "turn."
-        ),
-    }
-    messages_complapi.append(tool_instruction)
-
-
 class RoutedRequest:
     def __init__(
         self,
@@ -124,10 +68,7 @@ class RoutedRequest:
         self.params_complapi.setdefault("metadata", {})["trace_name"] = trace_name
 
         if not self.model_route.is_target_anthropic:
-            _adapt_for_non_anthropic_models(
-                messages_complapi=self.messages_complapi,
-                params_complapi=self.params_complapi,
-            )
+            self._adapt_complapi_for_non_anthropic_models()
 
         if self.model_route.use_responses_api:
             self.messages_respapi = convert_chat_messages_to_respapi(self.messages_complapi)
@@ -146,6 +87,55 @@ class RoutedRequest:
                 params_complapi=self.params_complapi,
                 messages_respapi=self.messages_respapi,
                 params_respapi=self.params_respapi,
+            )
+
+    def _adapt_complapi_for_non_anthropic_models(self) -> None:
+        """
+        Perform necessary prompt injections to adjust certain requests to work with
+        non-Anthropic models.
+        """
+        # Claude Code 2.x sends `context_management` on /v1/messages, but
+        # OpenAI's ChatCompletions and Responses APIs do not support it
+        # TODO How to reproduce the problem that the line below is fixing ?
+        #  (This fix was contributed)
+        self.params_complapi.pop("context_management", None)
+
+        if (
+            self.params_complapi.get("max_tokens") == 1
+            and len(self.messages_complapi) == 1
+            and self.messages_complapi[0].get("role") == "user"
+            and self.messages_complapi[0].get("content") in ["quota", "test"]
+        ):
+            # This is a "connectivity test" request by Claude Code => we need
+            # to make sure non-Anthropic models don't fail because of exceeding
+            # max_tokens
+            self.params_complapi["max_tokens"] = 100
+            self.messages_complapi[0]["role"] = "system"
+            self.messages_complapi[0][
+                "content"
+            ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
+            return
+
+        system_prompt_items = []
+
+        # Only add the instruction if at least two tools and/or functions are present in the request (in total)
+        num_tools = len(self.params_complapi.get("tools") or []) + len(self.params_complapi.get("functions") or [])
+        if ENFORCE_ONE_TOOL_CALL_PER_RESPONSE and num_tools > 1:
+            # Add the single tool call instruction as the last message
+            system_prompt_items.append(
+                "* When using tools, call AT MOST one tool per response. Never attempt multiple tool calls in a "
+                "single response. The client does not support multiple tool calls in a single response. If multiple "
+                "tools are needed, choose the next best single tool, return exactly one tool call, and wait for the "
+                "next turn."
+            )
+
+        if system_prompt_items:
+            # append the system prompt as the last message in the context
+            self.messages_complapi.append(
+                {
+                    "role": "system",
+                    "content": "IMPORTANT:\n" + "\n".join(system_prompt_items),
+                }
             )
 
 
