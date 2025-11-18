@@ -129,6 +129,12 @@ class RoutedRequest:
                 "next turn."
             )
 
+        if self.model_route.use_responses_api:
+            system_prompt_items.append(
+                "* Never just silently use tools, always accompany your tool use with an explanation of why you are "
+                "using it, so the user knows what you are doing."
+            )
+
         if system_prompt_items:
             # append the system prompt as the last message in the context
             self.messages_complapi.append(
