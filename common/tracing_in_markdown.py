@@ -97,6 +97,7 @@ def write_streaming_chunk_trace(
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     file = TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md"
+    text_file = TRACES_DIR / f"{timestamp}_RESPONSE_TEXT.md"
 
     # If file doesn't exist, create it with the main header
     if not file.exists():
@@ -117,3 +118,7 @@ def write_streaming_chunk_trace(
             # TODO Do `gen_chunk.model_dump_json(indent=2)` once it's not
             #  just a dict
             f.write(f"### GenericStreamingChunk:\n```json\n{json.dumps(generic_chunk, indent=2)}\n```\n\n")
+
+            # Append text only to the text file
+            with text_file.open("a", encoding="utf-8") as text_f:
+                text_f.write(generic_chunk["text"])
