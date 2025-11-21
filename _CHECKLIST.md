@@ -6,7 +6,9 @@
 * ~~Reproduce resp api models stopping~~
 * ~~Workaround resp api models stopping~~
 * Update README.md
+* Regenerate the picture
 * Drop .venv
 * Test old defaults (GPT-5)
 * Test Anthropic models
 * PLAN RELEASE STEPS
+* Rename the repo
