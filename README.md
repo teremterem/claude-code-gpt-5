@@ -3,7 +3,8 @@
         src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5/main/images/claude-code-gpt-5.jpeg">
 </p>
 
-This repository lets you use **Anthropic's Claude Code CLI** with **OpenAI's GPT-5** via a local LiteLLM proxy.
+This repository lets you use Anthropic's **Claude Code CLI** with OpenAI models such as **GPT-5 Codex, GPT-5.1, and others** via a local LiteLLM proxy.
+
 
 > ⚠️ **ATTENTION** ⚠️
 >
@@ -48,9 +49,9 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
    # Optional: override the default remaps if you need to (the values you see
    # below are the defaults - see .env.template for more info)
-   # REMAP_CLAUDE_HAIKU_TO=gpt-5-mini-reason-minimal
-   # REMAP_CLAUDE_SONNET_TO=gpt-5-reason-medium
-   # REMAP_CLAUDE_OPUS_TO=gpt-5-reason-high
+   # REMAP_CLAUDE_HAIKU_TO=gpt-5.1-codex-mini-reason-none
+   # REMAP_CLAUDE_SONNET_TO=gpt-5-codex-reason-medium
+   # REMAP_CLAUDE_OPUS_TO=gpt-5.1-reason-high
 
    # Some more optional settings (see .env.template for details)
    ...
