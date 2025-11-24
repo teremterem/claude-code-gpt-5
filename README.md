@@ -7,7 +7,7 @@ This repository lets you use Anthropic's **Claude Code CLI** with OpenAI models 
 
 > ⚠️ **ATTENTION** ⚠️
 >
-> If you're here to set up `your own LiteLLM Server` with `LibreChat` as the web UI (or any other OpenAI/Anthropic API compatible client, for that matter), head over to the [litellm-server-boilerplate](https://github.com/teremterem/litellm-server-boilerplate) repository. It contains a "boilerplate" version of this repo with Claude Code CLI stuff stripped away, **an optional `LibreChat` set up, and a `README` which specifically explains how to build `your own AI agents and assistants` on top of it.**
+> If you're here to set up `your own LiteLLM Server` with `LibreChat` as the web UI (or any other OpenAI / Anthropic API compatible client, for that matter), head over to the [litellm-server-boilerplate](https://github.com/teremterem/litellm-server-boilerplate) repository. It contains a "boilerplate" version of this repo with Claude Code CLI stuff stripped away, **an optional `LibreChat` set up, and a `README` which specifically explains how to build `your own AI agents and assistants` on top of it.**
 
 ## Quick Start ⚡
 
