@@ -65,16 +65,21 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    cp .env.template .env
    ```
 
-   Edit `.env` and add your OpenAI API key:
+   Edit `.env` and add your OpenAI API key or any other provider's API key(s) that you're planning to use:
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
+   ANTHROPIC_API_KEY=your-anthropic-api-key-here
+   GEMINI_API_KEY=your-gemini-api-key-here
 
-   # Optional (see .env.template for details):
+   ... # API key(s) of any other provider(s)
+
+   # Optional (see .env.template for explanation):
    # LITELLM_MASTER_KEY=strong-key-that-you-generated
 
-   # Some more optional settings (see .env.template for details)
-   ...
+   ... # Other optional settings (see .env.template)
    ```
+
+   See [Supported Mdoels & Providers](https://docs.litellm.ai/docs/providers) document by LiteLLM for the full list of supported models and providers.
 
 5. **Configure Environment Variables for LibreChat:**
 
