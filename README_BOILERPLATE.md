@@ -5,7 +5,7 @@
         src="images/librechat-master-yoda.jpg">
 </p>
 
-**A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect for **LibreChat** web UI (a quick setup of which is included in this repository) or any other OpenAI / Anthropic API compatible client. Contains an example of a custom provider that stylizes responses (Yoda example) to serve as a starting point for your own custom providers (which you can think of as **your own AI agents and assistants**).
+**A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect with **LibreChat** as the web UI (a quick setup of which is included in this repository) or any other OpenAI / Anthropic API compatible client. Contains an example of a custom provider that stylizes responses (Yoda example) to serve as a starting point for your own custom providers (which you can think of as **your own AI agents and assistants**).
 
 > ⚠️ **ATTENTION** ⚠️ This `README` is intended for the [litellm-server-boilerplate](https://github.com/teremterem/litellm-server-boilerplate) repository.
 
