@@ -7,7 +7,7 @@
 
 **A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect for **LibreChat** (a quick setup of which is included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
 
-> ⚠️ **ATTENTION** ⚠️ This README is about the [main-boilerplate](https://github.com/teremterem/claude-code-gpt-5/tree/main-boilerplate) branch of this repository.
+> ⚠️ **ATTENTION** ⚠️ This README is about the [main-boilerplate](https://github.com/teremterem/claude-code-gpt-5-codex/tree/main-boilerplate) branch of this repository.
 
 ## Quick Start ⚡
 
@@ -28,7 +28,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    git clone \
        --branch main-boilerplate \
        --origin boilerplate \
-       https://github.com/teremterem/claude-code-gpt-5.git \
+       https://github.com/teremterem/claude-code-gpt-5-codex.git \
        my-litellm-server
    ```
 
@@ -296,11 +296,11 @@ That’s it - your `main` branch now contains the latest boilerplate changes whi
 ## And if you like the project, please give it a Star 💫
 
 <p align="center">
-<a href="https://www.star-history.com/#teremterem/claude-code-gpt-5&type=date&legend=top-left">
+<a href="https://www.star-history.com/#teremterem/claude-code-gpt-5-codex&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5-codex&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5-codex&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5-codex&type=date&legend=top-left" />
  </picture>
 </a>
 </p>
