@@ -79,7 +79,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ... # Other optional settings (see .env.template)
    ```
 
-   See [Supported Mdoels & Providers](https://docs.litellm.ai/docs/providers) document by LiteLLM for the full list of supported models and providers.
+   See [Supported Models & Providers](https://docs.litellm.ai/docs/providers) document by LiteLLM for the full list of supported models and providers.
 
 5. **Configure Environment Variables for LibreChat:**
 
