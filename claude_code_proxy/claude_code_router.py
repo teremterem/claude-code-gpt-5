@@ -16,7 +16,7 @@ from litellm import (
     ResponsesAPIStreamingResponse,
 )
 
-from claude_code_proxy.proxy_config import ANTHROPIC, ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
+from claude_code_proxy.proxy_config import ENFORCE_ONE_TOOL_CALL_PER_RESPONSE
 from claude_code_proxy.route_model import ModelRoute
 from common.config import WRITE_TRACES_TO_FILES
 from common.tracing_in_markdown import (
@@ -31,62 +31,8 @@ from common.utils import (
     convert_respapi_to_model_response,
     generate_timestamp_utc,
     to_generic_streaming_chunk,
+    responses_eof_finalize_chunk,
 )
-
-
-def _adapt_for_non_anthropic_models(model: str, messages_complapi: list, params_complapi: dict) -> None:
-    """
-    Perform necessary prompt injections to adjust certain requests to work with
-    non-Anthropic models.
-
-    Args:
-        model: The model string (e.g., "openai/gpt-5") to adapt for
-        messages: Messages list to modify "in place"
-        optional_params: Request params which may include tools/functions (may
-            also be modified "in place")
-
-    Returns:
-        Modified messages list with additional instruction for non-Anthropic
-        models
-    """
-    if model.startswith(f"{ANTHROPIC}/"):
-        # Do not alter requests for Anthropic models
-        return
-
-    if (
-        params_complapi.get("max_tokens") == 1
-        and len(messages_complapi) == 1
-        and messages_complapi[0].get("role") == "user"
-        and messages_complapi[0].get("content") in ["quota", "test"]
-    ):
-        # This is a "connectivity test" request by Claude Code => we need to make sure non-Anthropic models don't fail
-        # because of exceeding max_tokens
-        params_complapi["max_tokens"] = 100
-        messages_complapi[0]["role"] = "system"
-        messages_complapi[0][
-            "content"
-        ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
-        return
-
-    if not ENFORCE_ONE_TOOL_CALL_PER_RESPONSE:
-        return
-
-    # Only add the instruction if at least two tools and/or functions are present in the request (in total)
-    num_tools = len(params_complapi.get("tools") or []) + len(params_complapi.get("functions") or [])
-    if num_tools < 2:
-        return
-
-    # Add the single tool call instruction as the last message
-    tool_instruction = {
-        "role": "system",
-        "content": (
-            "IMPORTANT: When using tools, call AT MOST one tool per response. Never attempt multiple tool calls in a "
-            "single response. The client does not support multiple tool calls in a single response. If multiple "
-            "tools are needed, choose the next best single tool, return exactly one tool call, and wait for the next "
-            "turn."
-        ),
-    }
-    messages_complapi.append(tool_instruction)
 
 
 class RoutedRequest:
@@ -121,11 +67,8 @@ class RoutedRequest:
         trace_name = f"{self.timestamp}-OUTBOUND-{self.calling_method}"
         self.params_complapi.setdefault("metadata", {})["trace_name"] = trace_name
 
-        _adapt_for_non_anthropic_models(
-            model=self.model_route.target_model,
-            messages_complapi=self.messages_complapi,
-            params_complapi=self.params_complapi,
-        )
+        if not self.model_route.is_target_anthropic:
+            self._adapt_complapi_for_non_anthropic_models()
 
         if self.model_route.use_responses_api:
             self.messages_respapi = convert_chat_messages_to_respapi(self.messages_complapi)
@@ -144,6 +87,71 @@ class RoutedRequest:
                 params_complapi=self.params_complapi,
                 messages_respapi=self.messages_respapi,
                 params_respapi=self.params_respapi,
+            )
+
+    def _adapt_complapi_for_non_anthropic_models(self) -> None:
+        """
+        Perform necessary prompt injections to adjust certain requests to work with
+        non-Anthropic models.
+        """
+        # Claude Code 2.x sends `context_management` on /v1/messages, but
+        # OpenAI's ChatCompletions and Responses APIs do not support it
+        # TODO How to reproduce the problem that the line below is fixing ?
+        #  (This fix was contributed)
+        self.params_complapi.pop("context_management", None)
+
+        if (
+            self.params_complapi.get("max_tokens") == 1
+            and len(self.messages_complapi) == 1
+            and self.messages_complapi[0].get("role") == "user"
+            and self.messages_complapi[0].get("content") in ["quota", "test"]
+        ):
+            # This is a "connectivity test" request by Claude Code => we need
+            # to make sure non-Anthropic models don't fail because of exceeding
+            # max_tokens
+            self.params_complapi["max_tokens"] = 100
+            self.messages_complapi[0]["role"] = "system"
+            self.messages_complapi[0][
+                "content"
+            ] = "The intention of this request is to test connectivity. Please respond with a single word: OK"
+            return
+
+        system_prompt_items = []
+
+        # Only add the instruction if at least two tools and/or functions are present in the request (in total)
+        num_tools = len(self.params_complapi.get("tools") or []) + len(self.params_complapi.get("functions") or [])
+        if ENFORCE_ONE_TOOL_CALL_PER_RESPONSE and num_tools > 1:
+            # Add the single tool call instruction as the last message
+            # TODO Get rid of this hack after the token conversion code in
+            #  `common/utils.py` is reimplemented. (Seems that it's not the
+            #  Claude Code CLI that doesn't support multiple tool calls in a
+            #  single response, it's our token conversion code that doesn't.)
+            system_prompt_items.append(
+                "* When using tools, call AT MOST one tool per response. Never attempt multiple tool calls in a "
+                "single response. The client does not support multiple tool calls in a single response. If multiple "
+                "tools are needed, choose the next best single tool, return exactly one tool call, and wait for the "
+                "next turn."
+            )
+
+        if self.model_route.use_responses_api:
+            # TODO A temporary measure until the token conversion code is
+            #  reimplemented. (Right now, whenever the model tries to
+            #  communicate that it needs to correct its course of action, it
+            #  just stops doing the task, which I suspect is a token conversion
+            #  issue.)
+            system_prompt_items.append(
+                "* Until you're COMPLETELY done with your task, DO NOT EXPLAIN TO THE USER ANYTHING AT ALL, even if "
+                "you need to correct your course of action (just use REASONING for that, which the user cannot see). "
+                "A summary of your work at the very end is enough."
+            )
+
+        if system_prompt_items:
+            # append the system prompt as the last message in the context
+            self.messages_complapi.append(
+                {
+                    "role": "system",
+                    "content": "IMPORTANT:\n" + "\n".join(system_prompt_items),
+                }
             )
 
 
@@ -359,6 +367,19 @@ class ClaudeCodeRouter(CustomLLM):
 
                 yield generic_chunk
 
+            # EOF fallback: if provider ended stream without a terminal event and
+            # we have a pending tool with buffered args, emit once.
+            # TODO Refactor or get rid of the try/except block below after the
+            #  code in `common/utils.py` is owned (after the vibe-code there is
+            #  replaced with proper code)
+            try:
+                eof_chunk = responses_eof_finalize_chunk()
+                if eof_chunk is not None:
+                    yield eof_chunk
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Ignore; best-effort fallback
+                pass
+
         except Exception as e:
             raise ProxyError(e) from e
 
@@ -436,6 +457,19 @@ class ClaudeCodeRouter(CustomLLM):
 
                 yield generic_chunk
                 chunk_idx += 1
+
+            # EOF fallback: if provider ended stream without a terminal event and
+            # we have a pending tool with buffered args, emit once.
+            # TODO Refactor or get rid of the try/except block below after the
+            #  code in `common/utils.py` is owned (after the vibe-code there is
+            #  replaced with proper code)
+            try:
+                eof_chunk = responses_eof_finalize_chunk()
+                if eof_chunk is not None:
+                    yield eof_chunk
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Ignore; best-effort fallback
+                pass
 
         except Exception as e:
             raise ProxyError(e) from e

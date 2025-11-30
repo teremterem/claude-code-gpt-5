@@ -1,13 +1,23 @@
-<h1 align="center">My LiteLLM Server</h1>
+<h1 align="center">LiteLLM Server Boilerplate (with LibreChat as UI)</h1>
 
 <p align="center">
     <img alt="LibreChat with LiteLLM Server Boilerplate"
         src="images/librechat-master-yoda.jpg">
 </p>
 
-**A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect for **LibreChat** (a quick setup of which is included in this repository) or other UI clients. Contains an example of a custom provider that stylizes responses **(Yoda example)** to serve as a starting point for your own custom providers.
+**A lightweight LiteLLM server boilerplate** pre-configured with `uv` and `Docker` for hosting your own **OpenAI- and Anthropic-compatible endpoints.** Perfect with **LibreChat** as the web UI (a quick setup of which is included in this repository) or any other OpenAI / Anthropic API compatible client. Contains an example of a custom provider that stylizes responses (Yoda example) to serve as a starting point for your own custom providers (which you can think of as **your own AI agents and assistants**).
 
-> ⚠️ **ATTENTION** ⚠️ This README is about the [main-boilerplate](https://github.com/teremterem/claude-code-gpt-5/tree/main-boilerplate) branch of this repository.
+> ⚠️ **ATTENTION** ⚠️ This `README` is intended for the [litellm-server-boilerplate](https://github.com/teremterem/litellm-server-boilerplate) repository.
+
+## Architecture 📝
+
+```
+OpenAI/Anthropic API compatible clients (LibreChat etc.)
+ ↓
+LiteLLM Server (Port 4000)
+ ↓
+Your custom agents
+```
 
 ## Quick Start ⚡
 
@@ -23,12 +33,11 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 ### Setup 🛠️
 
-1. **Clone this repository's `main-boilerplate` branch into a local directory:**
+1. **Clone this repository, but use a special remote name (`boilerplate` instead of `origin`):**
    ```bash
    git clone \
-       --branch main-boilerplate \
        --origin boilerplate \
-       https://github.com/teremterem/claude-code-gpt-5.git \
+       https://github.com/teremterem/litellm-server-boilerplate.git \
        my-litellm-server
    ```
 
@@ -38,19 +47,31 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
    > **NOTE:** If you want to, you can replace `my-litellm-server` with a different project name in both commands above.
 
-   Notice, that the `git clone` command above uses `boilerplate` as the remote name to link back to the boilerplate repository. **This is because in the next steps you will set up `origin` to link to your own remote repository.**
+   The `git clone` command above uses `boilerplate` as the remote name instead of the usual `origin` **because in later steps you will set up `origin` to point to YOUR OWN remote repository.**
 
-2. **Create `main` branch from the `main-boilerplate` in your local repository:**
+2. **Rename `main` branch to `main-boilerplate` in your local repository:**
+
+   ```bash
+   git branch --move main main-boilerplate
+   ```
+
+   You are renaming it like this locally because this will later allow you to use this branch to occasionally pull in bugfixes, new features etc. from the original "boilerplate" repo, while making room for YOUR OWN `main` branch, which you will modify as you please and push to YOUR OWN remote (see further steps).
+
+3. **Create YOUR OWN `main` branch in your local repository:**
 
    ```bash
    git switch --create main
    ```
 
-3. **(Optional) Set up `origin` remote and push your `main` branch to your remote repository:**
+   It will be based on `main-boilerplate` (since this was the branch you were on when you ran the command).
+
+4. **(Optional) Set up `origin` remote and push your `main` branch to YOUR OWN remote repository:**
 
    ```bash
    git remote add origin <your-remote-repository-url>
    ```
+
+   > **ATTENTION:** Make sure your remote repo DOES NOT have the `main` branch of its own already. If it does, delete the remote `main` branch manually (OR use `--force` flag with the next command **AS LONG AS YOU KNOW WHAT YOU'RE DOING**).
 
    ```bash
    git push --set-upstream origin main
@@ -58,25 +79,30 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
    Even though this step is optional, it is generally a good idea to have your own remote repository to push your changes to.
 
-4. **Configure Environment Variables for the LiteLLM Server:**
+5. **Configure Environment Variables for the LiteLLM Server:**
 
    Copy the template file to create your `.env`:
    ```bash
    cp .env.template .env
    ```
 
-   Edit `.env` and add your OpenAI API key:
+   Edit `.env` and add your OpenAI API key (and/or any other providers' API keys that you're planning to use):
    ```dotenv
    OPENAI_API_KEY=your-openai-api-key-here
+   #ANTHROPIC_API_KEY=your-anthropic-api-key-here
+   #GEMINI_API_KEY=your-gemini-api-key-here
 
-   # Optional (see .env.template for details):
+   ... # API key(s) of any other provider(s)
+
+   # Optional (see .env.template for explanation):
    # LITELLM_MASTER_KEY=strong-key-that-you-generated
 
-   # Some more optional settings (see .env.template for details)
-   ...
+   ... # Other optional settings (see .env.template)
    ```
 
-5. **Configure Environment Variables for LibreChat:**
+   See [Supported Models & Providers](https://docs.litellm.ai/docs/providers) document by LiteLLM for the full list of supported models and providers.
+
+6. **Configure Environment Variables for LibreChat:**
 
    Copy `librechat/.env.example` to `librechat/.env`:
    ```bash
@@ -85,7 +111,7 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
    (Optional) Edit `librechat/.env` if necessary (in case of local runs, it will work even if you don't edit it).
 
-6. **Run your LiteLLM Server with LibreChat and the Yoda example** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
+7. **Run your LiteLLM Server with LibreChat and the Yoda example** (make sure to install [Docker Desktop](https://docs.docker.com/desktop/) first):
 
    ```bash
    ./librechat/run-docker-compose.sh
@@ -270,7 +296,7 @@ Once you start customizing your copy, you will occasionally want to bring in the
 
 2. **Fetch the latest boilerplate branch.**
    ```bash
-   git fetch boilerplate main-boilerplate
+   git fetch boilerplate main:main-boilerplate
    ```
 
 3. **Switch to your local `main` branch.**
@@ -280,7 +306,7 @@ Once you start customizing your copy, you will occasionally want to bring in the
 
 4. **Merge the upstream updates into your branch.**
    ```bash
-   git merge boilerplate/main-boilerplate
+   git merge boilerplate/main
    ```
    If Git reports conflicts, resolve the files Git marks, `git add` them, and run `git commit` to complete the merge before continuing.
 
@@ -294,13 +320,3 @@ That’s it - your `main` branch now contains the latest boilerplate changes whi
 ## P. S. You are welcome to join our [MiniAgents Discord Server 👥](https://discord.gg/ptSvVnbwKt)
 
 ## And if you like the project, please give it a Star 💫
-
-<p align="center">
-<a href="https://www.star-history.com/#teremterem/claude-code-gpt-5&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
- </picture>
-</a>
-</p>

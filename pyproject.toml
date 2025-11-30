@@ -18,6 +18,7 @@ langfuse = [
 ]
 dev = [
     "black",
+    "ipython",
     "pre-commit",
     "pylint<4.0.0",  # TODO Adapt to pylint 4.x.x
 ]

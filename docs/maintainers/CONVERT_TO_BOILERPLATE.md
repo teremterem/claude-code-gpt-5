@@ -73,7 +73,7 @@ cd <repo-root-dir>
    ```
 
    ```bash
-   git push --set-upstream origin boilerplate-merging-branch
+   git push --set-upstream boilerplate boilerplate-merging-branch
    ```
 
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-merging-branch` already exists, either locally or on the remote, make sure to delete both - the local branch and the remote branch - and then retry the command(s) above.
@@ -97,7 +97,7 @@ cd <repo-root-dir>
    ```
 
    ```bash
-   git commit -m 'Merge remote-tracking branch '\''origin/main'\'' into boilerplate-merging-branch'
+   git commit -m 'Merge remote-tracking branch '\''superorigin/main'\'' into boilerplate-merging-branch'
    git push
    git status
    ```
@@ -109,7 +109,7 @@ cd <repo-root-dir>
    ```
 
    ```bash
-   git push --set-upstream origin boilerplate-MANUAL-merging-branch
+   git push --set-upstream boilerplate boilerplate-MANUAL-merging-branch
    ```
 
    > ⚠️ **ATTENTION** ⚠️ If `boilerplate-MANUAL-merging-branch` already exists, either locally or on the remote, make sure to delete both - the local branch and the remote branch - and then retry the command(s) above.
@@ -121,7 +121,7 @@ cd <repo-root-dir>
    ```bash
    rm -rf claude_code_proxy/
    rm -rf docs/maintainers/
-   rm images/claude-code-gpt-5.jpeg
+   rm images/claude-code-*
    rm deploy-docker.sh
    rm kill-docker.sh
    rm run-docker.sh
@@ -162,7 +162,7 @@ cd <repo-root-dir>
    **Replace the existing ATTENTION clause at the top with the following text:**
 
    ```markdown
-   > **NOTE:** If you want to go back to the `Claude Code CLI Proxy` version of this repository, click [here](https://github.com/teremterem/claude-code-gpt-5).
+   > **NOTE:** Check out our [claude-code-gpt-5-codex](https://github.com/teremterem/claude-code-gpt-5-codex) repository, if you would like to use Anthropic's `Claude Code CLI` with OpenAI models like `GPT-5 Codex`, `GPT-5.1`, and others.
    ```
 
    ```bash
@@ -171,7 +171,7 @@ cd <repo-root-dir>
    ```
 
    ```bash
-   git commit -m "Restore note about going back to CLI Proxy version"
+   git commit -m "Restore note about checking out Claude Code CLI Proxy repository"
    git push
    git status
    ```
@@ -264,7 +264,7 @@ cd <repo-root-dir>
     ```
 
     ```bash
-    git commit -m "Update pyproject.toml, Dockerfile and uv.lock"
+    git commit -m "Update Dockerfile, config.yaml, pyproject.toml and uv.lock"
     git push
     git status
     ```

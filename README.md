@@ -1,13 +1,13 @@
 <p align="center">
-    <img alt="Claude Code with GPT-5"
-        src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5/main/images/claude-code-gpt-5.jpeg">
+    <img alt="Claude Code with GPT-5 Codex"
+        src="https://raw.githubusercontent.com/teremterem/claude-code-gpt-5-codex/main/images/claude-code-gpt-5-codex2.jpeg">
 </p>
 
-This repository lets you use **Anthropic's Claude Code CLI** with **OpenAI's GPT-5** via a local LiteLLM proxy.
+This repository lets you use Anthropic's **Claude Code CLI** with OpenAI models such as **GPT-5-Codex, GPT-5.1, and others** via a local LiteLLM proxy.
 
 > ⚠️ **ATTENTION** ⚠️
 >
-> If you're here to set up `your own LiteLLM Server` (potentially with `LibreChat` or similar UI), head over to the [main-boilerplate](https://github.com/teremterem/claude-code-gpt-5/tree/main-boilerplate) branch. It contains a "boilerplate" version of this repo with Claude Code CLI stuff stripped away for simplicity, **and with a version of [README.md](https://github.com/teremterem/claude-code-gpt-5/blob/main-boilerplate/README.md) that specifically explains how to build on top of this repo as a boilerplate.**
+> If you're here to set up `your own LiteLLM Server` with `LibreChat` as the web UI (or any other OpenAI / Anthropic API compatible client, for that matter), head over to the [litellm-server-boilerplate](https://github.com/teremterem/litellm-server-boilerplate) repository. It contains a "boilerplate" version of this repo with Claude Code CLI stuff stripped away, **an optional `LibreChat` set up, and a `README` which specifically explains how to build `your own AI agents and assistants` on top of it.**
 
 ## Quick Start ⚡
 
@@ -26,8 +26,8 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
 
 1. **Clone this repository:**
    ```bash
-   git clone https://github.com/teremterem/claude-code-gpt-5.git
-   cd claude-code-gpt-5
+   git clone https://github.com/teremterem/claude-code-gpt-5-codex.git
+   cd claude-code-gpt-5-codex
    ```
 
 2. **Configure Environment Variables:**
@@ -46,11 +46,11 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    # Optional (see .env.template for details):
    # LITELLM_MASTER_KEY=your-master-key-here
 
-   # Optional: override the default remaps if you need to (the values you see
+   # Optional: specify the remaps explicitly if you need to (the values you see
    # below are the defaults - see .env.template for more info)
-   # REMAP_CLAUDE_HAIKU_TO=gpt-5-mini-reason-minimal
-   # REMAP_CLAUDE_SONNET_TO=gpt-5-reason-medium
-   # REMAP_CLAUDE_OPUS_TO=gpt-5-reason-high
+   # REMAP_CLAUDE_HAIKU_TO=gpt-5.1-codex-mini-reason-none
+   # REMAP_CLAUDE_SONNET_TO=gpt-5-codex-reason-medium
+   # REMAP_CLAUDE_OPUS_TO=gpt-5.1-reason-high
 
    # Some more optional settings (see .env.template for details)
    ...
@@ -112,12 +112,12 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    npm install -g @anthropic-ai/claude-code
    ```
 
-2. **Connect to GPT-5 instead of Claude:**
+2. **Connect it to the proxy:**
    ```bash
    ANTHROPIC_BASE_URL=http://localhost:4000 claude
    ```
 
-   If you set `LITELLM_MASTER_KEY` for the proxy (see `.env.template` for details), pass it as the Anthropic API key for the CLI:
+   If you set `LITELLM_MASTER_KEY` in your `.env` file (see `.env.template` for details), pass it as the Anthropic API key for the CLI:
    ```bash
    ANTHROPIC_API_KEY="<LITELLM_MASTER_KEY>" \
    ANTHROPIC_BASE_URL=http://localhost:4000 \
@@ -125,27 +125,19 @@ If you are going to use GPT-5 via API for the first time, **OpenAI may require y
    ```
    > **NOTE:** In this case, if you've previously authenticated, run `claude /logout` first.
 
-4. **That's it!** Your Claude Code client will now use the selected **GPT-5 variant(s)** with your chosen reasoning effort level(s). 🎯
+4. **That's it!** Your Claude Code client will now use the **OpenAI models** that this repo recommends by default (unless you explicitly specified different choices in your `.env` file). 🎯
 
-### Available GPT-5 model aliases
+### Model aliases
 
-- **GPT-5**:
-   - `gpt-5-reason-minimal`
-   - `gpt-5-reason-low`
-   - `gpt-5-reason-medium`
-   - `gpt-5-reason-high`
-- **GPT-5-mini**:
-   - `gpt-5-mini-reason-minimal`
-   - `gpt-5-mini-reason-low`
-   - `gpt-5-mini-reason-medium`
-   - `gpt-5-mini-reason-high`
-- **GPT-5-nano**:
-   - `gpt-5-nano-reason-minimal`
-   - `gpt-5-nano-reason-low`
-   - `gpt-5-nano-reason-medium`
-   - `gpt-5-nano-reason-high`
+You can find the full list of available OpenAI models in the [OpenAI API documentation](https://platform.openai.com/docs/models). Additionally, this proxy allows you to control the reasoning effort level for each model by appending it to the model name following the pattern `-reason-<effort>` (or `-reasoning-<effort>`, if you prefer). Here are some examples:
 
-> **NOTE:** Generally, you can use arbitrary models from [arbitrary providers](https://docs.litellm.ai/docs/providers), but for providers other than OpenAI or Anthropic, you will need to specify the provider in the model name, e.g. `gemini/gemini-pro`, `gemini/gemini-pro-reason-disable` etc. (as well as set the respective API keys along with any other environment variables that the provider might require in your `.env` file).
+- `gpt-5.1-codex-mini-reason-none`
+- `gpt-5.1-codex-mini-reason-medium`
+- `gpt-5.1-codex-mini-reason-high`
+
+If you don't specify the reasoning effort level (i.e. only specify the model name, like `gpt-5.1-codex-mini`), it will use the default level for the model.
+
+> **NOTE:** Theoretically, you can use arbitrary models from [arbitrary providers](https://docs.litellm.ai/docs/providers), but for providers other than OpenAI or Anthropic, you will need to specify the provider as a prefix in the model name, e.g. `gemini/gemini-pro`, `gemini/gemini-pro-reason-disable` etc. (as well as set the respective API key for that provider in your `.env` file).
 
 ## KNOWN PROBLEM
 
@@ -164,11 +156,11 @@ This is planned to be fixed soon.
 ## And if you like the project, please give it a Star 💫
 
 <p align="center">
-<a href="https://www.star-history.com/#teremterem/claude-code-gpt-5&type=date&legend=top-left">
+<a href="https://www.star-history.com/#teremterem/claude-code-gpt-5-codex&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5-codex&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5-codex&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=teremterem/claude-code-gpt-5-codex&type=date&legend=top-left" />
  </picture>
 </a>
 </p>

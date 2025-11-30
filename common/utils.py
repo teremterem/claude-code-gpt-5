@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from typing import Any, Optional, Union
 
 from litellm import GenericStreamingChunk, ModelResponse, ResponsesAPIResponse
+import json as _json_for_telemetry
 
 
 class ProxyError(RuntimeError):
@@ -46,17 +47,148 @@ def env_var_to_bool(value: Optional[str], default: str = "false") -> bool:
     return (value or default).lower() in ("true", "1", "on", "yes", "y")
 
 
+# TODO Refactor to avoid using global state if possible
+# Minimal state to accumulate Responses function_call arguments across chunks
+_RESPONSES_TOOL_STATE: dict[str, dict[str, Any]] = {}
+# Track which Responses tool item (by item_id) we have adopted for this turn.
+# We only ever emit a single tool_use for the adopted item.
+_RESPONSES_TOOL_ADOPTED: Optional[str] = None
+_RESPONSES_TOOL_DEBUG = os.environ.get("RESPONSES_TOOL_DEBUG", "0") not in ("0", "", "false", "False")
+_RESPONSES_TELEMETRY_ENABLED = os.environ.get("RESPONSES_TOOL_TELEMETRY", "0") not in ("0", "", "false", "False")
+
+_RESPONSES_TELEMETRY: dict[str, Any] = {
+    "saw_tool_items": 0,
+    "extra_tool_items_ignored": 0,
+    "adopted_item_id": None,
+    "adopted_output_index": None,
+}
+
+
+def _log_responses_tool(msg: str) -> None:
+    if not _RESPONSES_TOOL_DEBUG:
+        return
+    timestamp = datetime.now(UTC).isoformat()
+    print(f"[responses_tool_debug {timestamp}] {msg}")
+
+
+def _telemetry(event: str, **fields: Any) -> None:
+    if not _RESPONSES_TELEMETRY_ENABLED:
+        return
+    payload = {"event": event, **fields}
+    try:
+        print(f"[responses_tool_telemetry] {_json_for_telemetry.dumps(payload, ensure_ascii=False)}")
+    except Exception:
+        print(f"[responses_tool_telemetry] {event} {fields}")
+
+
+def _maybe_emit_tool(item_id: str, default_index: int = 0) -> Optional[dict[str, Any]]:
+    state = _RESPONSES_TOOL_STATE.get(item_id)
+    if not state or state.get("emitted"):
+        return None
+    if not state.get("args_done"):
+        return None
+    if not state.get("name"):
+        return None
+
+    args_str = state.get("args", "")
+    if not isinstance(args_str, str):
+        args_str = str(args_str)
+    final_args = args_str if args_str else "{}"
+
+    tool_use = {
+        "index": state.get("index", default_index),
+        "id": state.get("id"),
+        "type": "function",
+        "function": {
+            "name": state.get("name"),
+            "arguments": final_args,
+        },
+    }
+    _log_responses_tool(f"emitting tool_use item_id={item_id} name={state.get('name')} index={tool_use['index']}")
+    state["emitted"] = True
+    return tool_use
+
+
+def responses_eof_finalize_chunk() -> Optional[GenericStreamingChunk]:
+    """
+    Finalize a pending tool call if the stream ended without a terminal
+    event. If we have buffered args for the adopted tool and they parse as
+    JSON, emit a single tool_use. Otherwise emit an assistant-visible error.
+    Always clears internal tool state.
+    """
+    try:
+        adopted = _RESPONSES_TOOL_ADOPTED
+        if not adopted or adopted not in _RESPONSES_TOOL_STATE:
+            # Nothing pending
+            return None
+        state = _RESPONSES_TOOL_STATE.get(adopted, {})
+        if state.get("emitted"):
+            return None
+        args_str = state.get("args", "")
+        # Strict JSON parse if non-empty; empty means {} is fine
+        if isinstance(args_str, str) and args_str:
+            try:
+                json.loads(args_str)
+                args_ok = True
+            except Exception:
+                args_ok = False
+        else:
+            args_ok = True
+
+        if args_ok:
+            tool_use = {
+                "index": state.get("index", 0),
+                "id": state.get("id"),
+                "type": "function",
+                "function": {
+                    "name": state.get("name"),
+                    "arguments": args_str or "{}",
+                },
+            }
+            chunk: GenericStreamingChunk = {
+                "text": "",
+                "is_finished": False,
+                "finish_reason": "",
+                "usage": None,
+                "index": state.get("index", 0),
+                "tool_use": tool_use,
+                "provider_specific_fields": {"responses_type": "eof_fallback"},
+            }
+            return chunk
+        # Emit an assistant-visible error if args could not be finalized
+        err = "Provider ended stream before tool arguments were finalized."
+        return {
+            "text": err,
+            "is_finished": False,
+            "finish_reason": "error",
+            "usage": None,
+            "index": 0,
+            "tool_use": None,
+            "provider_specific_fields": {"responses_type": "eof_fallback_error"},
+        }
+    finally:
+        # Clear state regardless
+        try:
+            _RESPONSES_TOOL_STATE.clear()
+        except Exception:
+            pass
+        _RESPONSES_TOOL_ADOPTED = None
+
+
 def generate_timestamp_utc() -> str:
     """
-    Generate timestamp in format YYYYmmdd_HHMMSS_fff in UTC.
+    Generate timestamp in format YYYYmmdd_HHMMSS_fff_fff in UTC.
 
     An example of how these timestamps are used later:
 
-    `.traces/20251005_140642_180_RESPONSE_STREAM.md`
+    `.traces/20251005_140642_180_342_RESPONSE_STREAM.md`
     """
     now = datetime.now(UTC)
-    # Keep only milliseconds (first 3 digits of microseconds)
-    return now.strftime("%Y%m%d_%H%M%S_%f")[:-3]
+
+    str_repr = now.strftime("%Y%m%d_%H%M%S_%f")
+    # Let's separate the milliseconds from the microseconds with an underscore
+    # to make it more readable
+    return f"{str_repr[:-3]}_{str_repr[-3:]}"
 
 
 def to_generic_streaming_chunk(chunk: Any) -> GenericStreamingChunk:
@@ -304,7 +436,9 @@ _TOOL_TYPE_ALIASES = {
 
 _CONTENT_KEYS_TO_DROP = {"cache_control"}
 
-_MESSAGE_KEYS_TO_DROP = {"tool_calls", "function_call", "tool_call_id"}
+# For regular messages we drop tool_calls / function_call content; tool_call_id is handled
+# explicitly when role == "tool" and converted to function_call_output.
+_MESSAGE_KEYS_TO_DROP = {"tool_calls", "function_call"}
 
 _FUNCTION_METADATA_KEYS = ("description", "parameters", "strict")
 
@@ -320,6 +454,11 @@ def convert_chat_params_to_respapi(optional_params: dict[str, Any]) -> dict[str,
         raise TypeError("optional_params must be a dictionary when targeting the Responses API")
 
     params = deepcopy(optional_params)
+
+    # Claude Code expects one tool call per turn; disable parallel tool calls
+    # at the request level for Responses API.
+    # Force disable parallel tool calls; Claude Code executes one tool per turn
+    params["parallel_tool_calls"] = False
 
     tools = params.get("tools")
     if tools is not None:
@@ -358,6 +497,7 @@ def convert_chat_messages_to_respapi(messages: list[Any]) -> list[dict[str, Any]
         raise TypeError("messages must be provided as a list")
 
     converted: list[dict[str, Any]] = []
+    last_func_call_id: Optional[str] = None
     for idx, message in enumerate(messages):
         if not isinstance(message, dict):
             raise TypeError(f"Chat message at index {idx} must be a mapping")
@@ -366,17 +506,74 @@ def convert_chat_messages_to_respapi(messages: list[Any]) -> list[dict[str, Any]
         if not isinstance(role, str) or not role:
             raise ValueError(f"Chat message at index {idx} is missing a valid role")
 
+        # Assistant tool calls -> function_call items
+        if role == "assistant":
+            tool_calls = message.get("tool_calls")
+            if isinstance(tool_calls, list) and tool_calls:
+                for tc in tool_calls:
+                    try:
+                        call_id = tc.get("id") or tc.get("call_id") or tc.get("tool_call_id")
+                        fn = tc.get("function") or {}
+                        name = fn.get("name") or tc.get("name")
+                        arguments = fn.get("arguments") or tc.get("arguments") or ""
+                        if not isinstance(arguments, str):
+                            try:
+                                arguments = json.dumps(arguments)
+                            except Exception:
+                                arguments = str(arguments)
+                        # Fallback: if no call_id, synthesize a stable id for this turn
+                        if not isinstance(call_id, str) or not call_id:
+                            # Try to peek ahead for the next 'tool' message's tool_call_id
+                            peek_id = None
+                            for j in range(idx + 1, len(messages)):
+                                mj = messages[j]
+                                if isinstance(mj, dict) and mj.get("role") == "tool":
+                                    peek_id = mj.get("tool_call_id") or mj.get("call_id")
+                                    if peek_id:
+                                        break
+                            call_id = peek_id or f"fc_{idx}"
+                        converted.append(
+                            {
+                                "type": "function_call",
+                                "call_id": call_id,
+                                "name": name,
+                                "arguments": arguments,
+                            }
+                        )
+                        last_func_call_id = call_id
+                    except Exception:
+                        continue
+
+        # Tool results -> function_call_output items
+        if role == "tool":
+            call_id = message.get("tool_call_id") or message.get("call_id") or last_func_call_id or f"fc_{idx}"
+            content = message.get("content")
+            if isinstance(content, list):
+                output_str = _flatten_responses_text(content)
+            elif isinstance(content, str):
+                output_str = content
+            else:
+                try:
+                    output_str = json.dumps(content)
+                except Exception:
+                    output_str = str(content)
+
+            converted.append(
+                {
+                    "type": "function_call_output",
+                    "call_id": call_id,
+                    "output": output_str or "",
+                }
+            )
+            continue
+
         # Drop tool_calls and function_call - Responses API doesn't support these in message content
-        # Tool results are preserved in tool role messages with tool_result type
+        # We already emitted function_call / function_call_output items above.
         keys_to_exclude = {"content"} | _MESSAGE_KEYS_TO_DROP
         new_message: dict[str, Any] = {k: deepcopy(v) for k, v in message.items() if k not in keys_to_exclude}
 
-        # Convert role: "tool" to "user" for Responses API
-        # Responses API only supports: assistant, system, developer, user
+        # Responses API supports: assistant, system, developer, user
         normalized_role = role
-        if role == "tool":
-            normalized_role = "user"
-            new_message["role"] = "user"
 
         content = message.get("content")
         new_message["content"] = _normalize_message_content(normalized_role, content)
@@ -587,6 +784,8 @@ def _default_content_type_for_role(role: str) -> str:
 
 
 def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
+    global _RESPONSES_TOOL_ADOPTED
+
     def _get(obj: Any, key: str, default: Any = None) -> Any:
         if isinstance(obj, dict):
             return obj.get(key, default)
@@ -609,62 +808,218 @@ def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
         candidate_index = _get(chunk, "index")
         index = candidate_index if isinstance(candidate_index, int) else 0
 
-    delta = _get(chunk, "delta")
+    # Only stream assistant text for explicit output_text.delta events
     text = ""
-    if isinstance(delta, str):
-        text = delta
-    elif isinstance(delta, dict):
-        delta_text = delta.get("text")
-        if isinstance(delta_text, str):
-            text = delta_text
+    chunk_delta = _get(chunk, "delta")
+    if chunk_type == "response.output_text.delta":
+        if isinstance(chunk_delta, str):
+            text = chunk_delta
+        elif isinstance(chunk_delta, dict):
+            delta_text = chunk_delta.get("text")
+            if isinstance(delta_text, str):
+                text = delta_text
 
-    if not text:
-        text_candidate = _get(chunk, "text")
-        if isinstance(text_candidate, str):
-            text = text_candidate
+    # Do not pull text from generic 'text' or 'content' fields; only output_text.delta carries assistant text
 
-    if not text:
-        content_candidate = _get(chunk, "content")
-        if isinstance(content_candidate, str):
-            text = content_candidate
-
-    if not text:
-        response_obj = _get(chunk, "response")
-        if isinstance(response_obj, dict):
-            output_text = response_obj.get("output_text")
-            if isinstance(output_text, list):
-                text = "".join([part for part in output_text if isinstance(part, str)])
+    # Never flatten aggregated output_text on structural events to avoid duplication
 
     tool_use = None
-    if "tool_call" in chunk_type or "function_call" in chunk_type:
-        payloads: list[dict[str, Any]] = []
-        if isinstance(delta, dict):
-            payloads.append(delta)
-        tool_payload = _get(chunk, "tool_call")
-        if isinstance(tool_payload, dict):
-            payloads.append(tool_payload)
-        fn_payload = _get(chunk, "function_call")
-        if isinstance(fn_payload, dict):
-            payloads.append(fn_payload)
-        for payload in payloads:
-            name = payload.get("name") or payload.get("function_name")
-            arguments = payload.get("arguments") or payload.get("input") or payload.get("input_json")
-            if arguments is not None and not isinstance(arguments, str):
-                try:
-                    arguments = str(arguments)
-                except Exception as exc:
-                    raise ProxyError("Failed to convert Responses tool_call arguments to string") from exc
-            call_id = payload.get("id") or payload.get("call_id") or payload.get("tool_call_id")
-            tool_use = {
-                "index": index,
-                "id": call_id if isinstance(call_id, str) else None,
-                "type": "function",
-                "function": {
-                    "name": name if isinstance(name, str) else None,
-                    "arguments": arguments if isinstance(arguments, str) else None,
-                },
-            }
-            break
+
+    def _extract_tool_identity(source: Any) -> tuple[Optional[str], Optional[str]]:
+        if not source:
+            return None, None
+        tool_name = None
+        call_id = None
+        try:
+            tool_name = _get(source, "name") or _get(source, "function_name") or _get(source, "tool_name")
+            call_id = _get(source, "call_id") or _get(source, "tool_call_id") or _get(source, "id")
+        except Exception:
+            tool_name = None
+            call_id = None
+        return (
+            tool_name if isinstance(tool_name, str) and tool_name else None,
+            call_id if isinstance(call_id, str) and call_id else None,
+        )
+
+    def _apply_tool_identity(state: dict[str, Any], fallback: Any = None) -> None:
+        if state is None:
+            return
+        raw_item = state.get("raw_item")
+        tool_name = state.get("name")
+        call_id = state.get("id")
+        for candidate in (raw_item, fallback):
+            if candidate is None:
+                continue
+            cand_name, cand_id = _extract_tool_identity(candidate)
+            if not tool_name and cand_name:
+                tool_name = cand_name
+            if not call_id and cand_id:
+                call_id = cand_id
+            if tool_name and call_id:
+                break
+        state["name"] = tool_name
+        state["id"] = call_id or state.get("item_id")
+
+    # Suppress assistant text for tool argument events
+    if chunk_type in {
+        "response.function_call_arguments.delta",
+        "response.function_call_arguments.done",
+        "response.input_json.delta",
+    }:
+        text = ""
+
+    # Handle Responses tool/function call start event: response.output_item.added
+    if chunk_type == "response.output_item.added":
+        item = _get(chunk, "item")
+        if isinstance(item, dict):
+            item_type = _get(item, "type")
+            if item_type in {"function_call", "tool_call"}:
+                name = _get(item, "name") or _get(item, "function_name")
+                call_id = _get(item, "id") or _get(item, "call_id") or _get(item, "tool_call_id")
+                # Track this function call by its item id
+                item_id_for_state = _get(item, "id")
+                if isinstance(item_id_for_state, str) and item_id_for_state:
+                    state = _RESPONSES_TOOL_STATE[item_id_for_state]
+                else:
+                    state = {
+                        "item_id": item_id_for_state,
+                        "name": None,
+                        "id": None,
+                        "args": "",
+                        "args_done": False,
+                        "emitted": False,
+                        "pending_emit": False,
+                        "index": index,
+                        "raw_item": None,
+                    }
+                    _RESPONSES_TOOL_STATE[item_id_for_state] = state
+
+                state["name"] = state.get("name") or (name if isinstance(name, str) else None)
+                state["id"] = state.get("id") or (call_id if isinstance(call_id, str) else None)
+                state["raw_item"] = deepcopy(item)
+                _log_responses_tool(
+                    f"output_item.added item_id={item_id_for_state} name={state.get('name')} call_id={state.get('id')}"
+                )
+                _RESPONSES_TELEMETRY["saw_tool_items"] = _RESPONSES_TELEMETRY.get("saw_tool_items", 0) + 1
+                if _RESPONSES_TOOL_ADOPTED is None and isinstance(item_id_for_state, str):
+                    _RESPONSES_TELEMETRY["adopted_item_id"] = item_id_for_state
+                    _RESPONSES_TELEMETRY["adopted_output_index"] = index
+                elif (
+                    _RESPONSES_TOOL_ADOPTED is not None
+                    and isinstance(item_id_for_state, str)
+                    and _RESPONSES_TOOL_ADOPTED != item_id_for_state
+                ):
+                    _RESPONSES_TELEMETRY["extra_tool_items_ignored"] = (
+                        _RESPONSES_TELEMETRY.get("extra_tool_items_ignored", 0) + 1
+                    )
+                tool_use = _maybe_emit_tool(item_id_for_state, default_index=index)
+
+    # Accumulate streaming function_call arguments
+    if chunk_type == "response.function_call_arguments.delta":
+        item_id = _get(chunk, "item_id")
+        delta_text = _get(chunk, "delta")
+        if isinstance(item_id, str) and isinstance(delta_text, str):
+            state = _RESPONSES_TOOL_STATE.get(item_id)
+            if state is None:
+                state = {
+                    "item_id": item_id,
+                    "name": None,
+                    "id": None,
+                    "args": "",
+                    "args_done": False,
+                    "emitted": False,
+                    "pending_emit": False,
+                    "index": index,
+                    "raw_item": None,
+                }
+                _RESPONSES_TOOL_STATE[item_id] = state
+            # Adopt the first item we see args for
+            if _RESPONSES_TOOL_ADOPTED is None:
+                _RESPONSES_TOOL_ADOPTED = item_id
+                _log_responses_tool(f"adopted tool item_id={item_id} via arguments.delta")
+            state["args"] = (state.get("args") or "") + delta_text
+            tool_use = _maybe_emit_tool(item_id, default_index=index)
+            tool_use = _maybe_emit_tool(item_id, default_index=index)
+
+    # Some providers may stream JSON arguments via input_json.delta
+    if chunk_type == "response.input_json.delta":
+        item_id = _get(chunk, "item_id")
+        delta_text = _get(chunk, "delta")
+        if isinstance(item_id, str) and isinstance(delta_text, str):
+            state = _RESPONSES_TOOL_STATE.get(item_id)
+            if state is None:
+                state = {
+                    "item_id": item_id,
+                    "name": None,
+                    "id": None,
+                    "args": "",
+                    "args_done": False,
+                    "emitted": False,
+                    "pending_emit": False,
+                    "index": index,
+                    "raw_item": None,
+                }
+                _RESPONSES_TOOL_STATE[item_id] = state
+            if _RESPONSES_TOOL_ADOPTED is None:
+                _RESPONSES_TOOL_ADOPTED = item_id
+                _log_responses_tool(f"adopted tool item_id={item_id} via input_json.delta")
+            state["args"] = (state.get("args") or "") + delta_text
+
+    # Finalize args on done
+    if chunk_type == "response.function_call_arguments.done":
+        item_id = _get(chunk, "item_id")
+        if isinstance(item_id, str) and item_id in _RESPONSES_TOOL_STATE:
+            # If we haven't adopted yet (no deltas ever), adopt now
+            if _RESPONSES_TOOL_ADOPTED is None:
+                _RESPONSES_TOOL_ADOPTED = item_id
+                _log_responses_tool(f"adopted tool item_id={item_id} via arguments.done")
+            state = _RESPONSES_TOOL_STATE[item_id]
+            if _RESPONSES_TOOL_ADOPTED == item_id and not state.get("emitted"):
+                _apply_tool_identity(state)
+                final_args = _get(chunk, "arguments")
+                if isinstance(final_args, (dict, list)):
+                    try:
+                        final_args = json.dumps(final_args)
+                    except Exception:
+                        final_args = str(final_args)
+                if isinstance(final_args, str) and final_args:
+                    state["args"] = final_args
+                if not isinstance(state.get("args"), str) or not state.get("args"):
+                    state["args"] = state.get("args", "")
+                state["args_done"] = True
+                tool_use = _maybe_emit_tool(item_id, default_index=index)
+
+    if chunk_type == "response.output_item.done":
+        item = _get(chunk, "item")
+        if isinstance(item, dict):
+            item_type = _get(item, "type")
+            if item_type in {"function_call", "tool_call"}:
+                item_id = _get(item, "id")
+                if isinstance(item_id, str) and item_id in _RESPONSES_TOOL_STATE:
+                    state = _RESPONSES_TOOL_STATE[item_id]
+                    if not state.get("emitted"):
+                        _apply_tool_identity(state, fallback=item)
+                        final_args = _get(item, "arguments")
+                        if isinstance(final_args, (dict, list)):
+                            try:
+                                final_args = json.dumps(final_args)
+                            except Exception:
+                                final_args = str(final_args)
+                        if isinstance(final_args, str) and final_args:
+                            state["args"] = final_args
+                        if not state.get("args_done"):
+                            state["args_done"] = True
+                        tool_use = _maybe_emit_tool(item_id, default_index=index)
+                    try:
+                        del _RESPONSES_TOOL_STATE[item_id]
+                    except Exception:
+                        pass
+                    # Clear adoption if it was this item
+                    if _RESPONSES_TOOL_ADOPTED == item_id:
+                        _RESPONSES_TOOL_ADOPTED = None
+
+    # Suppress generic function/tool_call emissions mid-stream; we only emit
+    # once on *.arguments.done / output_item.done / completed fallback.
 
     # For completed responses, check response.output for tool calls
     if tool_use is None and chunk_type in {
@@ -690,15 +1045,20 @@ def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
                                     "Failed to convert Responses output tool_call arguments to string"
                                 ) from exc
                         call_id = _get(item, "id") or _get(item, "call_id") or _get(item, "tool_call_id")
-                        tool_use = {
-                            "index": index,
-                            "id": call_id if isinstance(call_id, str) else None,
-                            "type": "function",
-                            "function": {
+                        if _RESPONSES_TOOL_ADOPTED is None or _RESPONSES_TOOL_ADOPTED == _get(item, "id"):
+                            final_args = arguments if isinstance(arguments, str) and arguments else "{}"
+                            fallback_state = {
+                                "item_id": _get(item, "id"),
                                 "name": name if isinstance(name, str) else None,
-                                "arguments": arguments if isinstance(arguments, str) else None,
-                            },
-                        }
+                                "id": call_id if isinstance(call_id, str) else None,
+                                "args": final_args,
+                                "args_done": True,
+                                "emitted": False,
+                                "index": index,
+                                "raw_item": deepcopy(item),
+                            }
+                            _RESPONSES_TOOL_STATE[_get(item, "id")] = fallback_state
+                            tool_use = _maybe_emit_tool(_get(item, "id"), default_index=index)
                         break
 
     terminal_suffixes = (".completed", ".failed", ".cancelled", ".canceled")
@@ -711,13 +1071,27 @@ def _try_parse_responses_chunk(chunk: Any) -> Optional[dict[str, Any]]:
     elif is_finished and not finish_reason:
         finish_reason = "stop"
 
+    # Terminal cleanup: clear buffered tool state to avoid leaks across turns
+    if chunk_type in {
+        "response.completed",
+        "response.failed",
+        "response.canceled",
+        "response.cancelled",
+        "response.error",
+    }:
+        try:
+            _RESPONSES_TOOL_STATE.clear()
+        except Exception:
+            pass
+        _RESPONSES_TOOL_ADOPTED = None
+
     provider_specific_fields: dict[str, Any] = {"responses_type": chunk_type}
     for key in ("response_id", "output_index", "item_id", "id", "status"):
         value = _get(chunk, key)
         if value is not None:
             provider_specific_fields[key] = deepcopy(value)
-    if isinstance(delta, dict):
-        provider_specific_fields["delta"] = deepcopy(delta)
+    if isinstance(chunk_delta, dict):
+        provider_specific_fields["delta"] = deepcopy(chunk_delta)
     if not provider_specific_fields:
         provider_specific_fields = None
 
