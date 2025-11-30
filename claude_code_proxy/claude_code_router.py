@@ -31,7 +31,6 @@ from common.utils import (
     # convert_respapi_to_model_response,
     generate_timestamp_utc,
     model_response_stream_to_generic_streaming_chunks,
-    responses_eof_finalize_chunk,
 )
 
 
@@ -367,19 +366,6 @@ class ClaudeCodeRouter(CustomLLM):
 
                 yield from generic_chunks
 
-            # EOF fallback: if provider ended stream without a terminal event and
-            # we have a pending tool with buffered args, emit once.
-            # TODO Refactor or get rid of the try/except block below after the
-            #  code in `common/utils.py` is owned (after the vibe-code there is
-            #  replaced with proper code)
-            try:
-                eof_chunk = responses_eof_finalize_chunk()
-                if eof_chunk is not None:
-                    yield eof_chunk
-            except Exception:  # pylint: disable=broad-exception-caught
-                # Ignore; best-effort fallback
-                pass
-
         except Exception as e:
             raise ProxyError(e) from e
 
@@ -458,19 +444,6 @@ class ClaudeCodeRouter(CustomLLM):
                 for generic_chunk in generic_chunks:
                     yield generic_chunk
                 chunk_idx += 1
-
-            # EOF fallback: if provider ended stream without a terminal event and
-            # we have a pending tool with buffered args, emit once.
-            # TODO Refactor or get rid of the try/except block below after the
-            #  code in `common/utils.py` is owned (after the vibe-code there is
-            #  replaced with proper code)
-            try:
-                eof_chunk = responses_eof_finalize_chunk()
-                if eof_chunk is not None:
-                    yield eof_chunk
-            except Exception:  # pylint: disable=broad-exception-caught
-                # Ignore; best-effort fallback
-                pass
 
         except Exception as e:
             raise ProxyError(e) from e
