@@ -97,6 +97,7 @@ def write_streaming_chunks_trace(
 ) -> None:
     TRACES_DIR.mkdir(parents=True, exist_ok=True)
     file = TRACES_DIR / f"{timestamp}_RESPONSE_STREAM.md"
+    text_file = TRACES_DIR / f"{timestamp}_RESPONSE_TEXT.md"
 
     # If file doesn't exist, create it with the main header
     if not file.exists():
@@ -118,4 +119,7 @@ def write_streaming_chunks_trace(
             for generic_chunk in generic_chunks:
                 f.write(f"```json\n{json.dumps(generic_chunk, indent=2)}\n```\n\n")
 
-    # TODO Write pure text of the chunks to `*_RESPONSE_TEXT.md`
+                if generic_chunk["text"]:
+                    # Append the text of the chunk to the text file
+                    with text_file.open("a", encoding="utf-8") as text_f:
+                        text_f.write(generic_chunk["text"])

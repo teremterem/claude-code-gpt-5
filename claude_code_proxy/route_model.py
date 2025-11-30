@@ -8,6 +8,7 @@ from claude_code_proxy.proxy_config import (
     REMAP_CLAUDE_HAIKU_TO,
     REMAP_CLAUDE_OPUS_TO,
     REMAP_CLAUDE_SONNET_TO,
+    RESPAPI_ONLY_MODELS,
 )
 
 
@@ -16,7 +17,8 @@ class ModelRoute:
     remapped_to: str  # May or may not have a provider prefix
     target_model: str  # ALWAYS has a provider prefix ("provider/model_name")
     extra_params: dict[str, Any]
-    use_responses_api: bool = ALWAYS_USE_RESPONSES_API
+    is_target_anthropic: bool
+    use_responses_api: bool
 
     def __init__(self, requested_model: str) -> None:
         self.requested_model = requested_model.strip()
@@ -58,7 +60,6 @@ class ModelRoute:
             # Provider is not mentioned in the model name explicitly
             explicit_provider, model_name_only = None, self.remapped_to
 
-        extra_params = {}
         # Check if it is one of our GPT-5 model aliases with a reasoning effort
         # specified in the model name
         reasoning_effort_alias_match = re.fullmatch(
@@ -66,26 +67,30 @@ class ModelRoute:
         )
         if reasoning_effort_alias_match:
             model_name_only = reasoning_effort_alias_match.group("name")
-            extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
+            self.extra_params = {"reasoning_effort": reasoning_effort_alias_match.group("effort")}
+        else:
+            self.extra_params = {}
 
         # Autocorrect `gpt5` to `gpt-5` for convenience
         model_name_only = re.sub(r"\bgpt5\b", "gpt-5", model_name_only)
 
         if explicit_provider:
-            target_model = f"{explicit_provider}/{model_name_only}"
+            self.target_model = f"{explicit_provider}/{model_name_only}"
         elif model_name_only.startswith("claude-"):
-            target_model = f"{ANTHROPIC}/{model_name_only}"
+            self.target_model = f"{ANTHROPIC}/{model_name_only}"
         else:
             # Default to OpenAI if it is not a Claude model (and the provider
             # was not specified explicitly)
-            target_model = f"{OPENAI}/{model_name_only}"
+            self.target_model = f"{OPENAI}/{model_name_only}"
 
-        self.target_model = target_model
-        self.extra_params = extra_params
+        self.is_target_anthropic = self.target_model.startswith(f"{ANTHROPIC}/")
 
-        if "gpt-5-codex" in model_name_only:
-            # GPT-5-Codex does not support ChatCompletions API
-            self.use_responses_api = True
+        if self.is_target_anthropic:
+            self.use_responses_api = False
+        else:
+            self.use_responses_api = ALWAYS_USE_RESPONSES_API or any(
+                model in model_name_only for model in RESPAPI_ONLY_MODELS
+            )
 
     def _log_model_route(self) -> None:
         log_message = f"\033[1m\033[32m{self.requested_model}\033[0m -> " f"\033[1m\033[36m{self.target_model}\033[0m"
