@@ -1088,7 +1088,7 @@ wheels = [
 ]
 
 [[package]]
-name = "claude-code-gpt-5"
+name = "claude-code-gpt-5-codex"
 version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
